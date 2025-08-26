@@ -13,9 +13,6 @@ function formatFileSize(bytes: number): string {
 function App() {
 
   const r1: number = Math.floor(Math.random());
-  const r2: number = Math.floor(Math.random());
-  const r3: number = Math.floor(Math.random());
-  const r4: number = Math.floor(Math.random());
 
   const inputFile = useRef<HTMLInputElement | null>(null);
   const inputFolder = useRef<HTMLInputElement | null>(null);
@@ -201,8 +198,8 @@ function App() {
               <button onClick={() => startUploading()} type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 cursor-pointer">
                 Upload
               </button>
-
             </div>
+
           </div>
         )}
 
@@ -366,7 +363,6 @@ function App() {
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
                           <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
-
                       </button>
                     </div>
 
