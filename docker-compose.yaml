@@ -1,0 +1,28 @@
+services:
+  app:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+      args:
+        APP: ${APP}
+        USER: ${USER}
+        USER_HOME: ${USER_HOME}
+    privileged: true
+    ports:
+      - "${HTTP_SERVER_PORT}:${HTTP_SERVER_PORT}"
+    tty: true
+    stdin_open: true
+    volumes:
+      - ${PWD}:${USER_HOME}app
+    devices:
+      - /dev:/dev 
+    working_dir: ${USER_HOME}app
+    network_mode: "host"
+    environment:
+      - APP_ENV=development
+    command: ["/bin/bash"]
+
+
