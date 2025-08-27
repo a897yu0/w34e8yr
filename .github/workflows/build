@@ -7,6 +7,7 @@ on:
     branches: ['build']
   pull_request:
     branches: ['build']
+    types: [closed]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
