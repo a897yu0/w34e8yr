@@ -85,7 +85,7 @@ function App() {
  rounded">
         <h1 className="text-4xl font-bold text-black mb-12">W34</h1>
       </div>
-      <div className="w-full min-w-xs max-w-3xl flex flex-col items-center justify-center bg-white p-5 border border-gray-300
+      <div className="w-full min-w-xs max-w-3xl min-h-40 flex flex-col items-center justify-center bg-white p-5 border border-gray-300
  rounded">
         {(selectedFiles.length === 0) && (uploadingFiles.length === 0) && (
           <div className="flex gap-6">
