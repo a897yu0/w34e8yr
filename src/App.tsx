@@ -21,7 +21,7 @@ function App() {
   const [uploadingFiles, setUploadingFiles] = useState<File[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-  const [currentUploadProgress, setCurrentUploadProgress] = useState<number>(30);
+  const [currentUploadProgress, /*setCurrentUploadProgress*/] = useState<number>(30);
 
   const handleFileUpload = () => {
     inputFile.current?.click();
