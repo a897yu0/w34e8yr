@@ -48,6 +48,7 @@ function App() {
   };
 
   const clearFiles = () => {
+    // TODO: Make own confirm alert instead of window.confirm. Because of '[Violation] 'click' handler took 911ms'.
     if (window.confirm('Are you sure you want to clear all files?') === true) {
       setSelectedFiles([]);
     }
@@ -57,6 +58,7 @@ function App() {
     setSelectedFiles((prevFiles: File[]) => {
       const file: File = prevFiles[index];
 
+      // TODO: Make own confirm alert instead of window.confirm. Because of '[Violation] 'click' handler took 911ms'.
       if (window.confirm(`${file.name}\nAre you sure you want to remove file?`) === true) {
         return prevFiles.filter((_, i) => i !== index);
       }
@@ -74,6 +76,7 @@ function App() {
   };
 
   const cancelUploading = () => {
+    // TODO: Make own confirm alert instead of window.confirm. Because of '[Violation] 'click' handler took 911ms'.
     if (window.confirm('Are you sure you want to cancel uploading?') === true) {
       setUploadingFiles([]);
     }
