@@ -80,11 +80,13 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 gap-3 p-3">
       <div className="w-full min-w-xs max-w-3xl flex flex-col items-center justify-center bg-white p-5 border border-gray-300
  rounded">
         <h1 className="text-4xl font-bold text-black mb-12">W34</h1>
-
+      </div>
+      <div className="w-full min-w-xs max-w-3xl flex flex-col items-center justify-center bg-white p-5 border border-gray-300
+ rounded">
         {(selectedFiles.length === 0) && (uploadingFiles.length === 0) && (
           <div className="flex gap-6">
             <input className="hidden" type="file" onChange={handleFileChange} ref={(node: HTMLInputElement | null) => {
