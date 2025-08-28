@@ -476,6 +476,22 @@ function App() {
       <div className="w-full min-w-xs max-w-4xl flex flex-col items-center gap-2">
         <header className="w-full min-w-xs max-w-4xl flex flex-col items-center justify-center bg-white rounded-b-lg shadow-sm p-5">
           <h1 className="text-4xl font-bold text-black mb-12">W34</h1>
+
+          <div className="flex flex-wrap items-center gap-3 w-full max-w-2xl">
+            <input
+              type="text"
+              placeholder="Address"
+              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 whitespace-nowrap">
+              Connect
+            </button>
+          </div>
         </header>
         <main className="w-full min-h-40 flex flex-col items-center justify-center bg-white rounded-lg shadow-sm p-5">
           <FileUploader setDialog={(dialog: DialogContext) => setDialog(dialog)} />
