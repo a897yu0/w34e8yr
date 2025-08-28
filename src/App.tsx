@@ -55,16 +55,16 @@ function Dialog({
   );
 }
 
-function FileDetail({
-  setDialog,
-}: {
-  setDialog: (dialog: DialogContext) => void;
-}) {
-  return (
-    <>
-    </>
-  );
-}
+// function FileDetail({
+//   setDialog,
+// }: {
+//   setDialog: (dialog: DialogContext) => void;
+// }) {
+//   return (
+//     <>
+//     </>
+//   );
+// }
 
 function FileUploader({
   setDialog,
