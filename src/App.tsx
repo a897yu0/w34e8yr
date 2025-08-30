@@ -477,7 +477,7 @@ function App() {
         <header className="w-full min-w-xs max-w-4xl flex flex-col items-center justify-center bg-white rounded-b-lg shadow-sm p-5">
           <h1 className="text-4xl font-bold text-black mb-12">W34</h1>
 
-          <div className="flex flex-wrap items-center gap-3 w-full max-w-2xl">
+          <div className="flex flex-wrap items-center gap-1 w-full max-w-2xl">
             <input
               type="text"
               placeholder="Address"
@@ -493,7 +493,7 @@ function App() {
             </button>
           </div>
         </header>
-        <main className="w-full min-h-40 flex flex-col items-center justify-center bg-white rounded-lg shadow-sm p-5">
+        <main className="w-full flex flex-col items-center justify-center bg-white rounded-lg shadow-sm p-5">
           <FileUploader setDialog={(dialog: DialogContext) => setDialog(dialog)} />
         </main>
       </div>
