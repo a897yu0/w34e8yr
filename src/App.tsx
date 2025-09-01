@@ -66,9 +66,13 @@ function Dialog({
 //   );
 // }
 
-function BlobStorageConnector() {
+function Header() {
   return (
-    <div className="w-full flex flex-col items-center justify-center bg-white rounded-lg shadow-sm p-5">
+    <header className="w-full min-w-xs max-w-4xl flex flex-col items-center justify-center bg-white rounded-b-lg shadow-sm p-5">
+      <a href="/" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
+        <h1 className="text-4xl font-bold text-black mb-8">W34</h1>
+      </a>
+
       <div className="flex flex-wrap items-center gap-1 w-full max-w-md mb-4">
         <input
           type="text"
@@ -110,7 +114,7 @@ function BlobStorageConnector() {
           </a>
         </div>
       </nav>
-    </div>
+    </header>
   );
 }
 
@@ -522,13 +526,8 @@ function App() {
   return (
     <div className="min-w-xs min-h-screen flex flex-col items-center justify-between gap-2 px-2">
       <div className="w-full min-w-xs max-w-4xl flex flex-col items-center gap-2">
-        <header className="w-full min-w-xs max-w-4xl flex flex-col items-center justify-center bg-white rounded-b-lg shadow-sm p-5">
-          <a href="/" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
-            <h1 className="text-4xl font-bold text-black mb-4">W34</h1>
-          </a>
-        </header>
+        <Header />
         <main className="w-full flex flex-col items-center justify-center gap-2">
-          <BlobStorageConnector />
           <FileUploader setDialog={(dialog: DialogContext) => setDialog(dialog)} />
         </main>
       </div>
