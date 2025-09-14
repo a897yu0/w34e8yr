@@ -1,19 +1,37 @@
-import { memo, useRef, useState, type ChangeEvent } from 'react'
-
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) {
-    return '0 Bytes';
-  }
-  const k: number = 1024;
-  const sizes: string[] = ['Bytes', 'KB', 'MB', 'GB'];
-  const i: number = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
+import { memo, useRef, useState, type ChangeEvent } from 'react';
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 interface DialogContext {
   title: string;
   message: string;
   onConfirm: () => void;
+}
+
+interface DropdownMenuState {
+  [id: string]: boolean;
+}
+
+interface SidebarItemProps {
+  icon: React.ReactNode;
+  text: string;
+  href?: string;
+  badge?: string;
+  badgeColor?: string;
+  count?: number;
+  onClick?: () => void;
+}
+
+interface SidebarDropdownItemProps {
+  icon: React.ReactNode;
+  text: string;
+  href?: string;
+  badge?: string;
+  count?: number;
+  onClick?: () => void;
+}
+
+interface SidebarWrapperProps {
+  children: React.ReactNode;
 }
 
 function Dialog({
@@ -24,9 +42,9 @@ function Dialog({
 }) {
   return (
     <div className="fixed inset-0 bg-gray-400/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div className="bg-white shadow-xl max-w-md w-full mx-4">
         <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-black mb-4">
             {ctx.title}
           </h2>
           <p className="text-gray-600 mb-6">
@@ -55,503 +73,270 @@ function Dialog({
   );
 }
 
-// function FileDetail({
-//   setDialog,
-// }: {
-//   setDialog: (dialog: DialogContext) => void;
-// }) {
-//   return (
-//     <>
-//     </>
-//   );
-// }
-
 function Header() {
   return (
-    <header className="w-full min-w-xs max-w-4xl flex flex-col items-center justify-center bg-white rounded-b-lg shadow-sm p-5">
+    <header className="w-full min-w-xs flex flex-col items-start justify-center bg-white p-1 border-b-1 border-black">
       <a href="/" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
-        <h1 className="text-4xl font-bold text-black mb-8">W34</h1>
+        <h1 className="text-2xl font-bold text-black">W34</h1>
       </a>
 
-      <div className="flex flex-wrap items-center gap-1 w-full max-w-md mb-4">
-        <input
-          type="text"
-          placeholder="IP Address"
-          className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-        />
-        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 whitespace-nowrap">
-          Connect
-        </button>
-      </div>
-
-      <nav className="w-full flex flex-row items-center justify-center space-x-8">
-        <div className="flex space-x-6 text-sm font-medium text-gray-600">
-          <a title="storage" href="#" className="hover:text-gray-900 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
-            </svg>
-          </a>
-          <a title="devices" href="#" className="hover:text-gray-900 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-            </svg>
-          </a>
-          <a title="users" href="#" className="hover:text-gray-900 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-            </svg>
-          </a>
-          <a title="encryption" href="#" className="hover:text-gray-900 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-            </svg>
-          </a>
-        </div>
-        <div className="flex space-x-6 text-sm font-medium text-gray-600">
-          <a title="settings" href="#" className="hover:text-gray-900 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            </svg>
-          </a>
-          <a title="help" href="#" className="hover:text-gray-900 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-            </svg>
-          </a>
-        </div>
-      </nav>
     </header>
   );
 }
 
-function FileUploader({
-  setDialog,
-}: {
-  setDialog: (dialog: DialogContext) => void;
-}) {
-  const currentContextName: string = "File Uploader";
+function Sidebar() {
 
-  const r1: number = Math.floor(Math.random());
+  const [dropdownMenu, setDropdownMenu] = useState<DropdownMenuState>({});
 
-  const inputFile = useRef<HTMLInputElement | null>(null);
-  const inputFolder = useRef<HTMLInputElement | null>(null);
-
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploadingFiles, setUploadingFiles] = useState<File[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-
-  const [currentUploadProgress, /*setCurrentUploadProgress*/] = useState<number>(30);
-
-  const handleFileUpload = (): void => {
-    inputFile.current?.click();
+  const toggleDropdownMenu = (id: string): void => {
+    setDropdownMenu(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
-  const handleFolderUpload = (): void => {
-    inputFolder.current?.click();
-  };
-
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    const selectedFiles: FileList | null = event.target.files;
-    if (selectedFiles !== null) {
-      const fileArray: File[] = Array.from(selectedFiles);
-      setSelectedFiles(fileArray);
-    }
-  };
-
-  const handleFolderChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    const selectedFiles: FileList | null = event.target.files;
-    if (selectedFiles !== null) {
-      const fileArray: File[] = Array.from(selectedFiles);
-      setSelectedFiles(fileArray);
-    }
-  };
-
-  const clearFiles = (): void => {
-    const ctx: DialogContext = {
-      title: currentContextName,
-      message: `Are you sure you want to clear all files?`,
-      onConfirm: () => {
-        setSelectedFiles([]);
-      }
-    };
-
-    setDialog(ctx);
-
-    // TODO: Make own confirm alert instead of window.confirm. Because of '[Violation] 'click' handler took 911ms'.
-    // if (window.confirm('Are you sure you want to clear all files?') === true) {
-    //   setSelectedFiles([]);
-    // }
-  };
-
-  const removeFile = (file: File, index: number): void => {
-    const ctx: DialogContext = {
-      title: currentContextName,
-      message: `${file.name}: Are you sure you want to remove file?`,
-      onConfirm: () => {
-        setSelectedFiles((prevFiles: File[]) => prevFiles.filter((_, i) => (i !== index)));
-      }
-    };
-
-    setDialog(ctx);
-
-    // TODO: Make own confirm alert instead of window.confirm. Because of '[Violation] 'click' handler took 911ms'.
-    // if (window.confirm(`${file.name}\nAre you sure you want to remove file?`) === true) {
-    //   setSelectedFiles((prevFiles: File[]) => prevFiles.filter((_, i) => i !== index));
-    // }
-  };
-
-  const startUploading = (): void => {
-    setUploadingFiles((prevFiles: File[]) => [...prevFiles, ...selectedFiles]);
-    setUploadedFiles((prevFiles: File[]) => [...prevFiles, ...selectedFiles]);
-    setSelectedFiles([]);
-  };
-
-  const cancelUploading = (): void => {
-    const ctx: DialogContext = {
-      title: currentContextName,
-      message: `Are you sure you want to cancel uploading?`,
-      onConfirm: () => {
-        setUploadingFiles([]);
-      }
-    };
-
-    setDialog(ctx);
-
-    // TODO: Make own confirm alert instead of window.confirm. Because of '[Violation] 'click' handler took 911ms'.
-    // if (window.confirm('Are you sure you want to cancel uploading?') === true) {
-    //   setUploadingFiles([]);
-    // }
+  const SidebarWrapper: React.FC<SidebarWrapperProps> = ({
+    children,
+  }: SidebarWrapperProps) => {
+    return (
+      <ul className="border-black border-l-2 ml-1 font-medium">
+        {children}
+      </ul>
+    );
   }
 
+  const SidebarItem: React.FC<SidebarItemProps> = ({
+    icon,
+    text,
+    href = "#",
+    badge, badgeColor,
+    count,
+    onClick
+  }: SidebarItemProps) => {
+    return (
+      <li>
+        <a href={href} className="flex items-center p-1 text-black hover:bg-gray-100 group" onClick={onClick}
+        >
+          <div className="shrink-0 w-5 h-5 text-black transition duration-75 group-hover:text-gray-800">
+            {icon}
+          </div>
+          <span className="flex-1 ms-3 text-black whitespace-nowrap">{text}</span>
+          {badge && (
+            <span className={`inline-flex items-center justify-center px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
+              {badge}
+            </span>
+          )}
+          {count && (
+            <span className="inline-flex items-center justify-center w-3 h-3 p-3 ms-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">{count}</span>
+          )}
+        </a>
+      </li>
+    );
+  };
+
+  const SidebarDropdownItem: React.FC<SidebarItemProps> = ({
+    icon,
+    text,
+    href = "#",
+    badge,
+    count,
+    onClick
+  }: SidebarItemProps) => {
+    return (
+      <li>
+        <a href={href} className="flex items-center p-1 text-black hover:bg-gray-100 group" onClick={onClick}
+        >
+          <div className="shrink-0 w-5 h-5 text-black transition duration-75 group-hover:text-gray-800">
+            {icon}
+          </div>
+          <span className="flex-1 ms-3 text-black whitespace-nowrap">{text}</span>
+          {badge && (
+            <span className="inline-flex items-center justify-center px-2 ms-1 text-sm font-medium text-black bg-gray-200 rounded-full">
+              {badge}
+            </span>
+          )}
+          {count && (
+            <span className="inline-flex items-center justify-center w-3 h-3 p-3 ms-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">{count}</span>
+          )}
+        </a>
+      </li>
+    );
+  };
+
   return (
-    <div className="w-full flex flex-col items-center justify-center bg-white rounded-lg shadow-sm p-5">
-      {(selectedFiles.length === 0) && (uploadingFiles.length === 0) && (
-        <div className="flex gap-6">
-          <input className="hidden" type="file" onChange={handleFileChange} ref={(node: HTMLInputElement | null) => {
-            inputFile.current = node;
-
-          }} />
-          <input className="hidden" type="file" onChange={handleFolderChange} ref={(node: HTMLInputElement | null) => {
-            inputFolder.current = node;
-
-            if (node) {
-              ['webkitdirectory', 'directory', 'mozdirectory'].forEach((attr) => {
-                node.setAttribute(attr, '');
-              });
+    <aside id="sidebar-multi-level-sidebar" className="bg-white transition-transform -translate-x-full sm:translate-x-0 h-full border-black border-r-1" aria-label="Sidebar">
+      <div className="h-full overflow-y-auto">
+        <ul className="font-medium">
+          <SidebarItem
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+              </svg>
             }
-          }} />
-
-          <button onClick={handleFileUpload} className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            File Upload
-          </button>
-          <button onClick={handleFolderUpload} className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5L12 5H5a2 2 0 00-2 2z" />
-            </svg>
-            Folder Upload
-          </button>
-        </div>
-      )}
-
-      {(selectedFiles.length > 0) && (
-        <div className="w-full flex flex-col justify-between items-center">
-          <div className="w-full flex flex-row justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Selected Files ({selectedFiles.length})
-            </h2>
-            <div className="flex flex-row justify-center items-center gap-1">
-              <button
-                onClick={clearFiles}
-                className="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1 border border-red-300 rounded hover:bg-red-50 transition-colors cursor-pointer"
-              >
-                Clear All
-              </button>
-            </div>
-          </div>
-
-          <div className="w-full flex flex-row justify-between items-center mb-2">
-            <label htmlFor="selected-search" className="sr-only">Search</label>
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            text="Dashboard"
+          />
+          <li>
+            <button type="button" className="flex items-center w-full p-1 text-base text-black transition duration-75 group hover:bg-gray-100" onClick={() => toggleDropdownMenu("E_COMMERCE")}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
+              </svg>
+              <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">E-commerce</span>
+              {(dropdownMenu["E_COMMERCE"] === true) ? (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                 </svg>
-              </div>
-              <input type="text" id="selected-search" className="!outline-none bg-gray-50 border-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Search files..." />
-            </div>
-          </div>
-
-          <div className="w-full border border-gray-300 rounded-lg bg-gray-50 max-h-96 overflow-x-hidden overflow-y-auto mb-2">
-            <div className="divide-y divide-gray-200">
-              {selectedFiles.map((file: File, index: number) => (
-                <div key={index} className="p-4 hover:bg-white transition-colors flex justify-between items-center">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0">
-                        {file.type.startsWith('image/') ? (
-                          <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                          </svg>
-                        ) : file.type.startsWith('video/') ? (
-                          <svg className="w-8 h-8 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <svg className="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate" title={file.name}>
-                          {file.name}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {formatFileSize(file.size)} • {file.type || 'Unknown type'}
-                        </p>
-                        {file.webkitRelativePath && (
-                          <p className="text-xs text-gray-400 truncate" title={file.webkitRelativePath}>
-                            Path: {file.webkitRelativePath}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeFile(file, index)}
-                    className="ml-4 text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors"
-                    title="Remove file"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-row items-center justify-center">
-            <button onClick={() => startUploading()} type="button" className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer">
-              Upload
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+              )}
             </button>
-          </div>
+            {(dropdownMenu["E_COMMERCE"] === true) && (
+              <SidebarWrapper>
+                <SidebarItem
+                  icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                    </svg>
+                  }
+                  text="Products"
+                  badge="Pro"
+                  count={1}
+                />
+                <SidebarItem
+                  icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                    </svg>
+                  }
+                  text="Billing"
+                  badge="New" badgeColor="bg-red-200"
+                  count={1}
+                />
+                <SidebarItem
+                  icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
+                    </svg>
+                  }
+                  text="Invoice"
+                  badge="Billed" badgeColor="bg-red-200"
+                  count={1}
+                />
+              </SidebarWrapper>
+            )}
+          </li>
+          <SidebarItem
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5" />
+              </svg>
+            }
+            text="Kanban"
+          />
+          <SidebarItem
+            icon={
+              <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="m17.418 3.623-.018-.008a6.713 6.713 0 0 0-2.4-.569V2h1a1 1 0 1 0 0-2h-2a1 1 0 0 0-1 1v2H9.89A6.977 6.977 0 0 1 12 8v5h-2V8A5 5 0 1 0 0 8v6a1 1 0 0 0 1 1h8v4a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-4h6a1 1 0 0 0 1-1V8a5 5 0 0 0-2.582-4.377ZM6 12H4a1 1 0 0 1 0-2h2a1 1 0 0 1 0 2Z" />
+              </svg>
+            }
+            text="Inbox"
+            count={3}
+          />
+          <SidebarItem
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+              </svg>
+            }
+            text="Users"
+          />
+          <SidebarItem
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+              </svg>
 
-        </div>
-      )}
-
-      {(uploadingFiles.length > 0) && (
-        <div className="w-full flex flex-col justify-between items-center">
-          <div className="w-full flex flex-row justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Uploading Files ({uploadingFiles.length})
-            </h2>
-            <div className="flex flex-row justify-center items-center gap-1">
-              <button
-                onClick={() => cancelUploading()}
-                className="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1 border border-red-300 rounded hover:bg-red-50 transition-colors cursor-pointer"
-              >
-                Cancel All
-              </button>
-            </div>
-          </div>
-
-          <div className="w-full flex flex-row justify-between items-center mb-2">
-            <label htmlFor="uploading-search" className="sr-only">Search</label>
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-              </div>
-              <input type="text" id="uploading-search" className="!outline-none bg-gray-50 border-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" placeholder="Search files..." />
-            </div>
-          </div>
-
-          <div className="w-full border border-gray-300 rounded-lg bg-gray-50 max-h-96 overflow-x-hidden overflow-y-auto mb-2">
-            <div className="divide-y divide-gray-200">
-              {uploadingFiles.map((file: File, index: number) => (
-                <div key={index} className="relative hover:bg-white w-full p-4 transition-colors flex flex-col justify-between items-center">
-                  <div className="w-full flex flex-row justify-between items-center">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
-                          {file.type.startsWith('image/') ? (
-                            <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                            </svg>
-                          ) : file.type.startsWith('video/') ? (
-                            <svg className="w-8 h-8 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" clipRule="evenodd" />
-                            </svg>
-                          ) : (
-                            <svg className="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate" title={file.name}>
-                            {file.name}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {formatFileSize(file.size)} • {file.type || 'Unknown type'}
-                          </p>
-                          {file.webkitRelativePath && (
-                            <p className="text-xs text-gray-400 truncate" title={file.webkitRelativePath}>
-                              Path: {file.webkitRelativePath}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {(index === 0) && (
-                      <div className="flex flex-row items-center justify-center">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-500">
-                            {currentUploadProgress}%
-                          </span>
-                        </div>
-                        {((r1 % 2) == 0) && (
-                          <button
-                            className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors"
-                            title="Remove file"
-                          >
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M6 6h12v12H6z" />
-                            </svg>
-                          </button>
-                        )}
-                        {((r1 % 2) == 1) && (
-                          <button
-                            className="text-green-500 hover:text-green-700 p-1 rounded hover:bg-green-50 transition-colors"
-                            title="Remove file"
-                          >
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          </button>
-                        )}
-
-                      </div>
-                    )}
-                    {(index > 0) && (
-                      <div className="flex flex-row">
-                        <button
-                          onClick={() => removeFile(file, index)}
-                          className="ml-4 text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors"
-                          title="Remove file"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  {(index === 0) && (
-                    <div className="absolute bottom-0 left-0 right-0 w-full flex flex-col items-end">
-                      <div className="w-full bg-gray-200 h-2">
-                        <div
-                          className="bg-blue-500 h-2 transition-all duration-300 ease-out"
-                          style={{ width: `${currentUploadProgress}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {uploadedFiles.map((file: File, index: number) => (
-                <div key={index} className="p-4 hover:bg-white transition-colors flex justify-between items-center">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0">
-                        {file.type.startsWith('image/') ? (
-                          <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                          </svg>
-                        ) : file.type.startsWith('video/') ? (
-                          <svg className="w-8 h-8 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <svg className="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate" title={file.name}>
-                          {file.name}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {formatFileSize(file.size)} • {file.type || 'Unknown type'}
-                        </p>
-                        {file.webkitRelativePath && (
-                          <p className="text-xs text-gray-400 truncate" title={file.webkitRelativePath}>
-                            Path: {file.webkitRelativePath}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-row">
-                    <button
-                      className="ml-4 text-green-500 hover:text-green-700 p-1 rounded transition-colors"
-                      title="Upload completed"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                      </svg>
-                    </button>
-                  </div>
-
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      )}
-
-    </div>
+            }
+            text="Products"
+          />
+          <SidebarItem
+            icon={
+              <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+              </svg>
+            }
+            text="Sign In"
+          />
+          <SidebarItem
+            icon={
+              <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z" />
+                <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z" />
+                <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
+              </svg>
+            }
+            text="Sign Up"
+          />
+          <SidebarItem
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+                <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
+              </svg>
+            }
+            text="Kanban"
+            badge="Pro"
+            count={1}
+          />
+        </ul>
+      </div>
+    </aside>
   );
 }
 
 const MemoizedDialog = memo(Dialog);
 
 function App() {
+  const panelGroupSaveId: string = "a7fe4a4b-163b-44f8-bcff-be24fff940c8";
 
   const [dialog, setDialog] = useState<DialogContext | null>(null);
 
   return (
-    <div className="min-w-xs min-h-screen flex flex-col items-center justify-between gap-2 px-2">
-      <div className="w-full min-w-xs max-w-4xl flex flex-col items-center gap-2">
+    <div className="min-w-xs min-h-screen flex flex-col items-center justify-between gap-0 px-0">
+      <div className="w-full flex-1 min-w-xs flex flex-col items-center gap-0">
         <Header />
-        <main className="w-full flex flex-col items-center justify-center gap-2">
-          <FileUploader setDialog={(dialog: DialogContext) => setDialog(dialog)} />
+        <main className="w-full flex-1 flex flex-col items-start justify-center gap-0">
+          <PanelGroup autoSaveId={panelGroupSaveId} direction="horizontal" className="flex-1">
+            <Panel defaultSize={25}>
+              <Sidebar />
+            </Panel>
+            <PanelResizeHandle >
+              <div className="">
+              </div>
+            </PanelResizeHandle>
+            <Panel>
+            </Panel>
+            <PanelResizeHandle />
+            <Panel defaultSize={25}>
+            </Panel>
+          </PanelGroup>
+
         </main>
       </div>
 
-      <footer className="w-full min-w-xs max-w-4xl bg-white rounded-t-lg shadow-sm m-0">
-        <div className="w-full mx-auto max-w-screen-xl p-4 md:flex md:items-center md:justify-between">
+      <footer className="w-full min-w-xs bg-white m-0 border-t-1 border-black">
+        <div className="w-full mx-auto p-1 md:flex md:items-center md:justify-between">
           <span className="text-sm text-gray-500 sm:text-center">© 2025 <a href="https://w34.com/" className="hover:underline">W34E8YR</a>. All Rights Reserved.
           </span>
           <ul className="flex flex-wrap items-center text-sm font-medium text-gray-500">
             <li>
-              <a href="#" className="hover:underline me-4 md:me-6">About</a>
+              <a href="#" className="hover:underline me-2 md:me-2">About</a>
             </li>
             <li>
-              <a href="#" className="hover:underline me-4 md:me-6">Privacy Policy</a>
+              <a href="#" className="hover:underline me-2 md:me-2">Privacy Policy</a>
             </li>
             <li>
-              <a href="#" className="hover:underline me-4 md:me-6">Licensing</a>
+              <a href="#" className="hover:underline me-2 md:me-2">Licensing</a>
             </li>
             <li>
               <a href="#" className="hover:underline">Contact</a>

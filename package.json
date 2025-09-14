@@ -12,7 +12,8 @@
   "homepage": "https://a897yu0.github.io/w34e8yr",
   "dependencies": {
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-resizable-panels": "^3.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
