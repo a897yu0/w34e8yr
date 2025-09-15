@@ -360,7 +360,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
 
   // TODO: Save current state to the local storage (State: registered servers)
 
-  console.log("dropdownMenu:", dropdownMenu);
+  // console.log("dropdownMenu:", dropdownMenu);
 
   return (
     <aside id="sidebar-multi-level-sidebar" className="bg-white min-w-fit min-h-full" aria-label="Sidebar">
@@ -626,9 +626,9 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
 function ServersManagementPanel(): React.JSX.Element {
 
   return (
-    <>
+    <div className="w-full h-full flex flex-col justify-center items-center">
       ServersManagementPanel
-    </>
+    </div>
   );
 }
 
@@ -652,7 +652,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     <div className="w-full h-full flex flex-col">
       {path && (
         <>
-          <div className="w-full h-6 flex flex-row justify-between items-center bg-white border-black- border-b-1">
+          <div className="w-full h-6 p-1 flex flex-row justify-between items-center bg-gray-200 border-black- border-b-1">
             <div className="flex flex-row justify-center items-center">
               <div className="w-5 h-5 mr-1">
                 {icon || (
@@ -679,7 +679,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
             </div>
           )}
           {panels[path] || (
-            <div>
+            <div className="w-full h-full flex justify-center items-center">
               Not found
             </div>
           )}
