@@ -1,4 +1,9 @@
-import { memo, useCallback, useRef, useState, type ChangeEvent } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
+
+interface HeaderProps {
+  isSidebarShown: boolean;
+  toggleSidebarShown: () => void;
+}
 
 interface DialogContext {
   title: string;
@@ -84,17 +89,26 @@ function Dialog({
   );
 }
 
-function Header() {
+function Header(props: HeaderProps) {
+  const isSidebarShown: boolean = props.isSidebarShown;
+  const toggleSidebarShown: () => void = props.toggleSidebarShown;
+
   return (
-    <header className="w-full flex flex-row justify-start items-center bg-white p-1 border-b-1 border-black">
-      <div className="cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-        </svg>
-      </div>
-      <a href="/" className="cursor-pointer hover:opacity-80 transition-opacity duration-200 pl-4">
+    <header className="w-full flex flex-row justify-between items-center bg-white p-1 border-b-1 border-black">
+      <a href="/" className="cursor-pointer hover:opacity-80 transition-opacity duration-200">
         <h1 className="text-2xl font-bold text-black">W34</h1>
       </a>
+      <div className="block md:hidden cursor-pointer" onClick={() => toggleSidebarShown()}>
+        {(isSidebarShown === false) ? (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        )}
+      </div>
     </header>
   );
 }
@@ -399,26 +413,53 @@ function Sidebar() {
 const MemoizedDialog = memo(Dialog);
 
 function App() {
-  const panelGroupSaveId: string = "a7fe4a4b-163b-44f8-bcff-be24fff940c8";
 
   const [dialog, setDialog] = useState<DialogContext | null>(null);
 
+  const [isMobileSidebarShown, setIsMobileSidebarShown] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      // Reset mobile sidebar when window is resized
+      setIsMobileSidebarShown(false);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-y-hidden">
-      <Header />
-      <main className="w-full flex-1 flex flex-row justify-start items-center gap-0 overflow-y-hidden">
-        <div className="w-64 h-full overflow-y-scroll overflow-x-auto">
+      <Header isSidebarShown={isMobileSidebarShown} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
+      <main className="relative w-full flex-1 flex flex-row justify-start items-center gap-0 overflow-y-hidden">
+
+        {/* Desktop Sidebar */}
+        <div className="hidden md:block w-64 h-full overflow-y-scroll overflow-x-auto border-black border-r-1">
           <Sidebar />
         </div>
-        <div className="h-full border-black border-l-1" />
-        <div className="flex-1 h-full overflow-y-scroll overflow-x-auto">
-          {/* Other content area */}
+        {/* Mobile Sidebar */}
+        {(isMobileSidebarShown === true) && (
+          <div className="block md:hidden absolute inset-0 flex flex-row z-10">
+            <div className="bg-black opacity-30 flex-1 h-full" />
+            <div className="w-full sm:w-64 h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
+              <Sidebar />
+            </div>
+          </div>
+        )}
+
+        <div className="absolute md:relative w-full md:flex-1  h-full overflow-y-scroll overflow-x-auto">
+          Other content area
         </div>
-      </main>
+
+      </main >
 
       {/* <footer className="w-full bg-white m-0 border-t-1 border-black">
         <div className="w-full mx-auto p-1 md:flex md:items-center md:justify-between">
-          <span className="text-sm text-gray-500 sm:text-center">© 2025 <a href="https://w34.com/" className="hover:underline">W34E8YR</a>. All Rights Reserved.
+          <span className="text-sm text-gray-500 md:text-center">© 2025 <a href="https://w34.com/" className="hover:underline">W34E8YR</a>. All Rights Reserved.
           </span>
           <ul className="flex flex-wrap items-center text-sm font-medium text-gray-500">
             <li>
@@ -437,15 +478,17 @@ function App() {
         </div>
       </footer> */}
 
-      {(dialog !== null) && (
-        <>
-          <MemoizedDialog
-            onClose={() => setDialog(null)}
-            ctx={dialog} />
-        </>
-      )}
+      {
+        (dialog !== null) && (
+          <>
+            <MemoizedDialog
+              onClose={() => setDialog(null)}
+              ctx={dialog} />
+          </>
+        )
+      }
 
-    </div>
+    </div >
   );
 }
 
