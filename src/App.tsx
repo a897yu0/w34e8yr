@@ -43,7 +43,6 @@ interface SidebarWrapperProps {
   onItemClick?: (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void;
 
   toggleSidebarShown?: () => void;
-
 }
 
 interface SidebarDropdownItemProps extends SidebarItemProps, SidebarWrapperProps {
@@ -60,6 +59,8 @@ interface SidebarItemsWrapperProps extends SidebarWrapperProps {
 }
 
 interface SidebarProps extends SidebarWrapperProps {
+  dropdownMenu: DropdownMenu;
+  toggleDropdownMenu: (id: string) => void;
 }
 
 // interface ServersManagementPanelProps {
@@ -170,7 +171,7 @@ function Header(props: HeaderProps): React.JSX.Element {
   );
 }
 
-const SidebarWrapper = React.memo<SidebarItemsWrapperProps>((props: SidebarItemsWrapperProps): React.JSX.Element => {
+function SidebarWrapper(props: SidebarItemsWrapperProps): React.JSX.Element {
   const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
@@ -204,9 +205,9 @@ const SidebarWrapper = React.memo<SidebarItemsWrapperProps>((props: SidebarItems
       })}
     </ul>
   );
-});
+};
 
-const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
+function SidebarItem(props: SidebarItemProps): React.JSX.Element {
 
   const parentPath: string | undefined = props.parentPath;
   const name: string | undefined = props.name;
@@ -240,7 +241,7 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
         }
 
         if (toggleSidebarShown) {
-          // toggleSidebarShown();
+          toggleSidebarShown();
         }
       }}
       >
@@ -259,9 +260,9 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
       </a>
     </li>
   );
-});
+};
 
-const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: SidebarDropdownItemProps): React.JSX.Element => {
+function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element {
 
   const parentPath: string | undefined = props.parentPath;
   const name: string | undefined = props.name;
@@ -283,7 +284,8 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
   const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
-  const id: string = React.useMemo(() => generateUUID(), []);
+  // const id: string = React.useMemo(() => generateUUID(), []);
+  const id: string = (path || React.useMemo(() => generateUUID(), []));
 
   React.useEffect(() => {
     if (path) {
@@ -335,25 +337,17 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
       </SidebarWrapper>
     </li>
   );
-});
+};
 
 function Sidebar(props: SidebarProps): React.JSX.Element {
   const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
-  const [dropdownMenu, setDropdownMenu] = React.useState<DropdownMenu>({});
-
-  const toggleDropdownMenu = React.useCallback((id: string): void => {
-    setDropdownMenu((prevDropdownMenu: DropdownMenu) => ({
-      ...prevDropdownMenu,
-      [id]: !prevDropdownMenu[id],
-    }));
-  }, []);
+  const dropdownMenu: DropdownMenu = props.dropdownMenu;
+  const toggleDropdownMenu: (id: string) => void = props.toggleDropdownMenu;
 
   React.useEffect(() => {
     const handleResize = () => {
-      // Reset dropdown menu when window is resized
-      setDropdownMenu({});
     };
 
     window.addEventListener('resize', handleResize);
@@ -365,6 +359,8 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
   }, []);
 
   // TODO: Save current state to the local storage (State: registered servers)
+
+  console.log("dropdownMenu:", dropdownMenu);
 
   return (
     <aside id="sidebar-multi-level-sidebar" className="bg-white min-w-fit min-h-full" aria-label="Sidebar">
@@ -391,12 +387,12 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
             text="Management"
           />
           <SidebarDropdownItem
+            name="registered"
+
             dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
             text="Registered"
           >
             <SidebarItem
-              name="registered"
-
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
@@ -407,8 +403,6 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               args={["52.187.187.79"]}
             />
             <SidebarItem
-              name="registered"
-
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
@@ -419,8 +413,6 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               args={["205.141.230.240"]}
             />
             <SidebarItem
-              name="registered"
-
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
@@ -431,8 +423,6 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               args={["server-jw948g5", "Hello,", "World!"]}
             />
             <SidebarItem
-              name="registered"
-
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
@@ -631,7 +621,8 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
       </SidebarWrapper>
     </aside>
   );
-}
+};
+
 function ServersManagementPanel(): React.JSX.Element {
 
   return (
@@ -680,8 +671,8 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
           </div>
           {args && (args.length > 0) && (
             <div className="w-full bg-white border-black- border-b-1 p-1 flex flex-row flex-wrap justify-start items-start gap-1 overflow-hidden">
-              {args.map((value: string) => (
-                <div className="border">
+              {args.map((value: string, index: number) => (
+                <div key={index} className="border">
                   {value}
                 </div>
               ))}
@@ -702,6 +693,15 @@ function App(): React.JSX.Element {
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
+
+  const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<DropdownMenu>({});
+
+  const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
+    setSidebarDropdownMenu((prevMenu: DropdownMenu) => ({
+      ...prevMenu,
+      [id]: !prevMenu[id],
+    }));
+  }, []);
 
 
   const [currentMainPanelIcon, setCurrentMainPanelIcon] = React.useState<React.ReactNode | undefined>(undefined);
@@ -741,17 +741,32 @@ function App(): React.JSX.Element {
 
         {/* Desktop Sidebar */}
         <div className="hidden md:block min-w-64 w-fit h-full overflow-y-scroll overflow-x-auto border-black border-r-1">
-          <Sidebar onItemClick={clickSidebarItem} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
+          <Sidebar
+            onItemClick={clickSidebarItem}
+
+            toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)}
+
+            dropdownMenu={sidebarDropdownMenu}
+            toggleDropdownMenu={toggleSidebarDropdownMenu}
+          />
         </div>
         {/* Mobile Sidebar */}
-        {(isMobileSidebarShown === true) && (
-          <div className="block md:hidden absolute inset-0 flex flex-row z-10">
-            <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
-            <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
-              <Sidebar onItemClick={clickSidebarItem} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
-            </div>
+        <div className={clsx(
+          "block md:hidden absolute inset-0 flex flex-row z-10",
+          !isMobileSidebarShown && "hidden",
+        )}>
+          <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
+          <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
+            <Sidebar
+              onItemClick={clickSidebarItem}
+
+              toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)}
+
+              dropdownMenu={sidebarDropdownMenu}
+              toggleDropdownMenu={toggleSidebarDropdownMenu}
+            />
           </div>
-        )}
+        </div>
 
         <div className="absolute md:relative w-full md:flex-1  h-full overflow-hidden">
           {/* Main content area: This area displays the main panels */}
