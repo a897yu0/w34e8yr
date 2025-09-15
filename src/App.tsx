@@ -477,13 +477,13 @@ function App() {
           <span className="text-sm text-gray-500 md:text-center">© 2025 <a href="https://w34.com/" className="hover:underline">W34E8YR</a>. All Rights Reserved.</span>
           <ul className="flex flex-wrap items-center text-sm font-medium text-gray-500">
             <li>
-              <a href="#" className="hover:underline me-2 md:me-2">About</a>
+              <a href="#" className="hover:underline me-2">About</a>
             </li>
             <li>
-              <a href="#" className="hover:underline me-2 md:me-2">Privacy Policy</a>
+              <a href="#" className="hover:underline me-2">Privacy Policy</a>
             </li>
             <li>
-              <a href="#" className="hover:underline me-2 md:me-2">Licensing</a>
+              <a href="#" className="hover:underline me-2">Licensing</a>
             </li>
             <li>
               <a href="#" className="hover:underline">Contact</a>
