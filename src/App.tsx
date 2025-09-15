@@ -62,9 +62,9 @@ interface SidebarItemsWrapperProps extends SidebarWrapperProps {
 interface SidebarProps extends SidebarWrapperProps {
 }
 
-interface ServersManagementPanelProps {
+// interface ServersManagementPanelProps {
 
-}
+// }
 
 interface MainPanelWrapperProps {
   icon?: React.ReactNode;
