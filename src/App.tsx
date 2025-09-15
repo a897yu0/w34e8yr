@@ -472,10 +472,9 @@ function App() {
 
       </main >
 
-      {/* <footer className="w-full bg-white m-0 border-t-1 border-black">
+      <footer className="w-full bg-white m-0 border-t-1 border-black">
         <div className="w-full mx-auto p-1 md:flex md:items-center md:justify-between">
-          <span className="text-sm text-gray-500 md:text-center">© 2025 <a href="https://w34.com/" className="hover:underline">W34E8YR</a>. All Rights Reserved.
-          </span>
+          <span className="text-sm text-gray-500 md:text-center">© 2025 <a href="https://w34.com/" className="hover:underline">W34E8YR</a>. All Rights Reserved.</span>
           <ul className="flex flex-wrap items-center text-sm font-medium text-gray-500">
             <li>
               <a href="#" className="hover:underline me-2 md:me-2">About</a>
@@ -491,7 +490,7 @@ function App() {
             </li>
           </ul>
         </div>
-      </footer> */}
+      </footer>
 
       {
         (dialog !== null) && (
