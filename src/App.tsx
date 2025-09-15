@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface HeaderProps {
   isSidebarShown: boolean;
@@ -16,7 +16,7 @@ interface DropdownMenu {
 }
 
 interface SidebarItemProps {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   text: string;
   badge?: string;
   badgeColor?: string;
@@ -26,8 +26,7 @@ interface SidebarItemProps {
 
 interface SidebarDropdownItemProps {
   dropdownMenu: DropdownMenu; toggleDropdownMenu: (id: string) => void;
-  id: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   text: string;
   badge?: string;
   badgeColor?: string;
@@ -41,13 +40,13 @@ interface SidebarWrapperProps {
   children: React.ReactNode;
 }
 
-// const generateUUID = (): string => {
-//   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-//     const r = Math.random() * 16 | 0;
-//     const v = c === 'x' ? r : (r & 0x3 | 0x8);
-//     return v.toString(16);
-//   });
-// };
+const generateUUID = (): string => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 function Dialog({
   onClose, ctx,
@@ -125,7 +124,7 @@ const SidebarWrapper = memo<SidebarWrapperProps>(({
 });
 
 const SidebarItem = memo<SidebarItemProps>((props: SidebarItemProps) => {
-  const icon: React.ReactNode = props.icon;
+  const icon: React.ReactNode | undefined = props.icon;
   const text: string = props.text;
   const badge: string | undefined = props.badge;
   const badgeColor: string | undefined = props.badgeColor;
@@ -155,15 +154,16 @@ const SidebarItem = memo<SidebarItemProps>((props: SidebarItemProps) => {
 
 const SidebarDropdownItem = memo<SidebarDropdownItemProps>((props: SidebarDropdownItemProps) => {
   const dropdownMenu: DropdownMenu = props.dropdownMenu;
-  const toggleDropdownMenu: ((id: string) => void) = props.toggleDropdownMenu;
-  const id: string = props.id;
-  const icon: React.ReactNode = props.icon;
+  const toggleDropdownMenu: (id: string) => void = props.toggleDropdownMenu;
+  const icon: React.ReactNode | undefined = props.icon;
   const text: string = props.text;
   const badge: string | undefined = props.badge;
   const badgeColor: string | undefined = props.badgeColor;
   const count: number | undefined = props.count;
   const children: React.ReactNode | undefined = props.children;
   const onClick: (() => void) | undefined = props.onClick;
+
+  const id: string = useMemo(() => generateUUID(), []);
 
   return (
     <li>
@@ -215,12 +215,25 @@ function Sidebar() {
     }));
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      // Reset dropdown menu when window is resized
+      setDropdownMenu({});
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <aside id="sidebar-multi-level-sidebar" className="bg-white min-w-fit min-h-full" aria-label="Sidebar">
       <ul className="font-medium">
         <SidebarDropdownItem
           dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
-          id="be2a112c-beb6-4b84-a27a-4de4245c8336"
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z" />
@@ -228,7 +241,53 @@ function Sidebar() {
           }
           text="Servers"
         >
+          <SidebarItem
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+              </svg>
+            }
+            text="Management"
+          />
+          <SidebarDropdownItem
+            dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
+            text="Registered"
+          >
+            <SidebarItem
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
+                </svg>
+              }
+              text="52.187.187.79"
+            />
+            <SidebarItem
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
+                </svg>
+              }
+              text="205.141.230.240"
+            />
+            <SidebarItem
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
+                </svg>
+              }
+              text="server-jw948g5"
+            />
+            <SidebarItem
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
+                </svg>
+              }
+              text="ad2cadf7-ebe6-4afb-87e9-1db30ab7e815"
+            />
+          </SidebarDropdownItem>
         </SidebarDropdownItem>
+        <div className="mx-1 my-4 border-black border-t-1" />
         <SidebarItem
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
@@ -239,7 +298,6 @@ function Sidebar() {
         />
         <SidebarDropdownItem
           dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
-          id="5013e2d0-b5fd-4620-97c3-ad2d851aca9a"
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
@@ -271,7 +329,6 @@ function Sidebar() {
           />
           <SidebarDropdownItem
             dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
-            id="c879071d-be42-4365-bd4e-0969e7da5eb6"
             icon={
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
