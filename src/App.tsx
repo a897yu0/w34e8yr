@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 
 interface HeaderProps {
   isSidebarShown: boolean;
@@ -42,13 +42,13 @@ interface SidebarWrapperProps {
   children: React.ReactNode;
 }
 
-const generateUUID = (): string => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-};
+// const generateUUID = (): string => {
+//   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+//     const r = Math.random() * 16 | 0;
+//     const v = c === 'x' ? r : (r & 0x3 | 0x8);
+//     return v.toString(16);
+//   });
+// };
 
 function Dialog({
   onClose, ctx,
@@ -157,14 +157,14 @@ const SidebarItem = memo<SidebarItemProps>(({
 const SidebarDropdownItem = memo<SidebarDropdownItemProps>(({
   dropdownMenu, toggleDropdownMenu,
   id,
-  icon,
+  // icon,
   text,
-  href = "#",
-  badge,
-  count,
+  // href = "#",
+  // badge,
+  // count,
   children,
-  onClick
-}: SidebarItemProps) => {
+  // onClick
+}: SidebarDropdownItemProps) => {
   return (
     <li>
       <button type="button" className="flex items-center w-full p-1 text-base text-black transition duration-75 group hover:bg-gray-100 cursor-pointer" onClick={() => toggleDropdownMenu(id)}>
@@ -182,7 +182,7 @@ const SidebarDropdownItem = memo<SidebarDropdownItemProps>(({
           </svg>
         )}
       </button>
-      <SidebarWrapper hidden={!dropdownMenu[id] || dropdownMenu[id] === false}>
+      <SidebarWrapper hidden={!dropdownMenu[id]}>
         {children}
       </SidebarWrapper>
     </li>
