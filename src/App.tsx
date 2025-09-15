@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 import { memo, useCallback, useRef, useState, type ChangeEvent } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
@@ -185,7 +183,7 @@ function Sidebar() {
   }, []);
 
   return (
-    <aside id="sidebar-multi-level-sidebar" className="bg-white w-full h-full border-black border-r-1" aria-label="Sidebar">
+    <aside id="sidebar-multi-level-sidebar" className="bg-white w-full h-full" aria-label="Sidebar">
       <div className="h-full overflow-y-auto">
         <ul className="font-medium">
           <SidebarItem
@@ -413,13 +411,10 @@ function App() {
             <Panel defaultSize={25}>
               <Sidebar />
             </Panel>
-            <PanelResizeHandle >
-              <div className="">
-              </div>
-            </PanelResizeHandle>
+            <PanelResizeHandle className=" border-black border-r-1"/>
             <Panel>
             </Panel>
-            <PanelResizeHandle />
+            <PanelResizeHandle className=" border-black border-r-1"/>
             <Panel defaultSize={25}>
             </Panel>
           </PanelGroup>
