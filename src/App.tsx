@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React from 'react';
 
 interface HeaderProps {
@@ -20,7 +21,11 @@ interface DropdownMenu {
   [id: string]: boolean;
 }
 
-interface SidebarItemProps {
+interface PathComponentProps {
+  onClick?: (path: string, args?: string[]) => void;
+}
+
+interface SidebarItemProps extends PathComponentProps {
   parentPath?: string;
   name?: string;
 
@@ -29,7 +34,9 @@ interface SidebarItemProps {
   badge?: string;
   badgeColor?: string;
   count?: number;
-  onClick?: () => void;
+
+  parentArgs?: string[];
+  args?: string[];
 }
 
 interface SidebarDropdownItemProps extends SidebarItemProps {
@@ -38,9 +45,22 @@ interface SidebarDropdownItemProps extends SidebarItemProps {
   children?: React.ReactNode;
 }
 
-interface SidebarWrapperProps {
+interface SidebarWrapperProps extends PathComponentProps {
+  root?: boolean;
   hidden?: boolean;
+
   children: React.ReactNode;
+}
+
+interface SidebarProps extends PathComponentProps {
+}
+
+interface MainPanelProps {
+  path?: string;
+}
+
+interface ServersManagementPanel extends MainPanelProps {
+
 }
 
 const mainPanelPaths: { [id: string]: boolean; } = {};
@@ -124,18 +144,37 @@ function Header(props: HeaderProps): React.JSX.Element {
   );
 }
 
-const SidebarWrapper = React.memo<SidebarWrapperProps>(({
-  hidden,
-  children,
-}: SidebarWrapperProps): React.JSX.Element => {
+const SidebarWrapper = React.memo<SidebarWrapperProps>((props: SidebarWrapperProps): React.JSX.Element => {
+  const onClick: ((path: string, args?: string[]) => void) | undefined = props.onClick;
+
+  const root: boolean | undefined = props.root;;
+  const hidden: boolean | undefined = props.hidden;;
+
+  const children: React.ReactNode = props.children;
+
   return (
-    <ul className={`border-black border-l-2 ml-2 font-medium ${hidden === true && "hidden"}`}>
-      {children}
+    <ul className={clsx(
+      'font-medium',
+      !root && 'border-black border-l-2 ml-2',
+      hidden && 'hidden'
+    )}>
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child) && (child.type === SidebarItem || child.type === SidebarDropdownItem || child.type === SidebarWrapper)) {
+          return React.cloneElement(child, {
+            onClick: onClick,
+            ...(child.props as any), // Preserve existing props
+          });
+        }
+        return child;
+      })}
     </ul>
   );
 });
 
 const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
+
+  const onClick: ((path: string, args?: string[]) => void) | undefined = props.onClick;
+
   const parentPath: string | undefined = props.parentPath;
   const name: string | undefined = props.name;
 
@@ -146,7 +185,9 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
   const badge: string | undefined = props.badge;
   const badgeColor: string | undefined = props.badgeColor;
   const count: number | undefined = props.count;
-  const onClick: (() => void) | undefined = props.onClick;
+
+  const parentArgs: string[] | undefined = props.parentArgs;
+  const args: string[] | undefined = props.args;
 
   React.useEffect(() => {
     if (path) {
@@ -157,7 +198,7 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
 
   return (
     <li>
-      <a href="#" className="flex items-center p-1 text-black hover:bg-gray-100 group cursor-pointer" onClick={onClick}
+      <a href="#" className="flex items-center p-1 text-black hover:bg-gray-100 group cursor-pointer" onClick={() => (onClick && path && onClick(path, [...(parentArgs ?? []), ...(args ?? [])]))}
       >
         <div className="shrink-0 w-5 h-5 text-black transition duration-75 group-hover:text-gray-800">
           {icon}
@@ -177,6 +218,9 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
 });
 
 const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: SidebarDropdownItemProps): React.JSX.Element => {
+
+  const onClick: ((path: string, args?: string[]) => void) | undefined = props.onClick;
+
   const parentPath: string | undefined = props.parentPath;
   const name: string | undefined = props.name;
 
@@ -190,7 +234,9 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
   const badgeColor: string | undefined = props.badgeColor;
   const count: number | undefined = props.count;
   const children: React.ReactNode | undefined = props.children;
-  const onClick: (() => void) | undefined = props.onClick;
+
+  const parentArgs: string[] | undefined = props.parentArgs;
+  const args: string[] | undefined = props.args;
 
   const id: string = React.useMemo(() => generateUUID(), []);
 
@@ -203,13 +249,7 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
 
   return (
     <li>
-      <button type="button" className="flex items-center w-full p-1 text-base text-black transition duration-75 group hover:bg-gray-100 cursor-pointer" onClick={() => {
-        toggleDropdownMenu(id);
-
-        if (onClick) {
-          onClick();
-        }
-      }}>
+      <button type="button" className="flex items-center w-full p-1 text-base text-black transition duration-75 group hover:bg-gray-100 cursor-pointer" onClick={() => toggleDropdownMenu(id)}>
         <div className="shrink-0 w-5 h-5 text-black transition duration-75 group-hover:text-gray-800">
           {icon}
         </div>
@@ -234,11 +274,12 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
           )
         )}
       </button>
-      <SidebarWrapper hidden={!dropdownMenu[id]}>
+      <SidebarWrapper onClick={onClick} hidden={!dropdownMenu[id]}>
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child) && (child.type === SidebarItem || child.type === SidebarDropdownItem)) {
             return React.cloneElement(child, {
               parentPath: path,
+              args: [...(parentArgs ?? []), ...(args ?? [])],
               ...(child.props as any), // Preserve existing props
             });
           }
@@ -249,7 +290,9 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
   );
 });
 
-function Sidebar(): React.JSX.Element {
+function Sidebar(props: SidebarProps): React.JSX.Element {
+  const onClick: ((path: string, args?: string[]) => void) | undefined = props.onClick;
+
   const [dropdownMenu, setDropdownMenu] = React.useState<DropdownMenu>({});
 
   const toggleDropdownMenu = React.useCallback((id: string): void => {
@@ -275,7 +318,7 @@ function Sidebar(): React.JSX.Element {
 
   return (
     <aside id="sidebar-multi-level-sidebar" className="bg-white min-w-fit min-h-full" aria-label="Sidebar">
-      <ul className="font-medium">
+      <SidebarWrapper onClick={onClick} root>
         <SidebarDropdownItem
           name="servers"
           dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
@@ -307,6 +350,7 @@ function Sidebar(): React.JSX.Element {
                 </svg>
               }
               text="52.187.187.79"
+              args={["52.187.187.79"]}
             />
             <SidebarItem
               name="registered"
@@ -316,6 +360,7 @@ function Sidebar(): React.JSX.Element {
                 </svg>
               }
               text="205.141.230.240"
+              args={["205.141.230.240"]}
             />
             <SidebarItem
               name="registered"
@@ -325,6 +370,7 @@ function Sidebar(): React.JSX.Element {
                 </svg>
               }
               text="server-jw948g5"
+              args={["server-jw948g5"]}
             />
             <SidebarItem
               name="registered"
@@ -334,6 +380,7 @@ function Sidebar(): React.JSX.Element {
                 </svg>
               }
               text="ad2cadf7-ebe6-4afb-87e9-1db30ab7e815"
+              args={["ad2cadf7-ebe6-4afb-87e9-1db30ab7e815"]}
             />
           </SidebarDropdownItem>
         </SidebarDropdownItem>
@@ -505,8 +552,23 @@ function Sidebar(): React.JSX.Element {
           badge="Pro"
           count={1}
         />
-      </ul>
+      </SidebarWrapper>
     </aside>
+  );
+}
+
+function MainPanel(props: MainPanelProps): React.JSX.Element {
+  const path: string | undefined = props.path;
+
+  if (path) {
+    if (!mainPanelPaths[path]) {
+      throw Error(`Invalid path: ${path}`);
+    }
+  }
+
+  return (
+    <div>
+    </div>
   );
 }
 
@@ -514,6 +576,8 @@ function App(): React.JSX.Element {
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
+
+  const [currentMainPanelPath, setCurrentMainPanelPath] = React.useState<string | undefined>(undefined);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -536,21 +600,21 @@ function App(): React.JSX.Element {
 
         {/* Desktop Sidebar */}
         <div className="hidden md:block min-w-64 w-fit h-full overflow-y-scroll overflow-x-auto border-black border-r-1">
-          <Sidebar />
+          <Sidebar onClick={(path: string, args?: string[]) => console.log(path, args)} />
         </div>
         {/* Mobile Sidebar */}
         {(isMobileSidebarShown === true) && (
           <div className="block md:hidden absolute inset-0 flex flex-row z-10">
             <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
             <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
-              <Sidebar />
+              <Sidebar onClick={(path: string, args?: string[]) => console.log(path, args)} />
             </div>
           </div>
         )}
 
         <div className="absolute md:relative w-full md:flex-1  h-full overflow-hidden">
-          {/* Main content area: This area displays the main content panels */}
-          Main content area
+          {/* Main content area: This area displays the main panels */}
+          <MainPanel path={currentMainPanelPath} />
         </div>
 
       </main >
@@ -575,15 +639,11 @@ function App(): React.JSX.Element {
         </div>
       </footer>
 
-      {
-        (dialog !== null) && (
-          <>
-            <Dialog
-              onClose={() => setDialog(null)}
-              ctx={dialog} />
-          </>
-        )
-      }
+      {(dialog !== null) && (
+        <Dialog
+          onClose={() => setDialog(null)}
+          ctx={dialog} />
+      )}
 
     </div >
   );
