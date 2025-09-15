@@ -11,6 +11,11 @@ interface DialogContext {
   onConfirm: () => void;
 }
 
+interface DialogProps {
+  onClose: () => void;
+  ctx: DialogContext;
+}
+
 interface DropdownMenu {
   [id: string]: boolean;
 }
@@ -27,24 +32,18 @@ interface SidebarItemProps {
   onClick?: () => void;
 }
 
-interface SidebarDropdownItemProps {
-  parentPath?: string;
-  name?: string;
-
+interface SidebarDropdownItemProps extends SidebarItemProps {
   dropdownMenu: DropdownMenu; toggleDropdownMenu: (id: string) => void;
-  icon?: React.ReactNode;
-  text: string;
-  badge?: string;
-  badgeColor?: string;
-  count?: number;
+
   children?: React.ReactNode;
-  onClick?: () => void;
 }
 
 interface SidebarWrapperProps {
   hidden?: boolean;
   children: React.ReactNode;
 }
+
+const mainPanelPaths: { [id: string]: boolean; } = {};
 
 function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -64,12 +63,10 @@ function getPath(parentPath: string | undefined, name: string | undefined): stri
   }
 }
 
-function Dialog({
-  onClose, ctx,
-}: {
-  onClose: () => void;
-  ctx: DialogContext;
-}): React.JSX.Element {
+const Dialog = React.memo<DialogProps>((props: DialogProps): React.JSX.Element => {
+  const onClose: () => void = props.onClose;
+  const ctx: DialogContext = props.ctx;
+
   return (
     <div className="fixed inset-0 bg-gray-400/50 flex items-center justify-center z-50">
       <div className="bg-white shadow-xl max-w-md w-full mx-4">
@@ -101,7 +98,7 @@ function Dialog({
       </div>
     </div>
   );
-}
+});
 
 function Header(props: HeaderProps): React.JSX.Element {
   const isSidebarShown: boolean = props.isSidebarShown;
@@ -127,11 +124,10 @@ function Header(props: HeaderProps): React.JSX.Element {
   );
 }
 
-
 const SidebarWrapper = React.memo<SidebarWrapperProps>(({
   hidden,
   children,
-}: SidebarWrapperProps) => {
+}: SidebarWrapperProps): React.JSX.Element => {
   return (
     <ul className={`border-black border-l-2 ml-2 font-medium ${hidden === true && "hidden"}`}>
       {children}
@@ -145,14 +141,19 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
 
   const path: string | undefined = getPath(parentPath, name);
 
-  console.log("path:", path);
-
   const icon: React.ReactNode | undefined = props.icon;
   const text: string = props.text;
   const badge: string | undefined = props.badge;
   const badgeColor: string | undefined = props.badgeColor;
   const count: number | undefined = props.count;
   const onClick: (() => void) | undefined = props.onClick;
+
+  React.useEffect(() => {
+    if (path) {
+      mainPanelPaths[path] = true;
+    }
+
+  }, []);
 
   return (
     <li>
@@ -175,13 +176,11 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
   );
 });
 
-const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: SidebarDropdownItemProps) => {
+const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: SidebarDropdownItemProps): React.JSX.Element => {
   const parentPath: string | undefined = props.parentPath;
   const name: string | undefined = props.name;
 
   const path: string | undefined = getPath(parentPath, name);
-
-  console.log("path:", path);
 
   const dropdownMenu: DropdownMenu = props.dropdownMenu;
   const toggleDropdownMenu: (id: string) => void = props.toggleDropdownMenu;
@@ -194,6 +193,13 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
   const onClick: (() => void) | undefined = props.onClick;
 
   const id: string = React.useMemo(() => generateUUID(), []);
+
+  React.useEffect(() => {
+    if (path) {
+      mainPanelPaths[path] = true;
+    }
+
+  }, []);
 
   return (
     <li>
@@ -504,10 +510,7 @@ function Sidebar(): React.JSX.Element {
   );
 }
 
-const MemoizedDialog = React.memo(Dialog);
-
 function App(): React.JSX.Element {
-
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
@@ -546,7 +549,8 @@ function App(): React.JSX.Element {
         )}
 
         <div className="absolute md:relative w-full md:flex-1  h-full overflow-hidden">
-          Other content area
+          {/* Main content area: This area displays the main content panels */}
+          Main content area
         </div>
 
       </main >
@@ -574,7 +578,7 @@ function App(): React.JSX.Element {
       {
         (dialog !== null) && (
           <>
-            <MemoizedDialog
+            <Dialog
               onClose={() => setDialog(null)}
               ctx={dialog} />
           </>
