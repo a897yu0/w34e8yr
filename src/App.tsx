@@ -459,14 +459,14 @@ function App() {
         {/* Mobile Sidebar */}
         {(isMobileSidebarShown === true) && (
           <div className="block md:hidden absolute inset-0 flex flex-row z-10">
-            <div className="bg-black opacity-30 flex-1 h-full" />
+            <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
             <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
               <Sidebar />
             </div>
           </div>
         )}
 
-        <div className="absolute md:relative w-full md:flex-1  h-full overflow-y-scroll overflow-x-auto">
+        <div className="absolute md:relative w-full md:flex-1  h-full overflow-hidden">
           Other content area
         </div>
 
