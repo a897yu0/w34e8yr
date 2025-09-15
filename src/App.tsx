@@ -157,6 +157,7 @@ const SidebarDropdownItem = memo<SidebarDropdownItemProps>((props: SidebarDropdo
   const dropdownMenu: DropdownMenu = props.dropdownMenu;
   const toggleDropdownMenu: ((id: string) => void) = props.toggleDropdownMenu;
   const id: string = props.id;
+  const icon: React.ReactNode = props.icon;
   const text: string = props.text;
   const badge: string | undefined = props.badge;
   const badgeColor: string | undefined = props.badgeColor;
@@ -173,9 +174,9 @@ const SidebarDropdownItem = memo<SidebarDropdownItemProps>((props: SidebarDropdo
           onClick();
         }
       }}>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
-        </svg>
+        <div className="shrink-0 w-5 h-5 text-black transition duration-75 group-hover:text-gray-800">
+          {icon}
+        </div>
         <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{text}</span>
         {badge && (
           <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
@@ -185,14 +186,16 @@ const SidebarDropdownItem = memo<SidebarDropdownItemProps>((props: SidebarDropdo
         {count && (
           <span className="inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">{count}</span>
         )}
-        {(dropdownMenu[id] === true) ? (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-          </svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-          </svg>
+        {(!!children) && (
+          (dropdownMenu[id] === true) ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+          )
         )}
       </button>
       <SidebarWrapper hidden={!dropdownMenu[id]}>
@@ -206,15 +209,26 @@ function Sidebar() {
   const [dropdownMenu, setDropdownMenu] = useState<DropdownMenu>({});
 
   const toggleDropdownMenu = useCallback((id: string): void => {
-    setDropdownMenu(prev => ({
-      ...prev,
-      [id]: !prev[id]
+    setDropdownMenu((prevDropdownMenu: DropdownMenu) => ({
+      ...prevDropdownMenu,
+      [id]: !prevDropdownMenu[id],
     }));
   }, []);
 
   return (
     <aside id="sidebar-multi-level-sidebar" className="bg-white min-w-fit min-h-full" aria-label="Sidebar">
       <ul className="font-medium">
+        <SidebarDropdownItem
+          dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
+          id="be2a112c-beb6-4b84-a27a-4de4245c8336"
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z" />
+            </svg>
+          }
+          text="Servers"
+        >
+        </SidebarDropdownItem>
         <SidebarItem
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
@@ -307,57 +321,6 @@ function Sidebar() {
             count={1}
           />
         </SidebarDropdownItem>
-        <li>
-          <button type="button" className="flex items-center w-full p-1 text-base text-black transition duration-75 group hover:bg-gray-100" onClick={() => toggleDropdownMenu("E_COMMERCE")}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
-            </svg>
-            <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">E-commerce</span>
-            {(dropdownMenu["E_COMMERCE"] === true) ? (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-              </svg>
-            )}
-          </button>
-          {(dropdownMenu["E_COMMERCE"] === true) && (
-            <SidebarWrapper>
-              <SidebarItem
-                icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                  </svg>
-                }
-                text="Products"
-                badge="Pro"
-                count={1}
-              />
-              <SidebarItem
-                icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
-                  </svg>
-                }
-                text="Billing"
-                badge="New" badgeColor="bg-red-200"
-                count={1}
-              />
-              <SidebarItem
-                icon={
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
-                  </svg>
-                }
-                text="Invoice"
-                badge="Billed" badgeColor="bg-red-200"
-                count={1}
-              />
-            </SidebarWrapper>
-          )}
-        </li>
         <SidebarItem
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
