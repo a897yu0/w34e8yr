@@ -35,27 +35,31 @@ interface SidebarItemProps {
   args?: string[];
 
   onClick?: (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void;
-}
 
-interface SidebarDropdownItemProps extends SidebarItemProps {
-  dropdownMenu: DropdownMenu; toggleDropdownMenu: (id: string) => void;
-
-  children?: React.ReactNode;
-
-  onItemClick?: (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void;
+  toggleSidebarShown?: () => void;
 }
 
 interface SidebarWrapperProps {
+  onItemClick?: (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void;
+
+  toggleSidebarShown?: () => void;
+
+}
+
+interface SidebarDropdownItemProps extends SidebarItemProps, SidebarWrapperProps {
+  dropdownMenu: DropdownMenu; toggleDropdownMenu: (id: string) => void;
+
+  children?: React.ReactNode;
+}
+
+interface SidebarItemsWrapperProps extends SidebarWrapperProps {
   root?: boolean;
   hidden?: boolean;
 
   children: React.ReactNode;
-
-  onItemClick?: (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void;
 }
 
-interface SidebarProps {
-  onItemClick?: (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void;
+interface SidebarProps extends SidebarWrapperProps {
 }
 
 interface ServersManagementPanelProps {
@@ -67,6 +71,8 @@ interface MainPanelWrapperProps {
 
   path: string | undefined;
   resetPath: () => void;
+
+  args?: string[];
 }
 
 const mainPanelPaths: { [id: string]: boolean; } = {};
@@ -140,7 +146,7 @@ const Dialog = React.memo<DialogProps>((props: DialogProps): React.JSX.Element =
 
 function Header(props: HeaderProps): React.JSX.Element {
   const isSidebarShown: boolean = props.isSidebarShown;
-  const toggleSidebarShown: () => void = props.toggleSidebarShown;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   return (
     <header className="w-full flex flex-row justify-between items-center bg-white p-1 border-b-1 border-black">
@@ -164,8 +170,9 @@ function Header(props: HeaderProps): React.JSX.Element {
   );
 }
 
-const SidebarWrapper = React.memo<SidebarWrapperProps>((props: SidebarWrapperProps): React.JSX.Element => {
+const SidebarWrapper = React.memo<SidebarItemsWrapperProps>((props: SidebarItemsWrapperProps): React.JSX.Element => {
   const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const root: boolean | undefined = props.root;;
   const hidden: boolean | undefined = props.hidden;;
@@ -182,12 +189,14 @@ const SidebarWrapper = React.memo<SidebarWrapperProps>((props: SidebarWrapperPro
         if (React.isValidElement(child) && (child.type === SidebarDropdownItem || child.type === SidebarWrapper)) {
           return React.cloneElement(child, {
             onItemClick: onItemClick,
+            toggleSidebarShown: toggleSidebarShown,
             ...(child.props as any), // Preserve existing props
           });
         }
         if (React.isValidElement(child) && (child.type === SidebarItem)) {
           return React.cloneElement(child, {
             onClick: onItemClick,
+            toggleSidebarShown: toggleSidebarShown,
             ...(child.props as any), // Preserve existing props
           });
         }
@@ -214,6 +223,7 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
   const args: string[] | undefined = props.args;
 
   const onClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onClick;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   React.useEffect(() => {
     if (path) {
@@ -224,7 +234,15 @@ const SidebarItem = React.memo<SidebarItemProps>((props: SidebarItemProps) => {
 
   return (
     <li>
-      <a href="#" className="flex items-center p-1 text-black hover:bg-gray-100 group cursor-pointer" onClick={() => (onClick && path && onClick(icon, path, [...(parentArgs ?? []), ...(args ?? [])]))}
+      <a href="#" className="flex items-center p-1 text-black hover:bg-gray-100 group cursor-pointer" onClick={() => {
+        if (onClick && path) {
+          onClick(icon, path, [...(parentArgs ?? []), ...(args ?? [])]);
+        }
+
+        if (toggleSidebarShown) {
+          // toggleSidebarShown();
+        }
+      }}
       >
         <div className="shrink-0 w-5 h-5 text-black transition duration-75 group-hover:text-gray-800">
           {icon}
@@ -263,6 +281,7 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
   const args: string[] | undefined = props.args;
 
   const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const id: string = React.useMemo(() => generateUUID(), []);
 
@@ -302,7 +321,7 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
           </div>
         )}
       </button>
-      <SidebarWrapper onItemClick={onItemClick} hidden={!dropdownMenu[id]}>
+      <SidebarWrapper onItemClick={onItemClick} toggleSidebarShown={toggleSidebarShown} hidden={!dropdownMenu[id]}>
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child) && (child.type === SidebarItem || child.type === SidebarDropdownItem)) {
             return React.cloneElement(child, {
@@ -320,6 +339,7 @@ const SidebarDropdownItem = React.memo<SidebarDropdownItemProps>((props: Sidebar
 
 function Sidebar(props: SidebarProps): React.JSX.Element {
   const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const [dropdownMenu, setDropdownMenu] = React.useState<DropdownMenu>({});
 
@@ -348,7 +368,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
 
   return (
     <aside id="sidebar-multi-level-sidebar" className="bg-white min-w-fit min-h-full" aria-label="Sidebar">
-      <SidebarWrapper onItemClick={onItemClick} root>
+      <SidebarWrapper onItemClick={onItemClick} toggleSidebarShown={toggleSidebarShown} root>
         <SidebarDropdownItem
           name="servers"
 
@@ -408,7 +428,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               }
               text="server-jw948g5"
 
-              args={["server-jw948g5"]}
+              args={["server-jw948g5", "Hello,", "World!"]}
             />
             <SidebarItem
               name="registered"
@@ -627,6 +647,8 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   const path: string | undefined = props.path;
   const resetPath: () => void = props.resetPath;
 
+  const args: string[] | undefined = props.args;
+
   if (path && !mainPanelPaths[path]) {
     throw Error(`Invalid path: Unregistered main panel: ${path}`);
   }
@@ -656,6 +678,15 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
               </svg>
             </div>
           </div>
+          {args && (args.length > 0) && (
+            <div className="w-full bg-white border-black- border-b-1 p-1 flex flex-row flex-wrap justify-start items-start gap-1 overflow-hidden">
+              {args.map((value: string) => (
+                <div className="border">
+                  {value}
+                </div>
+              ))}
+            </div>
+          )}
           {panels[path] || (
             <div>
               Not found
@@ -675,6 +706,7 @@ function App(): React.JSX.Element {
 
   const [currentMainPanelIcon, setCurrentMainPanelIcon] = React.useState<React.ReactNode | undefined>(undefined);
   const [currentMainPanelPath, setCurrentMainPanelPath] = React.useState<string | undefined>(undefined);
+  const [currentMainPanelArgs, setCurrentMainPanelArgs] = React.useState<string[] | undefined>(undefined);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -690,7 +722,7 @@ function App(): React.JSX.Element {
     };
   }, []);
 
-  const clickSidebarItem = (icon: React.ReactNode | undefined, path: string, args?: string[]) => {
+  const clickSidebarItem = (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => {
     if (!isValidPathComponent(path)) {
       throw new Error(`Invalid path: Cannot contain whitespace or be empty: ${path}`);
     }
@@ -699,6 +731,7 @@ function App(): React.JSX.Element {
 
     setCurrentMainPanelIcon(icon);
     setCurrentMainPanelPath(path);
+    setCurrentMainPanelArgs(args);
   }
 
   return (
@@ -708,14 +741,14 @@ function App(): React.JSX.Element {
 
         {/* Desktop Sidebar */}
         <div className="hidden md:block min-w-64 w-fit h-full overflow-y-scroll overflow-x-auto border-black border-r-1">
-          <Sidebar onItemClick={clickSidebarItem} />
+          <Sidebar onItemClick={clickSidebarItem} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
         </div>
         {/* Mobile Sidebar */}
         {(isMobileSidebarShown === true) && (
           <div className="block md:hidden absolute inset-0 flex flex-row z-10">
             <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
             <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
-              <Sidebar onItemClick={clickSidebarItem} />
+              <Sidebar onItemClick={clickSidebarItem} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
             </div>
           </div>
         )}
@@ -724,7 +757,7 @@ function App(): React.JSX.Element {
           {/* Main content area: This area displays the main panels */}
           <MainPanelWrapper
             icon={currentMainPanelIcon}
-            path={currentMainPanelPath} resetPath={() => setCurrentMainPanelPath(undefined)} />
+            path={currentMainPanelPath} args={currentMainPanelArgs} resetPath={() => setCurrentMainPanelPath(undefined)} />
         </div>
 
       </main >
