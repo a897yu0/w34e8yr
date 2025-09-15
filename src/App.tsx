@@ -18,7 +18,6 @@ interface DropdownMenu {
 interface SidebarItemProps {
   icon: React.ReactNode;
   text: string;
-  href?: string;
   badge?: string;
   badgeColor?: string;
   count?: number;
@@ -30,8 +29,8 @@ interface SidebarDropdownItemProps {
   id: string;
   icon: React.ReactNode;
   text: string;
-  href?: string;
   badge?: string;
+  badgeColor?: string;
   count?: number;
   children?: React.ReactNode;
   onClick?: () => void;
@@ -125,53 +124,67 @@ const SidebarWrapper = memo<SidebarWrapperProps>(({
   );
 });
 
-const SidebarItem = memo<SidebarItemProps>(({
-  icon,
-  text,
-  href = "#",
-  badge, badgeColor,
-  count,
-  onClick
-}: SidebarItemProps) => {
+const SidebarItem = memo<SidebarItemProps>((props: SidebarItemProps) => {
+  const icon: React.ReactNode = props.icon;
+  const text: string = props.text;
+  const badge: string | undefined = props.badge;
+  const badgeColor: string | undefined = props.badgeColor;
+  const count: number | undefined = props.count;
+  const onClick: (() => void) | undefined = props.onClick;
+
   return (
     <li>
-      <a href={href} className="flex items-center p-1 text-black hover:bg-gray-100 group cursor-pointer" onClick={onClick}
+      <a href="#" className="flex items-center p-1 text-black hover:bg-gray-100 group cursor-pointer" onClick={onClick}
       >
         <div className="shrink-0 w-5 h-5 text-black transition duration-75 group-hover:text-gray-800">
           {icon}
         </div>
         <span className="flex-1 ms-3 text-black whitespace-nowrap">{text}</span>
         {badge && (
-          <span className={`inline-flex items-center justify-center px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
+          <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
             {badge}
           </span>
         )}
         {count && (
-          <span className="inline-flex items-center justify-center w-3 h-3 p-3 ms-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">{count}</span>
+          <span className="inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">{count}</span>
         )}
       </a>
     </li>
   );
 });
 
-const SidebarDropdownItem = memo<SidebarDropdownItemProps>(({
-  dropdownMenu, toggleDropdownMenu,
-  id,
-  // icon,
-  text,
-  // href = "#",
-  // badge,
-  // count,
-  children,
-  // onClick
-}: SidebarDropdownItemProps) => {
+const SidebarDropdownItem = memo<SidebarDropdownItemProps>((props: SidebarDropdownItemProps) => {
+  const dropdownMenu: DropdownMenu = props.dropdownMenu;
+  const toggleDropdownMenu: ((id: string) => void) = props.toggleDropdownMenu;
+  const id: string = props.id;
+  const text: string = props.text;
+  const badge: string | undefined = props.badge;
+  const badgeColor: string | undefined = props.badgeColor;
+  const count: number | undefined = props.count;
+  const children: React.ReactNode | undefined = props.children;
+  const onClick: (() => void) | undefined = props.onClick;
+
   return (
     <li>
-      <button type="button" className="flex items-center w-full p-1 text-base text-black transition duration-75 group hover:bg-gray-100 cursor-pointer" onClick={() => toggleDropdownMenu(id)}>
+      <button type="button" className="flex items-center w-full p-1 text-base text-black transition duration-75 group hover:bg-gray-100 cursor-pointer" onClick={() => {
+        toggleDropdownMenu(id);
+
+        if (onClick) {
+          onClick();
+        }
+      }}>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 flex-shrink-0 ">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
         </svg>
         <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{text}</span>
+        {badge && (
+          <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
+            {badge}
+          </span>
+        )}
+        {count && (
+          <span className="inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">{count}</span>
+        )}
         {(dropdownMenu[id] === true) ? (
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -200,7 +213,7 @@ function Sidebar() {
   }, []);
 
   return (
-    <aside id="sidebar-multi-level-sidebar" className="bg-white w-full min-h-full" aria-label="Sidebar">
+    <aside id="sidebar-multi-level-sidebar" className="bg-white min-w-fit min-h-full" aria-label="Sidebar">
       <ul className="font-medium">
         <SidebarItem
           icon={
@@ -219,6 +232,8 @@ function Sidebar() {
             </svg>
           }
           text="E-commerce"
+          badge="Good" badgeColor="bg-orange-200"
+          count={999}
         >
           <SidebarItem
             icon={
@@ -438,14 +453,14 @@ function App() {
       <main className="relative w-full flex-1 flex flex-row justify-start items-center gap-0 overflow-y-hidden">
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-64 h-full overflow-y-scroll overflow-x-auto border-black border-r-1">
+        <div className="hidden md:block min-w-64 w-fit h-full overflow-y-scroll overflow-x-auto border-black border-r-1">
           <Sidebar />
         </div>
         {/* Mobile Sidebar */}
         {(isMobileSidebarShown === true) && (
           <div className="block md:hidden absolute inset-0 flex flex-row z-10">
             <div className="bg-black opacity-30 flex-1 h-full" />
-            <div className="w-full sm:w-64 h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
+            <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
               <Sidebar />
             </div>
           </div>
