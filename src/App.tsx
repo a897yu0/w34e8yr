@@ -823,29 +823,30 @@ function App(): React.JSX.Element {
     };
   }, []);
 
-  // Listen for browser back/forward navigation
-  React.useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      // console.log('Browser navigation detected:', event.state);
+  // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
+  // // Listen for browser back/forward navigation
+  // React.useEffect(() => {
+  //   const handlePopState = (event: PopStateEvent) => {
+  //     // console.log('Browser navigation detected:', event.state);
 
-      // // Restore state from the history state
-      // if (event.state) {
-      // } else {
-      //   // No state means we're back to initial state
+  //     // // Restore state from the history state
+  //     // if (event.state) {
+  //     // } else {
+  //     //   // No state means we're back to initial state
 
-      // }
+  //     // }
 
-      event;
+  //     event;
 
-      loadCurrentMainPanel();
-    };
+  //     loadCurrentMainPanel();
+  //   };
 
-    window.addEventListener('popstate', handlePopState);
+  //   window.addEventListener('popstate', handlePopState);
 
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener('popstate', handlePopState);
+  //   };
+  // }, []);
 
   const clickSidebarItem = (path: string) => {
     if (!isValidPathComponent(path)) {
@@ -859,7 +860,11 @@ function App(): React.JSX.Element {
     const url: URL = new URL(window.location.href);
     url.searchParams.set('main', path);
 
-    window.history.pushState(undefined, '', url);
+    window.history.replaceState(undefined, '', url);
+
+    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
+    // window.history.pushState(undefined, '', url);  
+    
 
   }
 
