@@ -807,6 +807,45 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   //   throw new Error(`Invalid path: Unregistered main panel: ${path}`);
   // }
 
+
+  const PathSegmentComponent = (props: { segment?: string; index?: number; isLast?: boolean; }) => (
+    <span
+      className={`
+      hover:text-blue-500 cursor-pointer
+      ${props.isLast ? 'font-semibold text-blue-600' : 'text-gray-700'}
+    `}
+    // onClick={() => console.log(`Clicked segment: ${props.segment} at index ${props.index}`)}
+    >
+      {props.segment}
+    </span>
+  );
+
+  const PathSeparatorComponent = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 mt-0.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+    </svg>
+  );
+
+  const PathBreadcrumb = (props: { path: string; }) => {
+    const segments = props.path.split('/');
+
+    return (
+      <div className="flex flex-row justify-start items-center flex-wrap">
+        {segments.map((segment, index) => (
+          <React.Fragment key={index}>
+            <PathSegmentComponent
+              segment={segment}
+              index={index}
+              isLast={index === segments.length - 1}
+            />
+            {index < segments.length - 1 && <PathSeparatorComponent />}
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
+
   return (
     <div className="w-full h-full flex flex-col">
       {path && (
@@ -820,7 +859,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
                   </svg>
                 )}
               </div>
-              <span className="overflow-hidden inline-block">{path}</span>
+              <PathBreadcrumb path={path} />
             </div>
             <div className="w-5 h-5 cursor-pointer" onClick={() => resetPath()}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
