@@ -811,8 +811,8 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     <div className="w-full h-full flex flex-col">
       {path && (
         <>
-          <div className="w-full h-6 p-1 flex flex-row justify-between items-center bg-gray-200 border-black- border-b-1">
-            <div className="flex flex-row justify-center items-center">
+          <div className="w-full h-fit p-1 flex flex-row justify-between items-center flex-wrap bg-gray-200 border-black- border-b-1">
+            <div className="flex flex-row justify-start items-center flex-wrap">
               <div className="w-5 h-5 mr-1">
                 {(ctx && ctx.icon) || (
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
@@ -820,7 +820,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
                   </svg>
                 )}
               </div>
-              <span className="mb-1">{path}</span>
+              <span className="overflow-hidden inline-block">{path}</span>
             </div>
             <div className="w-5 h-5 cursor-pointer" onClick={() => resetPath()}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
