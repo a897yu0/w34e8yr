@@ -34,13 +34,13 @@ interface SidebarItemProps {
   parentArgs?: string[];
   args?: string[];
 
-  onClick?: (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void;
+  onClick?: (path: string) => void;
 
   toggleSidebarShown?: () => void;
 }
 
 interface SidebarWrapperProps {
-  onItemClick?: (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void;
+  onItemClick?: (path: string) => void;
 
   toggleSidebarShown?: () => void;
 }
@@ -68,15 +68,20 @@ interface SidebarProps extends SidebarWrapperProps {
 // }
 
 interface MainPanelWrapperProps {
-  icon?: React.ReactNode;
+  id?: string;
 
   path: string | undefined;
   resetPath: () => void;
+}
 
+interface MainPanelContext {
+  icon?: React.ReactNode;
+
+  path: string;
   args?: string[];
 }
 
-const mainPanelPaths: { [id: string]: boolean; } = {};
+const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
 
 function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -172,7 +177,7 @@ function Header(props: HeaderProps): React.JSX.Element {
 }
 
 function SidebarWrapper(props: SidebarItemsWrapperProps): React.JSX.Element {
-  const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
+  const onItemClick: ((path: string) => void) | undefined = props.onItemClick;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const root: boolean | undefined = props.root;;
@@ -223,12 +228,17 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
   const parentArgs: string[] | undefined = props.parentArgs;
   const args: string[] | undefined = props.args;
 
-  const onClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onClick;
+  const onClick: ((path: string) => void) | undefined = props.onClick;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   React.useEffect(() => {
     if (path) {
-      mainPanelPaths[path] = true;
+      pathToMainPanelContext[path] = {
+        icon: icon,
+
+        path: path,
+        args: [...(parentArgs ?? []), ...(args ?? [])],
+      };
     }
 
   }, []);
@@ -237,7 +247,7 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
     <li>
       <a href="#" className="flex items-center p-1 text-black hover:bg-gray-100 group cursor-pointer" onClick={() => {
         if (onClick && path) {
-          onClick(icon, path, [...(parentArgs ?? []), ...(args ?? [])]);
+          onClick(path);
         }
 
         if (toggleSidebarShown) {
@@ -281,16 +291,13 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
   const parentArgs: string[] | undefined = props.parentArgs;
   const args: string[] | undefined = props.args;
 
-  const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
+  const onItemClick: ((path: string) => void) | undefined = props.onItemClick;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   // const id: string = React.useMemo(() => generateUUID(), []);
   const id: string = (path || React.useMemo(() => generateUUID(), []));
 
   React.useEffect(() => {
-    if (path) {
-      mainPanelPaths[path] = true;
-    }
 
   }, []);
 
@@ -340,7 +347,7 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
 };
 
 function Sidebar(props: SidebarProps): React.JSX.Element {
-  const onItemClick: ((icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => void) | undefined = props.onItemClick;
+  const onItemClick: ((path: string) => void) | undefined = props.onItemClick;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const dropdownMenu: DropdownMenu = props.dropdownMenu;
@@ -393,6 +400,8 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
             text="Registered"
           >
             <SidebarItem
+              name="52.187.187.79"
+
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
@@ -403,6 +412,8 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               args={["52.187.187.79"]}
             />
             <SidebarItem
+              name="205.141.230.240"
+
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
@@ -413,6 +424,8 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               args={["205.141.230.240"]}
             />
             <SidebarItem
+              name="server-jw948g5"
+
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
@@ -423,6 +436,8 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               args={["server-jw948g5", "Hello,", "World!"]}
             />
             <SidebarItem
+              name="ad2cadf7-ebe6-4afb-87e9-1db30ab7e815"
+
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 0 0-.12-1.03l-2.268-9.64a3.375 3.375 0 0 0-3.285-2.602H7.923a3.375 3.375 0 0 0-3.285 2.602l-2.268 9.64a4.5 4.5 0 0 0-.12 1.03v.228m19.5 0a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3m19.5 0a3 3 0 0 0-3-3H5.25a3 3 0 0 0-3 3m16.5 0h.008v.008h-.008v-.008Zm-3 0h.008v.008h-.008v-.008Z" />
@@ -633,16 +648,27 @@ function ServersManagementPanel(): React.JSX.Element {
 }
 
 function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
-  const icon: React.ReactNode | undefined = props.icon;
+  const id: string | undefined = props.id;
 
   const path: string | undefined = props.path;
   const resetPath: () => void = props.resetPath;
 
-  const args: string[] | undefined = props.args;
+  const [ctx, setCtx] = React.useState<MainPanelContext | undefined>(undefined);
 
-  if (path && !mainPanelPaths[path]) {
-    throw Error(`Invalid path: Unregistered main panel: ${path}`);
-  }
+  React.useEffect(() => {
+    if (path) {
+      const ctx: MainPanelContext | undefined = pathToMainPanelContext[path];
+      setCtx(ctx);
+
+      console.log('ctx:', ctx);
+    }
+
+  }, [id]);
+
+
+  // if (path && !mainPanelPaths[path]) {
+  //   throw Error(`Invalid path: Unregistered main panel: ${path}`);
+  // }
 
   const panels: Record<string, React.JSX.Element> = {
     "servers/registered": <ServersManagementPanel />,
@@ -655,7 +681,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
           <div className="w-full h-6 p-1 flex flex-row justify-between items-center bg-gray-200 border-black- border-b-1">
             <div className="flex flex-row justify-center items-center">
               <div className="w-5 h-5 mr-1">
-                {icon || (
+                {(ctx && ctx.icon) || (
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
                   </svg>
@@ -669,9 +695,9 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
               </svg>
             </div>
           </div>
-          {args && (args.length > 0) && (
+          {ctx && ctx.args && (ctx.args.length > 0) && (
             <div className="w-full bg-white border-black- border-b-1 p-1 flex flex-row flex-wrap justify-start items-start gap-1 overflow-hidden">
-              {args.map((value: string, index: number) => (
+              {ctx.args.map((value: string, index: number) => (
                 <div key={index} className="border">
                   {value}
                 </div>
@@ -704,9 +730,8 @@ function App(): React.JSX.Element {
   }, []);
 
 
-  const [currentMainPanelIcon, setCurrentMainPanelIcon] = React.useState<React.ReactNode | undefined>(undefined);
   const [currentMainPanelPath, setCurrentMainPanelPath] = React.useState<string | undefined>(undefined);
-  const [currentMainPanelArgs, setCurrentMainPanelArgs] = React.useState<string[] | undefined>(undefined);
+  const [currentMainPanelId, setCurrentMainPanelId] = React.useState<string | undefined>(undefined);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -722,16 +747,52 @@ function App(): React.JSX.Element {
     };
   }, []);
 
-  const clickSidebarItem = (icon: React.ReactNode | undefined, path: string, args: string[] | undefined) => {
+  // Listen for browser back/forward navigation
+  React.useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      // console.log('Browser navigation detected:', event.state);
+
+      // // Restore state from the history state
+      // if (event.state) {
+      // } else {
+      //   // No state means we're back to initial state
+
+      // }
+
+      event;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const mainPanelPath: string | null = urlParams.get('main');
+
+      if (mainPanelPath) {
+        // console.log(mainPanelPath);
+
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  const clickSidebarItem = (path: string) => {
     if (!isValidPathComponent(path)) {
       throw new Error(`Invalid path: Cannot contain whitespace or be empty: ${path}`);
     }
 
     // console.log(path, args);
 
-    setCurrentMainPanelIcon(icon);
     setCurrentMainPanelPath(path);
-    setCurrentMainPanelArgs(args);
+
+    const url: URL = new URL(window.location.href);
+    url.searchParams.set('main', path);
+
+    window.history.pushState(undefined, '', url);
+
+    setCurrentMainPanelId(generateUUID());
+
   }
 
   return (
@@ -771,8 +832,8 @@ function App(): React.JSX.Element {
         <div className="absolute md:relative w-full md:flex-1  h-full overflow-hidden">
           {/* Main content area: This area displays the main panels */}
           <MainPanelWrapper
-            icon={currentMainPanelIcon}
-            path={currentMainPanelPath} args={currentMainPanelArgs} resetPath={() => setCurrentMainPanelPath(undefined)} />
+            id={currentMainPanelId}
+            path={currentMainPanelPath} resetPath={() => setCurrentMainPanelPath(undefined)} />
         </div>
 
       </main >
