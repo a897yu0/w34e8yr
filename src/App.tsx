@@ -83,6 +83,11 @@ interface MainPanelContext {
   args?: string[];
 }
 
+interface MainPanelWithParams {
+  panel: React.JSX.Element;
+  params: string[];
+}
+
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
 
 function generateUUID(): string {
@@ -435,7 +440,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               }
               text="52.187.187.79"
 
-              args={["52.187.187.79"]}
+              args={[]}
             />
             <SidebarItem
               name="205.141.230.240"
@@ -447,7 +452,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               }
               text="205.141.230.240"
 
-              args={["205.141.230.240"]}
+              args={[]}
             />
             <SidebarItem
               name="server-jw948g5"
@@ -459,7 +464,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               }
               text="server-jw948g5"
 
-              args={["server-jw948g5", "Hello,", "World!"]}
+              args={[]}
             />
             <SidebarItem
               name="ad2cadf7-ebe6-4afb-87e9-1db30ab7e815"
@@ -471,7 +476,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               }
               text="ad2cadf7-ebe6-4afb-87e9-1db30ab7e815"
 
-              args={["ad2cadf7-ebe6-4afb-87e9-1db30ab7e815"]}
+              args={[]}
             />
           </SidebarDropdownItem>
         </SidebarDropdownItem>
@@ -593,6 +598,8 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
             </svg>
           }
           text="Kanban"
+          badge="Pro"
+          count={1}
         />
         <SidebarItem
           name="inbox"
@@ -647,18 +654,6 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
           }
           text="Sign Up"
         />
-        <SidebarItem
-          name="kanban"
-
-          icon={
-            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-              <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
-            </svg>
-          }
-          text="Kanban"
-          badge="Pro"
-          count={1}
-        />
       </SidebarWrapper>
     </aside>
   );
@@ -680,10 +675,59 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
   const [ctx, setCtx] = React.useState<MainPanelContext | undefined>(undefined);
 
+  const [panelWithParams, setPanelWithParams] = React.useState<MainPanelWithParams | undefined>(undefined);
+
+  const pathToPanel: Record<string, React.JSX.Element> = {
+    "servers/registered/?": <ServersManagementPanel />,
+    "servers/registered/?/info/?": <ServersManagementPanel />,
+  };
+
+  function matchPathWithParams(pattern: string, path: string): { match: boolean; params: string[]; } {
+    const patternParts = pattern.split('/');
+    const pathParts = path.split('/');
+
+    if (patternParts.length !== pathParts.length) {
+      return { match: false, params: [] };
+    }
+
+    const params: string[] = [];
+
+    for (let i = 0; i < patternParts.length; i++) {
+      const patternPart = patternParts[i];
+      const pathPart = pathParts[i];
+
+      if (patternPart === '?') {
+        params.push(pathPart); // Capture the wildcard value
+      } else if (patternPart !== pathPart) {
+        return { match: false, params: [] };
+      }
+    }
+
+    return { match: true, params };
+  }
+
+  function findMatchingPanelWithParams(path: string): MainPanelWithParams | null {
+    for (const [pattern, panel] of Object.entries(pathToPanel)) {
+      const { match, params }: { match: boolean; params: string[]; } = matchPathWithParams(pattern, path);
+      if (match) {
+        return { panel, params };
+      }
+    }
+    return null;
+  }
+
   React.useEffect(() => {
     if (path) {
       const ctx: MainPanelContext | undefined = pathToMainPanelContext[path];
       setCtx(ctx);
+
+      const panelWithParams: MainPanelWithParams | null = findMatchingPanelWithParams(path);
+
+      if (panelWithParams) {
+        setPanelWithParams(panelWithParams);
+
+        console.log('panelWithParams:', panelWithParams);
+      }
 
       // console.log('ctx:', ctx);
     }
@@ -692,12 +736,8 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
 
   // if (path && !mainPanelPaths[path]) {
-  //   throw Error(`Invalid path: Unregistered main panel: ${path}`);
+  //   throw new Error(`Invalid path: Unregistered main panel: ${path}`);
   // }
-
-  const panels: Record<string, React.JSX.Element> = {
-    "servers/registered": <ServersManagementPanel />,
-  };
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -729,7 +769,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
               ))}
             </div>
           )}
-          {panels[path] || (
+          {(panelWithParams && panelWithParams.panel) || (
             <div className="w-full h-full flex justify-center items-center">
               Not found
             </div>
@@ -756,6 +796,17 @@ function App(): React.JSX.Element {
 
   const [currentMainPanelPath, setCurrentMainPanelPath] = React.useState<string | undefined>(undefined);
 
+  const loadCurrentMainPanel = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mainPanelPath: string | null = urlParams.get('main');
+
+    if (mainPanelPath) {
+      setCurrentMainPanelPath(mainPanelPath);
+    } else {
+      setCurrentMainPanelPath(undefined);
+    }
+  }
+
   React.useEffect(() => {
     const handleResize = () => {
       // Reset mobile sidebar when window is resized
@@ -763,6 +814,8 @@ function App(): React.JSX.Element {
     };
 
     window.addEventListener('resize', handleResize);
+
+    loadCurrentMainPanel();
 
     // Cleanup event listener on component unmount
     return () => {
@@ -784,14 +837,7 @@ function App(): React.JSX.Element {
 
       event;
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const mainPanelPath: string | null = urlParams.get('main');
-
-      if (mainPanelPath) {
-        setCurrentMainPanelPath(mainPanelPath);
-      } else {
-        setCurrentMainPanelPath(undefined);
-      }
+      loadCurrentMainPanel();
     };
 
     window.addEventListener('popstate', handlePopState);

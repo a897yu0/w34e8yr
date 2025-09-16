@@ -69,3 +69,9 @@ export default tseslint.config([
   },
 ])
 ```
+
+## Notes
+
+### TODO
+- Sync with platform accounts (like google) or own id/password
+    - Record the history (login timestamp, action history)
