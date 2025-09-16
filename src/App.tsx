@@ -163,8 +163,8 @@ function Header(props: HeaderProps): React.JSX.Element {
 
   return (
     <header className="w-full flex flex-row justify-between items-center bg-white p-1 border-b-1 border-black">
-      <div className="flex flex-row justify-center items-center cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7 mt-1">
+      <div className="flex flex-row justify-center items-center mt-0.5 cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7 mt-0.5">
           <path strokeLinecap="round" strokeLinejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
         </svg>
         <h1 className="text-2xl font-bold text-black ml-2">W34</h1>
