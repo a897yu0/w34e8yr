@@ -726,7 +726,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
       if (panelWithParams) {
         setPanelWithParams(panelWithParams);
 
-        console.log('panelWithParams:', panelWithParams);
+        // console.log('panelWithParams:', panelWithParams);
       }
 
       // console.log('ctx:', ctx);
