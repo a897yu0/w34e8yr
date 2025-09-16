@@ -874,7 +874,11 @@ function App(): React.JSX.Element {
     const url: URL = new URL(window.location.href);
     url.searchParams.delete('main');
 
-    window.history.pushState(undefined, '', url);
+    window.history.replaceState(undefined, '', url);
+
+    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
+    // window.history.pushState(undefined, '', url);  
+
   }
 
   const sidebarProps: SidebarProps = {
