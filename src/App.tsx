@@ -161,6 +161,17 @@ function Header(props: HeaderProps): React.JSX.Element {
   const isSidebarShown: boolean = props.isSidebarShown;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
+  const [avatarLoaded, setAvatarLoaded] = React.useState<boolean>(false);
+
+  const avatarUrl: string | undefined = 'https://avatar.iran.liara.run/public';
+  // const avatarUrl: string | undefined = undefined;
+
+  React.useEffect(() => {
+    if (avatarUrl) {
+      setAvatarLoaded(false);
+    }
+  }, [avatarUrl]);
+
   return (
     <header className="w-full flex flex-row justify-between items-center bg-white p-1 border-b-1 border-black">
       <div className="flex flex-row justify-center items-center mt-0.5 cursor-pointer">
@@ -169,8 +180,8 @@ function Header(props: HeaderProps): React.JSX.Element {
         </svg>
         <h1 className="text-2xl font-bold text-black ml-2">W34</h1>
       </div>
-      <div className="block md:hidden cursor-pointer" onClick={() => toggleSidebarShown()}>
-        <div className="w-6 h-6">
+      <div className="flex flex-row justify-center items-center gap-1">
+        <div className="block md:hidden cursor-pointer w-7 h-7" onClick={() => toggleSidebarShown()}>
           {(isSidebarShown === false) ? (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -180,6 +191,60 @@ function Header(props: HeaderProps): React.JSX.Element {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
           )}
+        </div>
+        <div className="cursor-pointer w-7 h-7">
+          {(avatarUrl && (
+            <div className="relative cursor-pointer w-full h-full">
+              {!avatarLoaded && (
+                <div className="absolute inset-0  flex items-center justify-center">
+                  <div className="w-full h-full border-2 border-gray-300 border-t-black rounded-full animate-spin"></div>
+                </div>
+              )}
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className={clsx(
+                  "absolute inset-0 size-full p-1",
+                  avatarLoaded && 'hidden',
+                )}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+              </svg>
+
+              <img
+                src={avatarUrl}
+                alt="User avatar"
+                className={clsx(
+                  "absolute inset-0 w-full h-full rounded-full object-cover",
+                  !avatarLoaded && 'hidden',
+                )}
+                onLoad={() => setAvatarLoaded(true)}
+                onError={() => setAvatarLoaded(false)}
+              />
+            </div>
+          )) || (
+
+              <div className="relative cursor-pointer w-full h-full">
+                <div className="absolute inset-0  flex items-center justify-center">
+                  <div className="w-full h-full border-2 border-black rounded-full"></div>
+                </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="absolute inset-0 size-full p-1"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+
+              </div>
+            )}
         </div>
       </div>
     </header>
