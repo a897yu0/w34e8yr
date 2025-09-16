@@ -961,7 +961,7 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-y-hidden">
+    <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
       <Header isSidebarShown={isMobileSidebarShown} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
       <main className="relative w-full flex-1 flex flex-row justify-start items-center gap-0 overflow-y-hidden">
 
