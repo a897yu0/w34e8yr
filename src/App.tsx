@@ -1349,13 +1349,10 @@ function App(): React.JSX.Element {
         }
 
         setResizableSidebarWidth((prevWidth: number) => {
-          if (windowInnerWidth < prevWidth) {
-            const newResizableSidebarWidth = windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0);
+          const newResizableSidebarWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
 
-            setInitialSidebarWidth(newResizableSidebarWidth);
-            return newResizableSidebarWidth;
-          }
-          return prevWidth;
+          setInitialSidebarWidth(newResizableSidebarWidth);
+          return newResizableSidebarWidth;
         });
 
       }
