@@ -187,6 +187,9 @@ function Header(props: HeaderProps): React.JSX.Element {
   const isSidebarShown: boolean = props.isSidebarShown;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
+  isSidebarShown;
+  toggleSidebarShown;
+
   const [avatarLoaded, setAvatarLoaded] = React.useState<boolean>(false);
 
   const avatarUrl: string | undefined = 'https://avatar.iran.liara.run/public';
