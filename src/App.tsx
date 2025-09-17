@@ -795,6 +795,8 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
         setPanelWithParams(panelWithParams);
 
         // console.log('panelWithParams:', panelWithParams);
+      } else {
+        setPanelWithParams(undefined);
       }
 
       // console.log('ctx:', ctx);
@@ -809,11 +811,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
 
   const PathSegmentComponent = (props: { segment?: string; index?: number; isLast?: boolean; }) => (
-    <span
-      className={`
-      hover:text-blue-500 cursor-pointer
-      ${props.isLast ? 'font-semibold text-blue-600' : 'text-gray-700'}
-    `}
+    <span className="cursor-pointer text-gray-700"
     // onClick={() => console.log(`Clicked segment: ${props.segment} at index ${props.index}`)}
     >
       {props.segment}
@@ -877,10 +875,12 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
             </div>
           )}
 
-          {/* TODO: When small screen, the text is getting cut off... */}
-          <div className="w-full h-full flex justify-center items-center overflow-auto">
-            {(panelWithParams && panelWithParams.panel) || "Not found"}
+          <div className="w-full h-full flex justify-start items-center overflow-x-auto overflow-y-auto">
+            <div className="flex-shrink-0 min-w-full h-full flex justify-center items-center">
+              {(panelWithParams && panelWithParams.panel) || (<span>Not found</span>)}
+            </div>
           </div>
+
         </div>
       )}
     </div>
