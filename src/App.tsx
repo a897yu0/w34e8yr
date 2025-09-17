@@ -88,9 +88,6 @@ interface MainPanelWithParams {
   params: string[];
 }
 
-const minSidebarWidth = 64;
-const initialSidebarWidth = 100;
-const maxSidebarWidth = 500;
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
 
 function generateUUID(): string {
@@ -1267,9 +1264,14 @@ function App(): React.JSX.Element {
 
   const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<DropdownMenu>({});
 
+  const minSidebarWidth: number = 0;
+  const initialSidebarWidth: number = 320;
+  const maxSidebarWidth: number = window.innerWidth;
+
   const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(initialSidebarWidth);
   const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
   const sidebarContainerRef = React.useRef<HTMLDivElement>(null);
+  const sidebarResizerRef = React.useRef<HTMLDivElement>(null);
 
   const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
     setSidebarDropdownMenu((prevMenu: DropdownMenu) => ({
@@ -1375,45 +1377,62 @@ function App(): React.JSX.Element {
     toggleDropdownMenu: toggleSidebarDropdownMenu,
   };
 
-  const handleSidebarResizerMouseDown = React.useCallback((e: React.MouseEvent) => {
+  const handleSidebarResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     setIsResizableSidebarDragging(true);
   }, []);
 
-  const handleSidebarResizerMouseMove = React.useCallback((e: MouseEvent) => {
+  const handleSidebarResizerPointerMove = React.useCallback((e: MouseEvent | TouchEvent) => {
     if (!isResizableSidebarDragging || !sidebarContainerRef.current) {
       return;
     }
 
-    console.log("move!");
-
     const containerRect = sidebarContainerRef.current.getBoundingClientRect();
-    const newLeftWidth = e.clientX - containerRect.left;
 
-    // Constrain within min and max bounds
-    const constrainedWidth = Math.min(Math.max(newLeftWidth, minSidebarWidth), maxSidebarWidth);
+    // Get X position from either mouse or touch event
+    const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
+    if (clientX === undefined) {
+      return;
+    }
+
+    const newLeftWidth = clientX - containerRect.left;
+
+    // Allow shrinking to 0, but prevent going beyond container width - 50px for right panel
+    const minWidth = 0;
+    const maxWidth = containerRect.width - (sidebarResizerRef.current?.clientWidth || 0);
+    const constrainedWidth = Math.min(Math.max(newLeftWidth, Math.max(minWidth, minSidebarWidth)), Math.min(maxWidth, maxSidebarWidth));
+
     setResizableSidebarWidth(constrainedWidth);
+
   }, [isResizableSidebarDragging, minSidebarWidth, maxSidebarWidth]);
 
-  const handleSidebarResizerMouseUp = React.useCallback(() => {
+  const handleSidebarResizerPointerUp = React.useCallback(() => {
     setIsResizableSidebarDragging(false);
   }, []);
 
   React.useEffect(() => {
     if (isResizableSidebarDragging) {
-      document.addEventListener('mousemove', handleSidebarResizerMouseMove);
-      document.addEventListener('mouseup', handleSidebarResizerMouseUp);
+      document.addEventListener('mousemove', handleSidebarResizerPointerMove);
+      document.addEventListener('mouseup', handleSidebarResizerPointerUp);
+      document.addEventListener('touchmove', handleSidebarResizerPointerMove, { passive: false });
+      document.addEventListener('touchend', handleSidebarResizerPointerUp);
+
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
+      document.body.style.touchAction = 'none'; // Prevent scrolling on mobile
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleSidebarResizerMouseMove);
-      document.removeEventListener('mouseup', handleSidebarResizerMouseUp);
+      document.removeEventListener('mousemove', handleSidebarResizerPointerMove);
+      document.removeEventListener('mouseup', handleSidebarResizerPointerUp);
+      document.removeEventListener('touchmove', handleSidebarResizerPointerMove);
+      document.removeEventListener('touchend', handleSidebarResizerPointerUp);
+
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      document.body.style.touchAction = '';
     };
-  }, [isResizableSidebarDragging, handleSidebarResizerMouseMove, handleSidebarResizerMouseUp]);
+  }, [isResizableSidebarDragging, handleSidebarResizerPointerMove, handleSidebarResizerPointerUp]);
 
   return (
     <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
@@ -1457,11 +1476,13 @@ function App(): React.JSX.Element {
         </div>
 
         <div
+          ref={sidebarResizerRef}
           className={clsx(
             "hidden md:block w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors duration-200",
             isResizableSidebarDragging ? 'bg-blue-500' : '',
           )}
-          onMouseDown={handleSidebarResizerMouseDown}
+          onMouseDown={handleSidebarResizerPointerDown}
+          onTouchStart={handleSidebarResizerPointerDown}
         >
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-0.5 h-8 bg-gray-400 rounded opacity-60"></div>
