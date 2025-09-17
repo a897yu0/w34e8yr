@@ -88,9 +88,35 @@ interface MainPanelWithParams {
   params: string[];
 }
 
-const INITIAL_SIDEBAR_WIDTH_LOCAL_STORAGE_KEY = 'db445a4e-0522-4534-a3b0-2aa03512c9c1';
+const initialSidebarWidthLocalStorageKey = 'db445a4e-0522-4534-a3b0-2aa03512c9c1';
 
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
+
+function getInitialSidebarWidth(minWidth: number, maxWidth: number, initWidth: number): number {
+  if (minWidth < 0) {
+    throw new Error(`Minimum sidebar width (${minWidth}) cannot be negative`);
+  }
+  if (maxWidth > window.innerWidth) {
+    throw new Error(`Maximum sidebar width (${maxWidth}) cannot be greater than window width (${window.innerWidth})`);
+  }
+  if (maxWidth < minWidth) {
+    throw new Error(`Maximum sidebar width (${maxWidth}) cannot be less than minimum sidebar width (${minWidth})`);
+  }
+
+  const item: string | null = localStorage.getItem(initialSidebarWidthLocalStorageKey);
+
+  let width: number = initWidth;
+
+  if (item) {
+    width = parseInt(item, 10);
+  }
+
+  return Math.min(Math.max(width, minWidth), maxWidth);
+}
+
+function setInitialSidebarWidth(width: number): void {
+  localStorage.setItem(initialSidebarWidthLocalStorageKey, width.toString());
+}
 
 function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -1263,9 +1289,24 @@ function App(): React.JSX.Element {
 
   const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<DropdownMenu>({});
 
-  const minSidebarWidth: number = 0;
-  const initialSidebarWidth: number = parseInt(localStorage.getItem(INITIAL_SIDEBAR_WIDTH_LOCAL_STORAGE_KEY) || '320', 10);
   const maxSidebarWidth: number = window.innerWidth;
+  const initSidebarWidth: number = 277;
+  const minSidebarWidth: number = Math.min(maxSidebarWidth, 177);
+  const initialSidebarWidth: number = getInitialSidebarWidth(minSidebarWidth, maxSidebarWidth, initSidebarWidth);
+
+  console.log("initialSidebarWidth:", initialSidebarWidth);
+
+  if (maxSidebarWidth < minSidebarWidth) {
+    throw new Error(`Maximum sidebar width (${maxSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
+  }
+
+  if (initialSidebarWidth < minSidebarWidth) {
+    throw new Error(`Initial sidebar width (${initialSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
+  }
+
+  if (initialSidebarWidth > maxSidebarWidth) {
+    throw new Error(`Initial sidebar width (${initialSidebarWidth}) cannot be greater than maximum sidebar width (${maxSidebarWidth})`);
+  }
 
   const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(initialSidebarWidth);
   const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
@@ -1296,6 +1337,22 @@ function App(): React.JSX.Element {
     const handleResize = () => {
       // Reset mobile sidebar when window is resized
       setIsMobileSidebarShown(false);
+
+      if (sidebarContainerRef.current) {
+        const containerRect: DOMRect = sidebarContainerRef.current.getBoundingClientRect();
+        const windowInnerWidth: number = Math.min(containerRect.width, window.innerWidth);
+
+        if (windowInnerWidth < minSidebarWidth) {
+          setResizableSidebarWidth(0);
+        } else if (windowInnerWidth < resizableSidebarWidth) {
+          const newResizableSidebarWidth = windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0);
+          setResizableSidebarWidth(newResizableSidebarWidth);
+
+          // console.log("newResizableSidebarWidth:", newResizableSidebarWidth);
+          setInitialSidebarWidth(newResizableSidebarWidth);
+        }
+
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -1377,7 +1434,13 @@ function App(): React.JSX.Element {
   };
 
   const handleSidebarResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
+    // Don't preventDefault here for touch events
+    if ('touches' in e) {
+      // Just start dragging, preventDefault will happen in touchmove
+    } else {
+      e.preventDefault(); // Only prevent for mouse events
+    }
+
     setIsResizableSidebarDragging(true);
   }, []);
 
@@ -1394,16 +1457,23 @@ function App(): React.JSX.Element {
       return;
     }
 
-    const newLeftWidth = clientX - containerRect.left;
+    const newLeftWidth = (clientX - containerRect.left);
 
-    // Allow shrinking to 0, but prevent going beyond container width - 50px for right panel
-    const minWidth = 0;
-    const maxWidth = containerRect.width - (sidebarResizerRef.current?.clientWidth || 0);
-    const constrainedWidth = Math.min(Math.max(newLeftWidth, Math.max(minWidth, minSidebarWidth)), Math.min(maxWidth, maxSidebarWidth));
+    if (newLeftWidth < minSidebarWidth) {
+      setResizableSidebarWidth(0);
 
-    setResizableSidebarWidth(constrainedWidth);
+      localStorage.setItem(initialSidebarWidthLocalStorageKey, '0');
+    } else {
+      // Allow shrinking to 0, but prevent going beyond container width - 50px for right panel
+      const minWidth = Math.max(0, minSidebarWidth);
+      const maxWidth = (Math.min(containerRect.width, maxSidebarWidth) - (sidebarResizerRef.current?.clientWidth || 0));
+      const constrainedWidth = Math.min(Math.max(newLeftWidth, minWidth), maxWidth);
 
-    localStorage.setItem(INITIAL_SIDEBAR_WIDTH_LOCAL_STORAGE_KEY, constrainedWidth.toString());
+      setResizableSidebarWidth(constrainedWidth);
+      setInitialSidebarWidth(constrainedWidth);
+
+      // console.log("constrainedWidth:", constrainedWidth);
+    }
 
   }, [isResizableSidebarDragging, minSidebarWidth, maxSidebarWidth]);
 
@@ -1447,7 +1517,7 @@ function App(): React.JSX.Element {
           "overflow-y-hidden",
         )}
         style={{
-          gridTemplateColumns: `${resizableSidebarWidth}px 6px 1fr`
+          gridTemplateColumns: `${resizableSidebarWidth}px 4px 1fr`
         }}
       >
 
@@ -1476,19 +1546,14 @@ function App(): React.JSX.Element {
         </div>
 
         <div ref={sidebarResizerRef}
-          className="hidden md:flex h-full border-black border-x  justify-center items-center">
-          <div
-            className={clsx(
-              "w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors duration-200",
-              isResizableSidebarDragging ? 'bg-blue-500' : '',
-            )}
-            onMouseDown={handleSidebarResizerPointerDown}
-            onTouchStart={handleSidebarResizerPointerDown}
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="w-0.5 h-8 bg-gray-400 rounded opacity-60"></div>
-            </div>
-          </div>
+          className={clsx(
+            "hidden md:flex cursor-col-resize h-full justify-center items-center",
+            isResizableSidebarDragging ? 'bg-blue-500' : 'bg-transparent',
+          )}
+          onMouseDown={handleSidebarResizerPointerDown}
+          onTouchStart={handleSidebarResizerPointerDown}
+        >
+          <div className="w-full h-full border-black border-x "></div>
         </div>
 
         <div className="absolute md:relative w-full md:flex-1 h-full overflow-hidden">
@@ -1499,7 +1564,7 @@ function App(): React.JSX.Element {
 
       </main >
 
-      <footer className="w-full bg-white m-0">
+      <footer className="w-full bg-white m-0 border-black border-t-1">
         <div className="w-full mx-auto p-1 md:flex md:items-center md:justify-between">
           <span className="text-sm text-gray-500 md:text-center">© 2025 <a href="https://w34.com/" className="hover:underline">W34E8YR</a>. All Rights Reserved.</span>
           <ul className="flex flex-wrap items-center text-sm font-medium text-gray-500">
