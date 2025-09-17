@@ -88,6 +88,9 @@ interface MainPanelWithParams {
   params: string[];
 }
 
+const minSidebarWidth = 64;
+const initialSidebarWidth = 100;
+const maxSidebarWidth = 500;
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
 
 function generateUUID(): string {
@@ -402,13 +405,13 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
           <span className="inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">{count}</span>
         )}
         {(!!children) && (
-          <div className="w-6 h-6">
+          <div className="w-6 h-6 flex-shrink-0">
             {(dropdownMenu[id] === true) ? (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full flex-shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
               </svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full flex-shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
               </svg>
             )}
@@ -464,7 +467,9 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
   // console.log("dropdownMenu:", dropdownMenu);
 
   return (
-    <aside id="sidebar-multi-level-sidebar" className="bg-white min-w-fit min-h-full" aria-label="Sidebar">
+    <aside id="sidebar-multi-level-sidebar"
+      className="bg-white min-w-fit min-h-full"
+      aria-label="Sidebar">
       <SidebarWrapper
         currentPath={currentPath}
         onItemClick={onItemClick}
@@ -1262,6 +1267,10 @@ function App(): React.JSX.Element {
 
   const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<DropdownMenu>({});
 
+  const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(initialSidebarWidth);
+  const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
+  const sidebarContainerRef = React.useRef<HTMLDivElement>(null);
+
   const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
     setSidebarDropdownMenu((prevMenu: DropdownMenu) => ({
       ...prevMenu,
@@ -1297,7 +1306,6 @@ function App(): React.JSX.Element {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-
 
   // Listen for browser back/forward navigation
   React.useEffect(() => {
@@ -1367,13 +1375,74 @@ function App(): React.JSX.Element {
     toggleDropdownMenu: toggleSidebarDropdownMenu,
   };
 
+  const handleSidebarResizerMouseDown = React.useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizableSidebarDragging(true);
+  }, []);
+
+  const handleSidebarResizerMouseMove = React.useCallback((e: MouseEvent) => {
+    if (!isResizableSidebarDragging || !sidebarContainerRef.current) {
+      return;
+    }
+
+    console.log("move!");
+
+    const containerRect = sidebarContainerRef.current.getBoundingClientRect();
+    const newLeftWidth = e.clientX - containerRect.left;
+
+    // Constrain within min and max bounds
+    const constrainedWidth = Math.min(Math.max(newLeftWidth, minSidebarWidth), maxSidebarWidth);
+    setResizableSidebarWidth(constrainedWidth);
+  }, [isResizableSidebarDragging, minSidebarWidth, maxSidebarWidth]);
+
+  const handleSidebarResizerMouseUp = React.useCallback(() => {
+    setIsResizableSidebarDragging(false);
+  }, []);
+
+  React.useEffect(() => {
+    if (isResizableSidebarDragging) {
+      document.addEventListener('mousemove', handleSidebarResizerMouseMove);
+      document.addEventListener('mouseup', handleSidebarResizerMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleSidebarResizerMouseMove);
+      document.removeEventListener('mouseup', handleSidebarResizerMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizableSidebarDragging, handleSidebarResizerMouseMove, handleSidebarResizerMouseUp]);
+
   return (
     <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
       <Header isSidebarShown={isMobileSidebarShown} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
-      <main className="relative w-full flex-1 flex flex-row justify-start items-center gap-0 overflow-y-hidden">
+      <main
+        ref={sidebarContainerRef}
+        className={clsx(
+          "relative w-full flex-1 ",
+          "flex flex-row justify-start items-center gap-0",
+          "md:grid",
+          "overflow-y-hidden",
+        )}
+        style={{
+          gridTemplateColumns: `${resizableSidebarWidth}px 4px 1fr`
+        }}
+      >
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block min-w-64 w-fit h-full overflow-y-scroll overflow-x-auto border-black border-r-1">
+        <div
+          className={clsx(
+            "hidden md:block",
+            "min-w-0 w-fit h-full",
+            "overflow-y-scroll overflow-x-auto",
+            "border-black border-r-1",
+          )}
+          style={{
+            width: `${resizableSidebarWidth}px`
+          }}
+        >
           <Sidebar {...sidebarProps} />
         </div>
         {/* Mobile Sidebar */}
@@ -1386,6 +1455,19 @@ function App(): React.JSX.Element {
             <Sidebar {...sidebarProps} />
           </div>
         </div>
+
+        <div
+          className={clsx(
+            "hidden md:block w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors duration-200",
+            isResizableSidebarDragging ? 'bg-blue-500' : '',
+          )}
+          onMouseDown={handleSidebarResizerMouseDown}
+        >
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-0.5 h-8 bg-gray-400 rounded opacity-60"></div>
+          </div>
+        </div>
+
 
         <div className="absolute md:relative w-full md:flex-1  h-full overflow-hidden">
           {/* Main content area: This area displays the main panels */}
