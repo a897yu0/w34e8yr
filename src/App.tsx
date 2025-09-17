@@ -1348,6 +1348,7 @@ function App(): React.JSX.Element {
         if (768 <= windowInnerWidth) {
           if (windowInnerWidth < minSidebarWidth) {
             setResizableSidebarWidth(0);
+            setInitialSidebarWidth(0);
           }
 
           setResizableSidebarWidth((prevWidth: number) => {
@@ -1479,8 +1480,7 @@ function App(): React.JSX.Element {
 
     if (resizableSidebarWidth < minSidebarWidth) {
       setResizableSidebarWidth(0);
-
-      localStorage.setItem(initialSidebarWidthLocalStorageKey, '0');
+      setInitialSidebarWidth(0);
     } else {
       // Allow shrinking to 0, but prevent going beyond container width - 50px for right panel
       const minWidth = Math.max(0, minSidebarWidth);
@@ -1535,7 +1535,7 @@ function App(): React.JSX.Element {
           "overflow-y-hidden",
         )}
         style={{
-          gridTemplateColumns: `${resizableSidebarWidth}px 4px 1fr`
+          gridTemplateColumns: `${resizableSidebarWidth}px 7px 1fr`
         }}
       >
 
