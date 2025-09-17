@@ -1312,7 +1312,20 @@ function App(): React.JSX.Element {
     } else {
       setCurrentMainPanelPath(undefined);
     }
-  }
+  };
+
+  const resetCurrentMainPanelPath = () => {
+    setCurrentMainPanelPath(undefined);
+
+    const url: URL = new URL(window.location.href);
+    url.searchParams.delete('main');
+
+    window.history.replaceState(undefined, '', url);
+
+    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
+    // window.history.pushState(undefined, '', url);  
+
+  };
 
   const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
     setSidebarDropdownMenu((prevMenu: DropdownMenu) => ({
@@ -1339,17 +1352,6 @@ function App(): React.JSX.Element {
     // window.history.pushState(undefined, '', url);  
 
 
-  }
-
-  const sidebarProps: SidebarProps = {
-    currentPath: currentMainPanelPath,
-
-    onItemClick: clickSidebarItem,
-
-    toggleSidebarShown: () => setIsMobileSidebarShown(prev => !prev),
-
-    dropdownMenu: sidebarDropdownMenu,
-    toggleDropdownMenu: toggleSidebarDropdownMenu,
   };
 
   const toggleSidebar = () => {
@@ -1456,17 +1458,15 @@ function App(): React.JSX.Element {
 
   };
 
-  const resetCurrentMainPanelPath = () => {
-    setCurrentMainPanelPath(undefined);
+  const sidebarProps: SidebarProps = {
+    currentPath: currentMainPanelPath,
 
-    const url: URL = new URL(window.location.href);
-    url.searchParams.delete('main');
+    onItemClick: clickSidebarItem,
 
-    window.history.replaceState(undefined, '', url);
+    toggleSidebarShown: () => setIsMobileSidebarShown(prev => !prev),
 
-    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
-    // window.history.pushState(undefined, '', url);  
-
+    dropdownMenu: sidebarDropdownMenu,
+    toggleDropdownMenu: toggleSidebarDropdownMenu,
   };
 
   // Resize event
