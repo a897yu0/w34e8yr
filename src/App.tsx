@@ -1301,13 +1301,6 @@ function App(): React.JSX.Element {
   const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(getCorrectSidebarWidth(minSidebarWidth, maxSidebarWidth, initSidebarWidth));
   const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
 
-  const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
-    setSidebarDropdownMenu((prevMenu: DropdownMenu) => ({
-      ...prevMenu,
-      [id]: !prevMenu[id],
-    }));
-  }, []);
-
   const [currentMainPanelPath, setCurrentMainPanelPath] = React.useState<string | undefined>(undefined);
 
   const loadCurrentMainPanel = () => {
@@ -1321,68 +1314,11 @@ function App(): React.JSX.Element {
     }
   }
 
-  React.useEffect(() => {
-    const handleResize = () => {
-      // Reset mobile sidebar when window is resized
-      setIsMobileSidebarShown(false);
-
-      // console.log("Resize!");
-
-      if (sidebarContainerRef.current) {
-        const containerRect: DOMRect = sidebarContainerRef.current.getBoundingClientRect();
-        const windowInnerWidth: number = Math.min(containerRect.width, window.innerWidth);
-
-        // The value 768px is breakpoint 'md' in tailwind Responsive design.
-        if (768 <= windowInnerWidth) {
-          if (windowInnerWidth < minSidebarWidth) {
-            setResizableSidebarWidth(0);
-            setInitialSidebarWidth(0);
-          }
-
-          setResizableSidebarWidth((prevWidth: number) => {
-            const newWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
-
-            setInitialSidebarWidth(newWidth);
-            return newWidth;
-          });
-        }
-
-
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    loadCurrentMainPanel();
-
-    // Cleanup event listener on component unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // Listen for browser back/forward navigation
-  React.useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      // console.log('Browser navigation detected:', event.state);
-
-      // Restore state from the history state
-      if (event.state) {
-      } else {
-        // No state means we're back to initial state
-
-      }
-
-      event;
-
-      loadCurrentMainPanel();
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
+  const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
+    setSidebarDropdownMenu((prevMenu: DropdownMenu) => ({
+      ...prevMenu,
+      [id]: !prevMenu[id],
+    }));
   }, []);
 
   const clickSidebarItem = (path: string) => {
@@ -1405,19 +1341,6 @@ function App(): React.JSX.Element {
 
   }
 
-  const resetCurrentMainPanelPath = () => {
-    setCurrentMainPanelPath(undefined);
-
-    const url: URL = new URL(window.location.href);
-    url.searchParams.delete('main');
-
-    window.history.replaceState(undefined, '', url);
-
-    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
-    // window.history.pushState(undefined, '', url);  
-
-  }
-
   const sidebarProps: SidebarProps = {
     currentPath: currentMainPanelPath,
 
@@ -1427,6 +1350,23 @@ function App(): React.JSX.Element {
 
     dropdownMenu: sidebarDropdownMenu,
     toggleDropdownMenu: toggleSidebarDropdownMenu,
+  };
+
+  const toggleSidebar = () => {
+    setIsMobileSidebarShown(prev => !prev);
+
+    setResizableSidebarWidth((prevWidth: number) => {
+      if (prevWidth > 0) {
+        setInitialSidebarWidth(0);
+        return 0;
+      }
+
+      const minWidth = Math.min(window.innerWidth, initSidebarWidth);
+      const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
+
+      setInitialSidebarWidth(newWidth);
+      return newWidth;
+    });
   };
 
   const handleSidebarResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -1488,6 +1428,89 @@ function App(): React.JSX.Element {
     setIsResizableSidebarDragging(false);
   }, []);
 
+  const adjustSidebarForWindowResize = () => {
+    // Reset mobile sidebar when window is resized
+    setIsMobileSidebarShown(false);
+
+    // console.log("Resize!");
+
+    if (sidebarContainerRef.current) {
+      const containerRect: DOMRect = sidebarContainerRef.current.getBoundingClientRect();
+      const windowInnerWidth: number = Math.min(containerRect.width, window.innerWidth);
+
+      // The value 768px is breakpoint 'md' in tailwind Responsive design.
+      if (768 <= windowInnerWidth) {
+        if (windowInnerWidth < minSidebarWidth) {
+          setResizableSidebarWidth(0);
+          setInitialSidebarWidth(0);
+        }
+
+        setResizableSidebarWidth((prevWidth: number) => {
+          const newWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
+
+          setInitialSidebarWidth(newWidth);
+          return newWidth;
+        });
+      }
+    }
+
+  };
+
+  const resetCurrentMainPanelPath = () => {
+    setCurrentMainPanelPath(undefined);
+
+    const url: URL = new URL(window.location.href);
+    url.searchParams.delete('main');
+
+    window.history.replaceState(undefined, '', url);
+
+    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
+    // window.history.pushState(undefined, '', url);  
+
+  };
+
+  // Resize event
+  React.useEffect(() => {
+    const handleResize = () => {
+      adjustSidebarForWindowResize();
+
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    loadCurrentMainPanel();
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Listen for browser back/forward navigation
+  React.useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      // console.log('Browser navigation detected:', event.state);
+
+      // Restore state from the history state
+      if (event.state) {
+      } else {
+        // No state means we're back to initial state
+
+      }
+
+      event;
+
+      loadCurrentMainPanel();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // Resizable sidebar handlers
   React.useEffect(() => {
     if (isResizableSidebarDragging) {
       document.addEventListener('mousemove', handleSidebarResizerPointerMove);
@@ -1515,24 +1538,10 @@ function App(): React.JSX.Element {
   return (
     <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
       <Header isSidebarShown={isMobileSidebarShown} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
-      {/* Subheader */}
+
+      {/* Subheader: Sudebar button, Quick access, Favorites */}
       <div className="w-full h-7 flex flex-row justify-between items-center bg-white p-1 border-b-1 border-black">
-        <div className="cursor-pointer w-7 h-7" onClick={() => {
-          setIsMobileSidebarShown(prev => !prev);
-
-          setResizableSidebarWidth((prevWidth: number) => {
-            if (prevWidth > 0) {
-              setInitialSidebarWidth(0);
-              return 0;
-            }
-
-            const minWidth = Math.min(window.innerWidth, initSidebarWidth);
-            const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
-
-            setInitialSidebarWidth(newWidth);
-            return newWidth;
-          });
-        }}>
+        <div className="cursor-pointer w-7 h-7" onClick={() => toggleSidebar()}>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -1592,16 +1601,15 @@ function App(): React.JSX.Element {
             <div
               className={clsx(
                 "w-1 h-10",
-                isResizableSidebarDragging ? 'bg-blue-500' : 'bg-transparent',
+                isResizableSidebarDragging ? 'bg-blue-500' : 'bg-gray-400',
               )}
             />
           </div>
         </div>
 
+        {/* Main content area: This area displays the main panels */}
         <div className="absolute md:relative w-full md:flex-1 h-full overflow-hidden">
-          {/* Main content area: This area displays the main panels */}
-          <MainPanelWrapper
-            path={currentMainPanelPath} resetPath={() => resetCurrentMainPanelPath()} />
+          <MainPanelWrapper path={currentMainPanelPath} resetPath={() => resetCurrentMainPanelPath()} />
         </div>
 
       </main >
