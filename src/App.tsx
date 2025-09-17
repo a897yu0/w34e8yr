@@ -1357,7 +1357,7 @@ function App(): React.JSX.Element {
           }
           return prevWidth;
         });
-sav
+
       }
     };
 
