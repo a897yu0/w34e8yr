@@ -1535,7 +1535,7 @@ function App(): React.JSX.Element {
           "overflow-y-hidden",
         )}
         style={{
-          gridTemplateColumns: `${resizableSidebarWidth}px 7px 1fr`
+          gridTemplateColumns: `${resizableSidebarWidth}px 10px 1fr`
         }}
       >
 
@@ -1563,15 +1563,27 @@ function App(): React.JSX.Element {
           </div>
         </div>
 
-        <div ref={sidebarResizerRef}
+        <div
+          ref={sidebarResizerRef}
           className={clsx(
-            "hidden md:flex cursor-col-resize h-full justify-center items-center",
-            isResizableSidebarDragging ? 'bg-blue-500' : 'bg-transparent',
+            "hidden md:flex bg-transparent cursor-col-resize h-full",
           )}
           onMouseDown={handleSidebarResizerPointerDown}
           onTouchStart={handleSidebarResizerPointerDown}
         >
-          <div className="w-full h-full border-black border-x "></div>
+          <div
+            className={clsx(
+              "w-full h-full flex justify-center items-center",
+              "border-black border-x-1"
+            )}
+          >
+            <div
+              className={clsx(
+                "w-1 h-10",
+                isResizableSidebarDragging ? 'bg-blue-500' : 'bg-transparent',
+              )}
+            />
+          </div>
         </div>
 
         <div className="absolute md:relative w-full md:flex-1 h-full overflow-hidden">
