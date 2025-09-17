@@ -88,6 +88,8 @@ interface MainPanelWithParams {
   params: string[];
 }
 
+const INITIAL_SIDEBAR_WIDTH_LOCAL_STORAGE_KEY = 'db445a4e-0522-4534-a3b0-2aa03512c9c1';
+
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
 
 function generateUUID(): string {
@@ -1209,7 +1211,6 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     );
   };
 
-
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
       {path && (
@@ -1246,9 +1247,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
           <div className="w-full h-full flex justify-start items-center bg-white overflow-auto">
             <div className="w-full h-full">
-              <div className="min-w-fit min-h-fit bg-white p-2">
-                {(panelWithParams && panelWithParams.panel) || (<span>Not found</span>)}
-              </div>
+              {(panelWithParams && (<div className="min-w-fit min-h-fit bg-white p-2">{panelWithParams.panel}</div>)) || (<div className="w-full h-full flex justify-center items-center"><span>Not found</span></div>)}
             </div>
           </div>
         </>
@@ -1265,7 +1264,7 @@ function App(): React.JSX.Element {
   const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<DropdownMenu>({});
 
   const minSidebarWidth: number = 0;
-  const initialSidebarWidth: number = 320;
+  const initialSidebarWidth: number = parseInt(localStorage.getItem(INITIAL_SIDEBAR_WIDTH_LOCAL_STORAGE_KEY) || '320', 10);
   const maxSidebarWidth: number = window.innerWidth;
 
   const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(initialSidebarWidth);
@@ -1404,6 +1403,8 @@ function App(): React.JSX.Element {
 
     setResizableSidebarWidth(constrainedWidth);
 
+    localStorage.setItem(INITIAL_SIDEBAR_WIDTH_LOCAL_STORAGE_KEY, constrainedWidth.toString());
+
   }, [isResizableSidebarDragging, minSidebarWidth, maxSidebarWidth]);
 
   const handleSidebarResizerPointerUp = React.useCallback(() => {
@@ -1446,7 +1447,7 @@ function App(): React.JSX.Element {
           "overflow-y-hidden",
         )}
         style={{
-          gridTemplateColumns: `${resizableSidebarWidth}px 4px 1fr`
+          gridTemplateColumns: `${resizableSidebarWidth}px 6px 1fr`
         }}
       >
 
@@ -1456,7 +1457,6 @@ function App(): React.JSX.Element {
             "hidden md:block",
             "min-w-0 w-fit h-full",
             "overflow-y-scroll overflow-x-auto",
-            "border-black border-r-1",
           )}
           style={{
             width: `${resizableSidebarWidth}px`
@@ -1470,27 +1470,28 @@ function App(): React.JSX.Element {
           !isMobileSidebarShown && "hidden",
         )}>
           <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
-          <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto border-black border-l-1 bg-white">
+          <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto bg-white">
             <Sidebar {...sidebarProps} />
           </div>
         </div>
 
-        <div
-          ref={sidebarResizerRef}
-          className={clsx(
-            "hidden md:block w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors duration-200",
-            isResizableSidebarDragging ? 'bg-blue-500' : '',
-          )}
-          onMouseDown={handleSidebarResizerPointerDown}
-          onTouchStart={handleSidebarResizerPointerDown}
-        >
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-0.5 h-8 bg-gray-400 rounded opacity-60"></div>
+        <div ref={sidebarResizerRef}
+          className="hidden md:flex h-full border-black border-x  justify-center items-center">
+          <div
+            className={clsx(
+              "w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors duration-200",
+              isResizableSidebarDragging ? 'bg-blue-500' : '',
+            )}
+            onMouseDown={handleSidebarResizerPointerDown}
+            onTouchStart={handleSidebarResizerPointerDown}
+          >
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-0.5 h-8 bg-gray-400 rounded opacity-60"></div>
+            </div>
           </div>
         </div>
 
-
-        <div className="absolute md:relative w-full md:flex-1  h-full overflow-hidden">
+        <div className="absolute md:relative w-full md:flex-1 h-full overflow-hidden">
           {/* Main content area: This area displays the main panels */}
           <MainPanelWrapper
             path={currentMainPanelPath} resetPath={() => resetCurrentMainPanelPath()} />
@@ -1498,7 +1499,7 @@ function App(): React.JSX.Element {
 
       </main >
 
-      <footer className="w-full bg-white m-0 border-t-1 border-black">
+      <footer className="w-full bg-white m-0">
         <div className="w-full mx-auto p-1 md:flex md:items-center md:justify-between">
           <span className="text-sm text-gray-500 md:text-center">© 2025 <a href="https://w34.com/" className="hover:underline">W34E8YR</a>. All Rights Reserved.</span>
           <ul className="flex flex-wrap items-center text-sm font-medium text-gray-500">
