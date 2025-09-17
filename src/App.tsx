@@ -1294,7 +1294,7 @@ function App(): React.JSX.Element {
   const minSidebarWidth: number = Math.min(maxSidebarWidth, 177);
   const initialSidebarWidth: number = getInitialSidebarWidth(minSidebarWidth, maxSidebarWidth, initSidebarWidth);
 
-  console.log("initialSidebarWidth:", initialSidebarWidth);
+  // console.log("initialSidebarWidth:", initialSidebarWidth);
 
   if (maxSidebarWidth < minSidebarWidth) {
     throw new Error(`Maximum sidebar width (${maxSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
@@ -1337,6 +1337,8 @@ function App(): React.JSX.Element {
     const handleResize = () => {
       // Reset mobile sidebar when window is resized
       setIsMobileSidebarShown(false);
+
+      // console.log("Resize!");
 
       if (sidebarContainerRef.current) {
         const containerRect: DOMRect = sidebarContainerRef.current.getBoundingClientRect();
@@ -1457,9 +1459,9 @@ function App(): React.JSX.Element {
       return;
     }
 
-    const newLeftWidth = (clientX - containerRect.left);
+    const resizableSidebarWidth = (clientX - containerRect.left);
 
-    if (newLeftWidth < minSidebarWidth) {
+    if (resizableSidebarWidth < minSidebarWidth) {
       setResizableSidebarWidth(0);
 
       localStorage.setItem(initialSidebarWidthLocalStorageKey, '0');
@@ -1467,10 +1469,10 @@ function App(): React.JSX.Element {
       // Allow shrinking to 0, but prevent going beyond container width - 50px for right panel
       const minWidth = Math.max(0, minSidebarWidth);
       const maxWidth = (Math.min(containerRect.width, maxSidebarWidth) - (sidebarResizerRef.current?.clientWidth || 0));
-      const constrainedWidth = Math.min(Math.max(newLeftWidth, minWidth), maxWidth);
+      const newResizableSidebarWidth = Math.min(Math.max(resizableSidebarWidth, minWidth), maxWidth);
 
-      setResizableSidebarWidth(constrainedWidth);
-      setInitialSidebarWidth(constrainedWidth);
+      setResizableSidebarWidth(newResizableSidebarWidth);
+      setInitialSidebarWidth(newResizableSidebarWidth);
 
       // console.log("constrainedWidth:", constrainedWidth);
     }
