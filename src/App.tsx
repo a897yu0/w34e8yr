@@ -1346,14 +1346,18 @@ function App(): React.JSX.Element {
 
         if (windowInnerWidth < minSidebarWidth) {
           setResizableSidebarWidth(0);
-        } else if (windowInnerWidth < resizableSidebarWidth) {
-          const newResizableSidebarWidth = windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0);
-          setResizableSidebarWidth(newResizableSidebarWidth);
-
-          // console.log("newResizableSidebarWidth:", newResizableSidebarWidth);
-          setInitialSidebarWidth(newResizableSidebarWidth);
         }
 
+        setResizableSidebarWidth((prevWidth: number) => {
+          if (windowInnerWidth < prevWidth) {
+            const newResizableSidebarWidth = windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0);
+
+            setInitialSidebarWidth(newResizableSidebarWidth);
+            return newResizableSidebarWidth;
+          }
+          return prevWidth;
+        });
+sav
       }
     };
 
