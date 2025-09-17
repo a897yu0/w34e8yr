@@ -92,7 +92,7 @@ const initialSidebarWidthLocalStorageKey = 'db445a4e-0522-4534-a3b0-2aa03512c9c1
 
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
 
-function getInitialSidebarWidth(minWidth: number, maxWidth: number, initWidth: number): number {
+function getCorrectSidebarWidth(minWidth: number, maxWidth: number, width: number): number {
   if (minWidth < 0) {
     throw new Error(`Minimum sidebar width (${minWidth}) cannot be negative`);
   }
@@ -104,8 +104,6 @@ function getInitialSidebarWidth(minWidth: number, maxWidth: number, initWidth: n
   }
 
   const item: string | null = localStorage.getItem(initialSidebarWidthLocalStorageKey);
-
-  let width: number = initWidth;
 
   if (item) {
     width = parseInt(item, 10);
@@ -209,7 +207,7 @@ function Header(props: HeaderProps): React.JSX.Element {
         <h1 className="text-2xl font-bold text-black ml-2">W34</h1>
       </div>
       <div className="flex flex-row justify-center items-center gap-1">
-        <div className="block md:hidden cursor-pointer w-7 h-7" onClick={() => toggleSidebarShown()}>
+        {/* <div className="block md:hidden cursor-pointer w-7 h-7" onClick={() => toggleSidebarShown()}>
           {(isSidebarShown === false) ? (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -219,7 +217,7 @@ function Header(props: HeaderProps): React.JSX.Element {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
           )}
-        </div>
+        </div> */}
         <div className="cursor-pointer w-7 h-7">
           {(avatarUrl && (
             <div className="relative cursor-pointer w-full h-full">
@@ -228,7 +226,6 @@ function Header(props: HeaderProps): React.JSX.Element {
                   <div className="w-full h-full border-2 border-gray-300 border-t-black rounded-full animate-spin"></div>
                 </div>
               )}
-
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -242,7 +239,6 @@ function Header(props: HeaderProps): React.JSX.Element {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
               </svg>
-
               <img
                 src={avatarUrl}
                 alt="User avatar"
@@ -255,7 +251,6 @@ function Header(props: HeaderProps): React.JSX.Element {
               />
             </div>
           )) || (
-
               <div className="relative cursor-pointer w-full h-full">
                 <div className="absolute inset-0  flex items-center justify-center">
                   <div className="w-full h-full border-2 border-black rounded-full"></div>
@@ -1289,29 +1284,19 @@ function App(): React.JSX.Element {
 
   const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<DropdownMenu>({});
 
-  const maxSidebarWidth: number = window.innerWidth;
+  const sidebarContainerRef = React.useRef<HTMLDivElement>(null);
+  const sidebarResizerRef = React.useRef<HTMLDivElement>(null);
+
+  const maxSidebarWidth: number = Math.max(window.innerWidth - (sidebarResizerRef.current?.clientWidth || 0), window.innerWidth);
   const initSidebarWidth: number = 277;
   const minSidebarWidth: number = Math.min(maxSidebarWidth, 177);
-  const initialSidebarWidth: number = getInitialSidebarWidth(minSidebarWidth, maxSidebarWidth, initSidebarWidth);
-
-  // console.log("initialSidebarWidth:", initialSidebarWidth);
 
   if (maxSidebarWidth < minSidebarWidth) {
     throw new Error(`Maximum sidebar width (${maxSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
   }
 
-  if (initialSidebarWidth < minSidebarWidth) {
-    throw new Error(`Initial sidebar width (${initialSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
-  }
-
-  if (initialSidebarWidth > maxSidebarWidth) {
-    throw new Error(`Initial sidebar width (${initialSidebarWidth}) cannot be greater than maximum sidebar width (${maxSidebarWidth})`);
-  }
-
-  const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(initialSidebarWidth);
+  const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(getCorrectSidebarWidth(minSidebarWidth, maxSidebarWidth, initSidebarWidth));
   const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
-  const sidebarContainerRef = React.useRef<HTMLDivElement>(null);
-  const sidebarResizerRef = React.useRef<HTMLDivElement>(null);
 
   const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
     setSidebarDropdownMenu((prevMenu: DropdownMenu) => ({
@@ -1450,11 +1435,12 @@ function App(): React.JSX.Element {
     }
 
     setResizableSidebarWidth((prevWidth: number) => {
-      if (prevWidth > 0) {
+      if (prevWidth >= 0) {
         return prevWidth;
       }
 
-      const newWidth = (Math.min(window.innerWidth, minSidebarWidth) - (sidebarResizerRef.current?.clientWidth || 0));
+      const minWidth = Math.min(window.innerWidth, minSidebarWidth);
+      const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
 
       setInitialSidebarWidth(newWidth);
       return newWidth;
@@ -1526,6 +1512,28 @@ function App(): React.JSX.Element {
   return (
     <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
       <Header isSidebarShown={isMobileSidebarShown} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
+      <div className="w-full h-7 flex flex-row justify-between items-center bg-white p-1 border-b-1 border-black">
+        <div className="cursor-pointer w-7 h-7" onClick={() => {
+          setIsMobileSidebarShown(prev => !prev);
+
+          setResizableSidebarWidth((prevWidth: number) => {
+            if (prevWidth > 0) {
+              setInitialSidebarWidth(0);
+              return 0;
+            }
+
+            const minWidth = Math.min(window.innerWidth, minSidebarWidth);
+            const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
+
+            setInitialSidebarWidth(newWidth);
+            return newWidth;
+          });
+        }}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </div>
+      </div>
       <main
         ref={sidebarContainerRef}
         className={clsx(
@@ -1535,7 +1543,7 @@ function App(): React.JSX.Element {
           "overflow-y-hidden",
         )}
         style={{
-          gridTemplateColumns: `${resizableSidebarWidth}px 10px 1fr`
+          gridTemplateColumns: `${resizableSidebarWidth}px 7px 1fr`
         }}
       >
 
@@ -1557,10 +1565,10 @@ function App(): React.JSX.Element {
           "block md:hidden absolute inset-0 flex flex-row z-10",
           !isMobileSidebarShown && "hidden",
         )}>
-          <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
           <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto bg-white">
             <Sidebar {...sidebarProps} />
           </div>
+          <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
         </div>
 
         <div
