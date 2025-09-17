@@ -1526,7 +1526,7 @@ function App(): React.JSX.Element {
               return 0;
             }
 
-            const minWidth = Math.min(window.innerWidth, minSidebarWidth);
+            const minWidth = Math.min(window.innerWidth, initSidebarWidth);
             const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
 
             setInitialSidebarWidth(newWidth);
