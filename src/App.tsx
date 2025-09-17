@@ -845,43 +845,45 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col overflow-auto">
       {path && (
-        <div className="w-full h-full flex flex-col justify-center items-center overflow-hidden">
-          <div className="w-full h-fit p-1 flex flex-row justify-between items-center flex-wrap bg-gray-200 border-black- border-b-1">
-            <div className="flex flex-row justify-start items-center flex-wrap">
-              <div className="w-5 h-5 mr-1">
-                {(ctx && ctx.icon) || (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-                  </svg>
-                )}
-              </div>
-              <PathBreadcrumb path={path} />
-            </div>
-            <div className="w-5 h-5 cursor-pointer" onClick={() => resetPath()}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
-            </div>
-          </div>
-          {ctx && ctx.args && (ctx.args.length > 0) && (
-            <div className="w-full bg-white border-black- border-b-1 p-1 flex flex-row flex-wrap justify-start items-start gap-1 overflow-hidden">
-              {ctx.args.map((value: string, index: number) => (
-                <div key={index} className="border">
-                  {value}
+        <>
+          <div className="w-full flex flex-row justify-between items-center flex-wrap bg-gray-200 border-black- border-b-1">
+            <div className="w-full  flex-shrink-0 flex flex-row justify-between items-center flex-wrap">
+              <div className="flex flex-row justify-start items-center flex-wrap">
+                <div className="w-5 h-5 mr-1">
+                  {(ctx && ctx.icon) || (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                    </svg>
+                  )}
                 </div>
-              ))}
+                <PathBreadcrumb path={path} />
+              </div>
+              <div className="w-5 h-5 cursor-pointer" onClick={() => resetPath()}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </div>
             </div>
-          )}
 
-          <div className="w-full h-full flex justify-start items-center overflow-x-auto overflow-y-auto">
+            {ctx && ctx.args && (ctx.args.length > 0) && (
+              <div className="w-full bg-white border-black- border-b-1 p-1 flex flex-row flex-wrap justify-start items-start gap-1">
+                {ctx.args.map((value: string, index: number) => (
+                  <div key={index} className="border">
+                    {value}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="w-full h-full flex justify-start items-center">
             <div className="flex-shrink-0 min-w-full h-full flex justify-center items-center">
               {(panelWithParams && panelWithParams.panel) || (<span>Not found</span>)}
             </div>
           </div>
-
-        </div>
+        </>
       )}
     </div>
   );
