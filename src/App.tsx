@@ -1351,10 +1351,10 @@ function App(): React.JSX.Element {
           }
 
           setResizableSidebarWidth((prevWidth: number) => {
-            const newResizableSidebarWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
+            const newWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
 
-            setInitialSidebarWidth(newResizableSidebarWidth);
-            return newResizableSidebarWidth;
+            setInitialSidebarWidth(newWidth);
+            return newWidth;
           });
         }
 
@@ -1447,6 +1447,17 @@ function App(): React.JSX.Element {
     } else {
       e.preventDefault(); // Only prevent for mouse events
     }
+
+    setResizableSidebarWidth((prevWidth: number) => {
+      if (prevWidth > 0) {
+        return prevWidth;
+      }
+
+      const newWidth = (Math.min(window.innerWidth, minSidebarWidth) - (sidebarResizerRef.current?.clientWidth || 0));
+
+      setInitialSidebarWidth(newWidth);
+      return newWidth;
+    });
 
     setIsResizableSidebarDragging(true);
   }, []);
