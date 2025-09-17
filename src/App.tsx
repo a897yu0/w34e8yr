@@ -1344,16 +1344,20 @@ function App(): React.JSX.Element {
         const containerRect: DOMRect = sidebarContainerRef.current.getBoundingClientRect();
         const windowInnerWidth: number = Math.min(containerRect.width, window.innerWidth);
 
-        // if (windowInnerWidth < minSidebarWidth) {
-        //   setResizableSidebarWidth(0);
-        // }
+        // The value 768px is breakpoint 'md' in tailwind Responsive design.
+        if (768 <= windowInnerWidth) {
+          if (windowInnerWidth < minSidebarWidth) {
+            setResizableSidebarWidth(0);
+          }
 
-        setResizableSidebarWidth((prevWidth: number) => {
-          const newResizableSidebarWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
+          setResizableSidebarWidth((prevWidth: number) => {
+            const newResizableSidebarWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
 
-          setInitialSidebarWidth(newResizableSidebarWidth);
-          return newResizableSidebarWidth;
-        });
+            setInitialSidebarWidth(newResizableSidebarWidth);
+            return newResizableSidebarWidth;
+          });
+        }
+
 
       }
     };
