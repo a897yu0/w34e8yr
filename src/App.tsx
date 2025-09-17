@@ -848,7 +848,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     <div className="w-full h-full flex flex-col overflow-auto">
       {path && (
         <>
-          <div className="w-full flex flex-row justify-between items-center flex-wrap bg-gray-200 border-black- border-b-1">
+          <div className="w-full flex flex-row justify-between items-center flex-wrap bg-gray-200 border-black border-b-1">
             <div className="w-full  flex-shrink-0 flex flex-row justify-between items-center flex-wrap">
               <div className="flex flex-row justify-start items-center flex-wrap">
                 <div className="w-5 h-5 mr-1">
