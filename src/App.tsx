@@ -1512,7 +1512,7 @@ function App(): React.JSX.Element {
   return (
     <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
       <Header isSidebarShown={isMobileSidebarShown} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
-      {/* Toolbar */}
+      {/* Subheader */}
       <div className="w-full h-7 flex flex-row justify-between items-center bg-white p-1 border-b-1 border-black">
         <div className="cursor-pointer w-7 h-7" onClick={() => {
           setIsMobileSidebarShown(prev => !prev);
