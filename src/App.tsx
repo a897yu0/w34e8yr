@@ -1344,9 +1344,9 @@ function App(): React.JSX.Element {
         const containerRect: DOMRect = sidebarContainerRef.current.getBoundingClientRect();
         const windowInnerWidth: number = Math.min(containerRect.width, window.innerWidth);
 
-        if (windowInnerWidth < minSidebarWidth) {
-          setResizableSidebarWidth(0);
-        }
+        // if (windowInnerWidth < minSidebarWidth) {
+        //   setResizableSidebarWidth(0);
+        // }
 
         setResizableSidebarWidth((prevWidth: number) => {
           const newResizableSidebarWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
