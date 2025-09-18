@@ -920,7 +920,7 @@ function App(): React.JSX.Element {
   const sidebarContainerRef = React.useRef<HTMLDivElement>(null);
   const sidebarResizerRef = React.useRef<HTMLDivElement>(null);
 
-  const maxSidebarWidth: number = Math.max(window.innerWidth - (sidebarResizerRef.current?.clientWidth || 0), window.innerWidth);
+  const maxSidebarWidth: number = window.innerWidth;
   const initSidebarWidth: number = 277;
   const minSidebarWidth: number = Math.min(maxSidebarWidth, 177);
 
@@ -949,6 +949,10 @@ function App(): React.JSX.Element {
       width = parseInt(item, 10);
     }
 
+    console.assert(width >= 0);
+    console.assert(minWidth >= 0);
+    console.assert(maxWidth >= 0);
+    console.assert(minWidth <= maxWidth);
     return Math.min(Math.max(width, minWidth), maxWidth);
   }
 
@@ -1017,13 +1021,18 @@ function App(): React.JSX.Element {
 
     setResizableSidebarWidth((prevWidth: number) => {
       if (prevWidth > 0) {
-        saveInitialSidebarWidth(0);
+        // saveInitialSidebarWidth(0);
         return 0;
       }
 
-      const minWidth = Math.min(window.innerWidth, initSidebarWidth);
-      const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
+      console.assert(minSidebarWidth >= 0);
+      console.assert(maxSidebarWidth >= 0);
+      console.assert(minSidebarWidth <= maxSidebarWidth);
+      console.assert(initSidebarWidth >= 0);
+      const newWidth = getInitialSidebarWidthInCorrectRange(minSidebarWidth, maxSidebarWidth, initSidebarWidth);
 
+      // console.log("initSidebarWidth:", initSidebarWidth);
+      // console.log("newWidth:", newWidth);
       saveInitialSidebarWidth(newWidth);
       return newWidth;
     });
@@ -1122,6 +1131,22 @@ function App(): React.JSX.Element {
     }
 
   };
+
+  // Adjust the gap or interval of sidebar resizer when sidebar has exceeded width to the screen
+  React.useEffect(() => {
+    if (!sidebarResizerRef.current || !sidebarContainerRef.current) {
+      return;
+    }
+
+    console.assert(sidebarResizerRef.current.clientWidth < sidebarContainerRef.current.clientWidth)
+    const validWidth: number = (sidebarContainerRef.current.clientWidth - sidebarResizerRef.current.clientWidth);
+
+    if (validWidth < resizableSidebarWidth) {
+      setResizableSidebarWidth(validWidth);
+    }
+
+    console.log("validWidth:", validWidth);
+  }, [sidebarResizerRef, sidebarContainerRef, resizableSidebarWidth]);
 
   const sidebarProps: SidebarProps = {
     currentPath: currentMainPanelPath,
