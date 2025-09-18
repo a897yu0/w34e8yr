@@ -928,6 +928,10 @@ function App(): React.JSX.Element {
     throw new Error(`Minimum sidebar width (${minSidebarWidth}) cannot be negative`);
   }
 
+  if (initSidebarWidth <= 0) {
+    throw new Error(`Initial sidebar width (${minSidebarWidth}) cannot be negative or zero`);
+  }
+
   if (maxSidebarWidth < minSidebarWidth) {
     throw new Error(`Maximum sidebar width (${maxSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
   }
@@ -1028,14 +1032,24 @@ function App(): React.JSX.Element {
       console.assert(minSidebarWidth >= 0);
       console.assert(maxSidebarWidth >= 0);
       console.assert(minSidebarWidth <= maxSidebarWidth);
-      console.assert(initSidebarWidth >= 0);
+      console.assert(initSidebarWidth > 0);
       const newWidth = getInitialSidebarWidthInCorrectRange(minSidebarWidth, maxSidebarWidth, initSidebarWidth);
 
-      // console.log("initSidebarWidth:", initSidebarWidth);
-      // console.log("newWidth:", newWidth);
+      console.assert(newWidth > 0);
       saveInitialSidebarWidth(newWidth);
       return newWidth;
     });
+  };
+
+  const resetSidebar = () => {
+    setIsMobileSidebarShown(prev => !prev);
+
+    console.assert(initSidebarWidth > 0);
+    const newWidth = Math.min(initSidebarWidth, window.innerWidth);
+
+    console.assert(newWidth > 0);
+    setResizableSidebarWidth(newWidth);
+    saveInitialSidebarWidth(newWidth);
   };
 
   const handleSidebarResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -1229,14 +1243,36 @@ function App(): React.JSX.Element {
     <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
       <Header isSidebarShown={isMobileSidebarShown} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
 
-      {/* Subheader: Sudebar button, Quick access, Favorites */}
-      <div className="w-full h-7 flex flex-row justify-between items-center bg-white p-1 border-b-1 border-black">
-        <div className="cursor-pointer w-7 h-7" onClick={() => toggleSidebar()}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
+      {/* Subheader: Sidebar button, Quick access, Favorites */}
+      <div className="w-full h-8 flex flex-row justify-start items-center bg-white border-b-1 border-black">
+        <div className="w-fit h-full flex flex-row justify-start items-center">
+          <div className="cursor-pointer aspect-square" onClick={() => toggleSidebar()}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </div>
+          <div className={clsx(
+            "cursor-pointer aspect-square",
+            resizableSidebarWidth === 0 && "hidden",
+            resizableSidebarWidth <= initSidebarWidth && "hidden",
+          )} onClick={() => resetSidebar()}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 4.5-15 15m0 0h11.25m-11.25 0V8.25" />
+            </svg>
+          </div>
+          <div className={clsx(
+            "cursor-pointer aspect-square",
+            resizableSidebarWidth === 0 && "hidden",
+            resizableSidebarWidth >= initSidebarWidth && "hidden",
+          )} onClick={() => resetSidebar()}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 4.5 15 15m0 0V8.25m0 11.25H8.25" />
+            </svg>
+          </div>
         </div>
+        <div className="h-4 ml-1 border-gray-300 border-r-2 rounded-lg" />
       </div>
+
       <main
         ref={sidebarContainerRef}
         className={clsx(
