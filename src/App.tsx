@@ -1145,7 +1145,7 @@ function App(): React.JSX.Element {
       setResizableSidebarWidth(validWidth);
     }
 
-    console.log("validWidth:", validWidth);
+    // console.log("validWidth:", validWidth);
   }, [sidebarResizerRef, sidebarContainerRef, resizableSidebarWidth]);
 
   const sidebarProps: SidebarProps = {
