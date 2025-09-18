@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import React from 'react';
 
+import ServersManagementPanel from './components/panels/ServersManagementPanel';
+
 interface HeaderProps {
   isSidebarShown: boolean;
   toggleSidebarShown: () => void;
@@ -67,10 +69,6 @@ interface SidebarProps extends SidebarWrapperProps {
   toggleDropdownMenu: (id: string) => void;
 }
 
-// interface ServersManagementPanelProps {
-
-// }
-
 interface MainPanelWrapperProps {
   path: string | undefined;
   resetPath: () => void;
@@ -92,7 +90,7 @@ const initialSidebarWidthLocalStorageKey = 'db445a4e-0522-4534-a3b0-2aa03512c9c1
 
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
 
-function getCorrectSidebarWidth(minWidth: number, maxWidth: number, width: number): number {
+function getWidthInCorrectRange(minWidth: number, maxWidth: number, width: number): number {
   if (minWidth < 0) {
     throw new Error(`Minimum sidebar width (${minWidth}) cannot be negative`);
   }
@@ -764,356 +762,6 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
   );
 };
 
-function ServersManagementPanel(): React.JSX.Element {
-  /**
-   * Features:
-   * Current server count
-   * Add/Remove servers with name, IP address
-   * Server table (Search, Pagination, Filter) with name, IP address, online status, last ping-pong timestamp, registered timestamp, detail, Account required in server
-   */
-
-  interface Server {
-    id: number;
-    name: string;
-    ipAddress: string;
-    isOnline: boolean;
-    lastPingTimestamp: Date;
-    registeredTimestamp: Date;
-    accountRequired: boolean;
-  }
-
-  // Mock server data
-  const [servers, setServers] = React.useState<Server[]>([
-    {
-      id: 1,
-      name: 'Production Server',
-      ipAddress: '192.168.1.100',
-      isOnline: true,
-      lastPingTimestamp: new Date('2024-01-15T10:30:00'),
-      registeredTimestamp: new Date('2024-01-01T09:00:00'),
-      accountRequired: true
-    },
-    {
-      id: 2,
-      name: 'Development Server',
-      ipAddress: '192.168.1.101',
-      isOnline: false,
-      lastPingTimestamp: new Date('2024-01-14T15:20:00'),
-      registeredTimestamp: new Date('2024-01-05T11:30:00'),
-      accountRequired: false
-    },
-    {
-      id: 3,
-      name: 'Testing Server',
-      ipAddress: '192.168.1.102',
-      isOnline: true,
-      lastPingTimestamp: new Date('2024-01-15T09:45:00'),
-      registeredTimestamp: new Date('2024-01-10T14:15:00'),
-      accountRequired: true
-    }
-  ]);
-
-  // State for form
-  const [showAddForm, setShowAddForm] = React.useState(false);
-  const [formData, setFormData] = React.useState({
-    name: '',
-    ipAddress: '',
-    accountRequired: false
-  });
-
-  // State for table controls
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('all');
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [itemsPerPage] = React.useState(5);
-  const [selectedServer, setSelectedServer] = React.useState<Server | null>(null);
-
-  // Add server
-  const handleAddServer = () => {
-    if (formData.name && formData.ipAddress) {
-      const newServer = {
-        id: servers.length + 1,
-        name: formData.name,
-        ipAddress: formData.ipAddress,
-        isOnline: Math.random() > 0.5, // Random online status
-        lastPingTimestamp: new Date(),
-        registeredTimestamp: new Date(),
-        accountRequired: formData.accountRequired
-      };
-      setServers([...servers, newServer]);
-      setFormData({ name: '', ipAddress: '', accountRequired: false });
-      setShowAddForm(false);
-    }
-  };
-
-  // Remove server
-  const handleRemoveServer = (id: number) => {
-    setServers(servers.filter(server => server.id !== id));
-    setSelectedServer(null);
-  };
-
-  // Filter and search servers
-  const filteredServers = React.useMemo(() => {
-    return servers.filter(server => {
-      const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        server.ipAddress.includes(searchTerm);
-      const matchesStatus = statusFilter === 'all' ||
-        (statusFilter === 'online' && server.isOnline) ||
-        (statusFilter === 'offline' && !server.isOnline);
-      return matchesSearch && matchesStatus;
-    });
-  }, [servers, searchTerm, statusFilter]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredServers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedServers = filteredServers.slice(startIndex, startIndex + itemsPerPage);
-
-  const formatTimestamp = (timestamp: Date) => {
-    return timestamp.toLocaleString();
-  };
-
-  return (
-    <>
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2 text-black">Servers Management Panel</h1>
-        <div className="flex items-center gap-4 mb-4">
-          <div className="text-lg text-black">
-            Total Servers: <span className="font-semibold">{servers.length}</span>
-          </div>
-          <div className="text-lg text-black">
-            Online: <span className="font-semibold text-green-600">
-              {servers.filter(s => s.isOnline).length}
-            </span>
-          </div>
-          <div className="text-lg text-black">
-            Offline: <span className="font-semibold text-red-600">
-              {servers.filter(s => !s.isOnline).length}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Add Server Button */}
-      <div className="mb-6">
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="px-4 py-2 bg-white border border-black text-black hover:bg-gray-50 transition-colors"
-        >
-          {showAddForm ? 'Cancel' : 'Add Server'}
-        </button>
-      </div>
-
-      {/* Add Server Form */}
-      {showAddForm && (
-        <div className="mb-6 p-4 border border-black bg-white">
-          <h3 className="text-lg font-semibold mb-4 text-black">Add New Server</h3>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-black font-medium mb-1">Server Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-black bg-white text-black"
-                  placeholder="Enter server name"
-                />
-              </div>
-              <div>
-                <label className="block text-black font-medium mb-1">IP Address</label>
-                <input
-                  type="text"
-                  value={formData.ipAddress}
-                  onChange={(e) => setFormData({ ...formData, ipAddress: e.target.value })}
-                  className="w-full px-3 py-2 border border-black bg-white text-black"
-                  placeholder="192.168.1.1"
-                />
-              </div>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="accountRequired"
-                checked={formData.accountRequired}
-                onChange={(e) => setFormData({ ...formData, accountRequired: e.target.checked })}
-                className="mr-2"
-              />
-              <label htmlFor="accountRequired" className="text-black">
-                Account Required
-              </label>
-            </div>
-            <button
-              onClick={handleAddServer}
-              className="px-4 py-2 bg-white border border-black text-black hover:bg-gray-50 transition-colors"
-            >
-              Add Server
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Search and Filter Controls */}
-      <div className="mb-6 flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Search servers by name or IP..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-black bg-white text-black"
-          />
-        </div>
-        <div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-black bg-white text-black"
-          >
-            <option value="all">All Status</option>
-            <option value="online">Online Only</option>
-            <option value="offline">Offline Only</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Servers Table */}
-      <div className="border border-black bg-white">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-black">
-              <th className="px-4 py-3 text-left text-black font-semibold">Name</th>
-              <th className="px-4 py-3 text-left text-black font-semibold">IP Address</th>
-              <th className="px-4 py-3 text-left text-black font-semibold">Status</th>
-              <th className="px-4 py-3 text-left text-black font-semibold">Last Ping</th>
-              <th className="px-4 py-3 text-left text-black font-semibold">Registered</th>
-              <th className="px-4 py-3 text-left text-black font-semibold">Account Req.</th>
-              <th className="px-4 py-3 text-left text-black font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedServers.map((server) => (
-              <tr key={server.id} className="border-b border-black last:border-b-0">
-                <td className="px-4 py-3 text-black">{server.name}</td>
-                <td className="px-4 py-3 text-black font-mono">{server.ipAddress}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 text-sm border ${server.isOnline
-                    ? 'bg-green-50 border-green-600 text-green-600'
-                    : 'bg-red-50 border-red-600 text-red-600'
-                    }`}>
-                    {server.isOnline ? 'Online' : 'Offline'}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-black text-sm">
-                  {formatTimestamp(server.lastPingTimestamp)}
-                </td>
-                <td className="px-4 py-3 text-black text-sm">
-                  {formatTimestamp(server.registeredTimestamp)}
-                </td>
-                <td className="px-4 py-3 text-black">
-                  {server.accountRequired ? 'Yes' : 'No'}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedServer(selectedServer?.id === server.id ? null : server)}
-                      className="px-2 py-1 text-sm bg-white border border-black text-black hover:bg-gray-50"
-                    >
-                      {selectedServer?.id === server.id ? 'Hide' : 'Details'}
-                    </button>
-                    <button
-                      onClick={() => handleRemoveServer(server.id)}
-                      className="px-2 py-1 text-sm bg-white border border-red-600 text-red-600 hover:bg-red-50"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {paginatedServers.length === 0 && (
-          <div className="px-4 py-8 text-center text-black">
-            No servers found matching your criteria.
-          </div>
-        )}
-      </div>
-
-      {/* Server Details */}
-      {selectedServer && (
-        <div className="mt-4 p-4 border border-black bg-white">
-          <h3 className="text-lg font-semibold mb-3 text-black">Server Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <strong className="text-black">ID:</strong> {selectedServer.id}
-            </div>
-            <div>
-              <strong className="text-black">Name:</strong> {selectedServer.name}
-            </div>
-            <div>
-              <strong className="text-black">IP Address:</strong> {selectedServer.ipAddress}
-            </div>
-            <div>
-              <strong className="text-black">Status:</strong>
-              <span className={selectedServer.isOnline ? 'text-green-600' : 'text-red-600'}>
-                {selectedServer.isOnline ? ' Online' : ' Offline'}
-              </span>
-            </div>
-            <div>
-              <strong className="text-black">Last Ping:</strong> {formatTimestamp(selectedServer.lastPingTimestamp)}
-            </div>
-            <div>
-              <strong className="text-black">Registered:</strong> {formatTimestamp(selectedServer.registeredTimestamp)}
-            </div>
-            <div>
-              <strong className="text-black">Account Required:</strong> {selectedServer.accountRequired ? 'Yes' : 'No'}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center items-center gap-2">
-          <button
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 bg-white border border-black text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-
-          <div className="flex gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1 border border-black ${currentPage === page
-                  ? 'bg-black text-white'
-                  : 'bg-white text-black hover:bg-gray-50'
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 bg-white border border-black text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      )}
-    </>
-  );
-}
-
 function RegisteredServerPanel(): React.JSX.Element {
   /**
    * Features:
@@ -1269,9 +917,15 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
             )}
           </div>
 
-          <div className="w-full h-full flex justify-start items-center bg-white overflow-auto">
-            <div className="w-full h-full">
-              {(panelWithParams && (<div className="min-w-fit min-h-fit bg-white p-2">{panelWithParams.panel}</div>)) || (<div className="w-full h-full flex justify-center items-center"><span>Not found</span></div>)}
+          <div className="w-full h-full flex justify-start items-center bg-white">
+            <div className="w-full h-full relative">
+              {(panelWithParams && (
+                <div className="absolute w-full h-full overflow-auto">
+                  <div className="min-w-fit min-h-fit w-full h-full p-2">
+                    {panelWithParams.panel}
+                  </div>
+                </div>
+              )) || (<div className="w-full h-full flex justify-center items-center"><span>Not found</span></div>)}
             </div>
           </div>
         </>
@@ -1298,7 +952,7 @@ function App(): React.JSX.Element {
     throw new Error(`Maximum sidebar width (${maxSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
   }
 
-  const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(getCorrectSidebarWidth(minSidebarWidth, maxSidebarWidth, initSidebarWidth));
+  const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(getWidthInCorrectRange(minSidebarWidth, maxSidebarWidth, initSidebarWidth));
   const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
 
   const [currentMainPanelPath, setCurrentMainPanelPath] = React.useState<string | undefined>(undefined);
@@ -1398,6 +1052,10 @@ function App(): React.JSX.Element {
     if (!isResizableSidebarDragging || !sidebarContainerRef.current) {
       return;
     }
+
+    // Prevent default behavior and stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
 
     const containerRect = sidebarContainerRef.current.getBoundingClientRect();
 
