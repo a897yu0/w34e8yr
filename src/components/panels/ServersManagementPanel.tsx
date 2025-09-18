@@ -58,11 +58,15 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
   const initHeight: number = props.initHeight;
   const minHeight: number = props.minHeight;
 
+  if (minHeight < 0) {
+    throw new Error(`Minimum height (${minHeight}) cannot be negative`);
+  }
+
   const children: React.JSX.Element = props.children;
 
   const localStorageKey: string | undefined = props.localStorageKey;
 
-  const getHeightInCorrectRange = (minHeight: number, height: number): number => {
+  const getInitialHeightInCorrectRange = (minHeight: number, height: number): number => {
     if (minHeight < 0) {
       throw new Error(`Minimum height (${minHeight}) cannot be negative`);
     }
@@ -76,10 +80,11 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
 
     }
 
+    console.assert(minHeight >= 0);
     return Math.max(height, minHeight);
   }
 
-  const setInitialHeight = (height: number): void => {
+  const saveInitialHeight = (height: number): void => {
     if (localStorageKey) {
       localStorage.setItem(localStorageKey, height.toString());
     }
@@ -91,7 +96,7 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
   // const initHeight: number = 177;
   // const minHeight: number = 77;
 
-  const [resizableTableHeight, setResizableTableHeight] = React.useState<number>(getHeightInCorrectRange(minHeight, initHeight));
+  const [resizableTableHeight, setResizableTableHeight] = React.useState<number>(getInitialHeightInCorrectRange(minHeight, initHeight));
   const [isResizableTableDragging, setIsResizableTableDragging] = React.useState<boolean>(false);
 
   const handleTableResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -122,19 +127,41 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
       return;
     }
 
+    console.assert(containerRect.top <= clientY);
     const height = (clientY - containerRect.top);
 
-    const minCorrectHeight = Math.max(0, minHeight);
-    const newHeight = Math.max(height, minCorrectHeight);
+    console.assert(minHeight >= 0);
+    const newHeight = Math.max(height, minHeight);
 
     setResizableTableHeight(newHeight);
-    setInitialHeight(newHeight);
+    saveInitialHeight(newHeight);
 
   }, [isResizableTableDragging, minHeight]);
 
   const handleTableResizerPointerUp = React.useCallback(() => {
     setIsResizableTableDragging(false);
   }, []);
+
+  const handleManualExpansion = () => {
+    setResizableTableHeight((prevHeight: number) => {
+      const newHeight: number = (prevHeight + 77);
+
+      console.assert(newHeight >= 0);
+      saveInitialHeight(newHeight);
+      return newHeight;
+    });
+  };
+
+  const handleManualReduction = () => {
+    setResizableTableHeight((prevHeight: number) => {
+      console.assert(minHeight >= 0);
+      const newHeight: number = Math.max(prevHeight - 77, minHeight);
+
+      console.assert(newHeight >= 0);
+      saveInitialHeight(newHeight);
+      return newHeight;
+    });
+  };
 
   // Resizable sidebar handlers
   React.useEffect(() => {
@@ -184,6 +211,19 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
         onMouseDown={handleTableResizerPointerDown}
         onTouchStart={handleTableResizerPointerDown}
       >
+      </div>
+
+      <div className="w-full h-7 flex flex-row justify-end items-center gap-1">
+        <div className="h-full aspect-square cursor-pointer" onClick={() => handleManualReduction()}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+          </svg>
+        </div>
+        <div className="h-full aspect-square cursor-pointer" onClick={() => handleManualExpansion()}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+          </svg>
+        </div>
       </div>
 
     </div>
@@ -402,7 +442,10 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
       )}
 
       {/* Servers Table */}
-      <ResizableVerticalWrapper initHeight={177} minHeight={77} localStorageKey="6698a24e-4233-473a-b0a1-1b3bd697e94a">
+      <ResizableVerticalWrapper
+        initHeight={177} minHeight={77}
+        localStorageKey="6698a24e-4233-473a-b0a1-1b3bd697e94a"
+      >
         <table className="w-fit h-fit border-r-1 border-black ">
           <thead>
             <tr className="border-b border-black">

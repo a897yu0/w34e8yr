@@ -86,33 +86,7 @@ interface MainPanelWithParams {
   params: string[];
 }
 
-const initialSidebarWidthLocalStorageKey = 'db445a4e-0522-4534-a3b0-2aa03512c9c1';
-
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
-
-function getWidthInCorrectRange(minWidth: number, maxWidth: number, width: number): number {
-  if (minWidth < 0) {
-    throw new Error(`Minimum sidebar width (${minWidth}) cannot be negative`);
-  }
-  if (maxWidth > window.innerWidth) {
-    throw new Error(`Maximum sidebar width (${maxWidth}) cannot be greater than window width (${window.innerWidth})`);
-  }
-  if (maxWidth < minWidth) {
-    throw new Error(`Maximum sidebar width (${maxWidth}) cannot be less than minimum sidebar width (${minWidth})`);
-  }
-
-  const item: string | null = localStorage.getItem(initialSidebarWidthLocalStorageKey);
-
-  if (item) {
-    width = parseInt(item, 10);
-  }
-
-  return Math.min(Math.max(width, minWidth), maxWidth);
-}
-
-function setInitialSidebarWidth(width: number): void {
-  localStorage.setItem(initialSidebarWidthLocalStorageKey, width.toString());
-}
 
 function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -939,6 +913,8 @@ function App(): React.JSX.Element {
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
 
+  const initialSidebarWidthLocalStorageKey = 'db445a4e-0522-4534-a3b0-2aa03512c9c1';
+
   const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<DropdownMenu>({});
 
   const sidebarContainerRef = React.useRef<HTMLDivElement>(null);
@@ -948,11 +924,39 @@ function App(): React.JSX.Element {
   const initSidebarWidth: number = 277;
   const minSidebarWidth: number = Math.min(maxSidebarWidth, 177);
 
+  if (minSidebarWidth < 0) {
+    throw new Error(`Minimum sidebar width (${minSidebarWidth}) cannot be negative`);
+  }
+
   if (maxSidebarWidth < minSidebarWidth) {
     throw new Error(`Maximum sidebar width (${maxSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
   }
 
-  const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(getWidthInCorrectRange(minSidebarWidth, maxSidebarWidth, initSidebarWidth));
+  const getInitialSidebarWidthInCorrectRange = (minWidth: number, maxWidth: number, width: number): number => {
+    if (minWidth < 0) {
+      throw new Error(`Minimum sidebar width (${minWidth}) cannot be negative`);
+    }
+    if (maxWidth > window.innerWidth) {
+      throw new Error(`Maximum sidebar width (${maxWidth}) cannot be greater than window width (${window.innerWidth})`);
+    }
+    if (maxWidth < minWidth) {
+      throw new Error(`Maximum sidebar width (${maxWidth}) cannot be less than minimum sidebar width (${minWidth})`);
+    }
+
+    const item: string | null = localStorage.getItem(initialSidebarWidthLocalStorageKey);
+
+    if (item) {
+      width = parseInt(item, 10);
+    }
+
+    return Math.min(Math.max(width, minWidth), maxWidth);
+  }
+
+  const saveInitialSidebarWidth = (width: number): void => {
+    localStorage.setItem(initialSidebarWidthLocalStorageKey, width.toString());
+  }
+
+  const [resizableSidebarWidth, setResizableSidebarWidth] = React.useState<number>(getInitialSidebarWidthInCorrectRange(minSidebarWidth, maxSidebarWidth, initSidebarWidth));
   const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
 
   const [currentMainPanelPath, setCurrentMainPanelPath] = React.useState<string | undefined>(undefined);
@@ -1013,14 +1017,14 @@ function App(): React.JSX.Element {
 
     setResizableSidebarWidth((prevWidth: number) => {
       if (prevWidth > 0) {
-        setInitialSidebarWidth(0);
+        saveInitialSidebarWidth(0);
         return 0;
       }
 
       const minWidth = Math.min(window.innerWidth, initSidebarWidth);
       const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
 
-      setInitialSidebarWidth(newWidth);
+      saveInitialSidebarWidth(newWidth);
       return newWidth;
     });
   };
@@ -1041,7 +1045,7 @@ function App(): React.JSX.Element {
       const minWidth = Math.min(window.innerWidth, minSidebarWidth);
       const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
 
-      setInitialSidebarWidth(newWidth);
+      saveInitialSidebarWidth(newWidth);
       return newWidth;
     });
 
@@ -1065,19 +1069,21 @@ function App(): React.JSX.Element {
       return;
     }
 
-    const resizableSidebarWidth = (clientX - containerRect.left);
+    console.assert(containerRect.left <= clientX);
+    const width = (clientX - containerRect.left);
 
-    if (resizableSidebarWidth < minSidebarWidth) {
+    console.assert(minSidebarWidth >= 0);
+    if (width < minSidebarWidth) {
       setResizableSidebarWidth(0);
-      setInitialSidebarWidth(0);
+      saveInitialSidebarWidth(0);
     } else {
-      // Allow shrinking to 0, but prevent going beyond container width - 50px for right panel
-      const minWidth = Math.max(0, minSidebarWidth);
+      console.assert(minSidebarWidth >= 0);
       const maxWidth = (Math.min(containerRect.width, maxSidebarWidth) - (sidebarResizerRef.current?.clientWidth || 0));
-      const newResizableSidebarWidth = Math.min(Math.max(resizableSidebarWidth, minWidth), maxWidth);
+      const newWidth = Math.min(Math.max(width, minSidebarWidth), maxWidth);
 
-      setResizableSidebarWidth(newResizableSidebarWidth);
-      setInitialSidebarWidth(newResizableSidebarWidth);
+      console.assert(newWidth >= 0);
+      setResizableSidebarWidth(newWidth);
+      saveInitialSidebarWidth(newWidth);
 
       // console.log("constrainedWidth:", constrainedWidth);
     }
@@ -1102,13 +1108,14 @@ function App(): React.JSX.Element {
       if (768 <= windowInnerWidth) {
         if (windowInnerWidth < minSidebarWidth) {
           setResizableSidebarWidth(0);
-          setInitialSidebarWidth(0);
+          saveInitialSidebarWidth(0);
         }
 
         setResizableSidebarWidth((prevWidth: number) => {
           const newWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
 
-          setInitialSidebarWidth(newWidth);
+          console.assert(newWidth >= 0);
+          saveInitialSidebarWidth(newWidth);
           return newWidth;
         });
       }
