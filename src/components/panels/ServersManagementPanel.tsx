@@ -2,21 +2,8 @@ import clsx from 'clsx';
 import React from 'react';
 
 import type { MainPanelProps } from '@/types/MainPanelProps';
+import type { Server } from '@/types/Server';
 import sampleServerList from './sampleServerList';
-
-interface Server {
-  id: number;
-
-  name: string;
-  ipAddress: string;
-  isOnline: boolean;
-  lastPingTimestamp: Date;
-  registeredTimestamp: Date;
-  accountRequired: boolean;
-
-  capacity: number;
-  freeSpace: number;
-}
 
 interface ResizableVerticalWrapperProps {
   initHeight: number;
