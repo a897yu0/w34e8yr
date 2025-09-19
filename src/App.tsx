@@ -1166,8 +1166,8 @@ function Main(props: MainProps): React.JSX.Element {
     console.assert(sidebarResizerRef.current.clientWidth < sidebarContainerRef.current.clientWidth)
     const validWidth: number = (sidebarContainerRef.current.clientWidth - sidebarResizerRef.current.clientWidth);
 
-    console.log("sidebarContainerRef.current.clientWidth:", sidebarContainerRef.current.clientWidth);
-    console.log("sidebarResizerRef.current.clientWidth:", sidebarResizerRef.current.clientWidth);
+    // console.log("sidebarContainerRef.current.clientWidth:", sidebarContainerRef.current.clientWidth);
+    // console.log("sidebarResizerRef.current.clientWidth:", sidebarResizerRef.current.clientWidth);
 
     if (validWidth < resizableSidebarWidth) {
       setResizableSidebarWidth(validWidth);
