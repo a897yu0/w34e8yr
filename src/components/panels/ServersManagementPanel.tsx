@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import React from 'react';
 
 import type { MainPanelProps } from '@/types/MainPanelProps';
+import sampleServerList from './sampleServerList';
 
 interface Server {
   id: number;
@@ -36,74 +37,6 @@ interface PaginatedServerList {
   totalPages: number;
 }
 
-const serverList: Server[] = [
-  {
-    id: 9,
-
-    name: 'home-red',
-    ipAddress: '192.168.1.100',
-    isOnline: true,
-    lastPingTimestamp: new Date('2024-01-15T10:30:00'),
-    registeredTimestamp: new Date('2024-01-01T09:00:00'),
-    accountRequired: true,
-
-    capacity: 1099511627776,
-    freeSpace: 121162777612,
-  },
-  {
-    id: 8,
-
-    name: 'office-private',
-    ipAddress: '192.168.1.101',
-    isOnline: false,
-    lastPingTimestamp: new Date('2024-01-14T15:20:00'),
-    registeredTimestamp: new Date('2024-01-05T11:30:00'),
-    accountRequired: false,
-
-    capacity: 4327819519847,
-    freeSpace: 3345789034251,
-  },
-  {
-    id: 5,
-
-    name: 'office-public',
-    ipAddress: '192.168.1.101',
-    isOnline: false,
-    lastPingTimestamp: new Date('2024-01-14T15:20:00'),
-    registeredTimestamp: new Date('2024-01-05T11:30:00'),
-    accountRequired: false,
-
-    capacity: 4327819519847,
-    freeSpace: 434578903425,
-  },
-  {
-    id: 4,
-
-    name: 'Testing Server',
-    ipAddress: '192.168.1.102',
-    isOnline: true,
-    lastPingTimestamp: new Date('2024-01-15T09:45:00'),
-    registeredTimestamp: new Date('2024-01-10T14:15:00'),
-    accountRequired: true,
-
-    capacity: 248978905348923,
-    freeSpace: 71318194327776,
-  },
-  {
-    id: 0,
-
-    name: 'home-blue',
-    ipAddress: '192.168.1.100',
-    isOnline: true,
-    lastPingTimestamp: new Date('2024-01-15T10:30:00'),
-    registeredTimestamp: new Date('2024-01-01T09:00:00'),
-    accountRequired: true,
-
-    capacity: 1099511627776,
-    freeSpace: 1211627776,
-  },
-];
-
 function formatBytes(bytes: number, decimals: number = 2): string {
   if (bytes === 0) return '0 Bytes';
 
@@ -126,7 +59,7 @@ function getPaginatedServerList(page: number, pageSize: number = 3): PaginatedSe
   };
 
   // Sort servers by order first
-  const sortedServers = [...serverList].sort((a, b) => b.id - a.id);
+  const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
 
   const totalItems = sortedServers.length;
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -148,9 +81,9 @@ function getPaginatedServerList(page: number, pageSize: number = 3): PaginatedSe
 
 function moveServerItemToFirst(id: number) {
 
-  const sortedServers = [...serverList].sort((a, b) => b.id - a.id);
+  const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
 
-  serverList.forEach((server: Server) => {
+  sampleServerList.forEach((server: Server) => {
     if (server.id !== id) return;
 
     server.id = (sortedServers[0].id + 1);
@@ -419,7 +352,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
   const [searchTerm, setSearchTerm] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('all');
   const [currentPage, setCurrentPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState<number>(5);
+  const [pageSize, setPageSize] = React.useState<number>(7);
   const [selectedServer, setSelectedServer] = React.useState<Server | null>(null);
 
   setPageSize;
@@ -729,7 +662,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
           <button
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -741,7 +674,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1 border border-black ${currentPage === page
+                className={`px-3 py-1 border border-black  cursor-pointer ${currentPage === page
                   ? 'bg-black text-white'
                   : 'bg-white text-black hover:bg-gray-50'
                   }`}
@@ -754,7 +687,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
           <button
             onClick={() => setCurrentPage(Math.min(serverList.totalPages, currentPage + 1))}
             disabled={currentPage === serverList.totalPages}
-            className="p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
