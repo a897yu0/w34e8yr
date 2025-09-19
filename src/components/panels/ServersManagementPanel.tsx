@@ -48,7 +48,7 @@ const serverList: Server[] = [
     accountRequired: true,
 
     capacity: 1099511627776,
-    freeSpace: 1211627776,
+    freeSpace: 121162777612,
   },
   {
     id: 8,
@@ -61,7 +61,7 @@ const serverList: Server[] = [
     accountRequired: false,
 
     capacity: 4327819519847,
-    freeSpace: 134578903425,
+    freeSpace: 3345789034251,
   },
   {
     id: 5,
@@ -74,7 +74,7 @@ const serverList: Server[] = [
     accountRequired: false,
 
     capacity: 4327819519847,
-    freeSpace: 134578903425,
+    freeSpace: 434578903425,
   },
   {
     id: 4,
@@ -87,7 +87,7 @@ const serverList: Server[] = [
     accountRequired: true,
 
     capacity: 248978905348923,
-    freeSpace: 194327776,
+    freeSpace: 71318194327776,
   },
   {
     id: 0,
@@ -158,6 +158,77 @@ function moveServerItemToFirst(id: number) {
 
 }
 
+// Simple Circle Progress Component
+interface CircleProgressProps {
+  percentage: number;
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+  backgroundColor?: string;
+  showPercentage?: boolean;
+  className?: string;
+}
+
+const CircleProgress: React.FC<CircleProgressProps> = ({
+  percentage,
+  size = 120,
+  strokeWidth = 8,
+  backgroundColor = '#e5e7eb',
+  showPercentage = true,
+  className = ''
+}) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const strokeDasharray = circumference;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  const getColorInfo = (percentage: number) => {
+    if (percentage < 50) return { color: '#10b981', label: 'Good', bg: 'bg-green-50' };
+    if (percentage < 75) return { color: '#f59e0b', label: 'Fair', bg: 'bg-yellow-50' };
+    if (percentage < 90) return { color: '#f97316', label: 'High', bg: 'bg-orange-50' };
+    return { color: '#ef4444', label: 'Critical', bg: 'bg-red-50' };
+  };
+
+  const color = getColorInfo(percentage).color;
+
+  return (
+    <div className="relative flex flex-row">
+      <div className={`inline-flex items-center justify-center ${className}`}>
+        <svg width={size} height={size} className="transform -rotate-90">
+          {/* Background circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={backgroundColor}
+            strokeWidth={strokeWidth}
+            fill="transparent"
+          />
+          {/* Progress circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={color}
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            strokeDasharray={strokeDasharray}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            className="transition-all duration-300 ease-in-out"
+          />
+        </svg>
+      </div>
+      {showPercentage && (
+        <div className="ml-2 inset-0 flex items-center justify-center">
+          <span className="text-sm font-semibold text-gray-700">
+            {percentage.toFixed(1)}%
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
 function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.JSX.Element {
   const initHeight: number = props.initHeight;
   const minHeight: number = props.minHeight;
@@ -582,6 +653,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Last Ping</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Registered</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Account Req.</th>
+              <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Usage</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Actions</th>
             </tr>
           </thead>
@@ -607,6 +679,16 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
                 <td className="px-4 py-3 whitespace-nowrap text-black">
                   {server.accountRequired ? 'Yes' : 'No'}
                 </td>
+                <td className="px-4 py-3 whitespace-nowrap text-black">
+                  <CircleProgress
+                    percentage={((server.capacity - server.freeSpace) / server.capacity) * 100}
+                    size={28}
+                    strokeWidth={28 * 0.09}
+                    backgroundColor="#f3f4f6"
+                    showPercentage={true}
+                  />
+                </td>
+
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex gap-2">
                     <button
