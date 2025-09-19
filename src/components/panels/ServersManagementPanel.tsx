@@ -5,12 +5,16 @@ import type { MainPanelProps } from '@/types/MainPanelProps';
 
 interface Server {
   id: number;
+
   name: string;
   ipAddress: string;
   isOnline: boolean;
   lastPingTimestamp: Date;
   registeredTimestamp: Date;
   accountRequired: boolean;
+
+  capacity: number;
+  freeSpace: number;
 }
 
 interface ResizableVerticalWrapperProps {
@@ -25,35 +29,134 @@ interface ResizableVerticalWrapperProps {
 interface ServersManagementPanelProps extends MainPanelProps {
 }
 
-const fakeServers: Server[] = [
+interface PaginatedServerList {
+  items: Server[];
+
+  currentPage: number;
+  totalPages: number;
+}
+
+const serverList: Server[] = [
   {
-    id: 1,
-    name: 'Production Server',
+    id: 9,
+
+    name: 'home-red',
     ipAddress: '192.168.1.100',
     isOnline: true,
     lastPingTimestamp: new Date('2024-01-15T10:30:00'),
     registeredTimestamp: new Date('2024-01-01T09:00:00'),
-    accountRequired: true
+    accountRequired: true,
+
+    capacity: 1099511627776,
+    freeSpace: 1211627776,
   },
   {
-    id: 2,
-    name: 'Development Server',
+    id: 8,
+
+    name: 'office-private',
     ipAddress: '192.168.1.101',
     isOnline: false,
     lastPingTimestamp: new Date('2024-01-14T15:20:00'),
     registeredTimestamp: new Date('2024-01-05T11:30:00'),
-    accountRequired: false
+    accountRequired: false,
+
+    capacity: 4327819519847,
+    freeSpace: 134578903425,
   },
   {
-    id: 3,
+    id: 5,
+
+    name: 'office-public',
+    ipAddress: '192.168.1.101',
+    isOnline: false,
+    lastPingTimestamp: new Date('2024-01-14T15:20:00'),
+    registeredTimestamp: new Date('2024-01-05T11:30:00'),
+    accountRequired: false,
+
+    capacity: 4327819519847,
+    freeSpace: 134578903425,
+  },
+  {
+    id: 4,
+
     name: 'Testing Server',
     ipAddress: '192.168.1.102',
     isOnline: true,
     lastPingTimestamp: new Date('2024-01-15T09:45:00'),
     registeredTimestamp: new Date('2024-01-10T14:15:00'),
-    accountRequired: true
-  }
+    accountRequired: true,
+
+    capacity: 248978905348923,
+    freeSpace: 194327776,
+  },
+  {
+    id: 0,
+
+    name: 'home-blue',
+    ipAddress: '192.168.1.100',
+    isOnline: true,
+    lastPingTimestamp: new Date('2024-01-15T10:30:00'),
+    registeredTimestamp: new Date('2024-01-01T09:00:00'),
+    accountRequired: true,
+
+    capacity: 1099511627776,
+    freeSpace: 1211627776,
+  },
 ];
+
+function formatBytes(bytes: number, decimals: number = 2): string {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+function formatTimestamp(timestamp: Date): string {
+  return timestamp.toLocaleString();
+};
+
+function getPaginatedServerList(page: number, pageSize: number = 3): PaginatedServerList {
+  if (pageSize <= 0) {
+    throw new Error(`Invalid page size: ${pageSize} <= 0`);
+  };
+
+  // Sort servers by order first
+  const sortedServers = [...serverList].sort((a, b) => b.id - a.id);
+
+  const totalItems = sortedServers.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+
+  // Ensure page is within valid range
+  const currentPage = Math.max(1, Math.min(page, totalPages));
+
+  // Calculate start and end indices
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
+  return {
+    items: sortedServers.slice(startIndex, endIndex),
+
+    currentPage: currentPage,
+    totalPages: totalPages,
+  };
+}
+
+function moveServerItemToFirst(id: number) {
+
+  const sortedServers = [...serverList].sort((a, b) => b.id - a.id);
+
+  serverList.forEach((server: Server) => {
+    if (server.id !== id) return;
+
+    server.id = (sortedServers[0].id + 1);
+  });
+
+}
 
 function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.JSX.Element {
   const initHeight: number = props.initHeight;
@@ -241,8 +344,18 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
 
   props;
 
+  // State for table controls
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState('all');
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState<number>(5);
+  const [selectedServer, setSelectedServer] = React.useState<Server | null>(null);
+
+  setPageSize;
+
   // Mock server data
-  const [servers, setServers] = React.useState<Server[]>(fakeServers);
+  // The order is pre-sorted when this list get from DB. and the pagination is handled by partially, not paginated at the client.
+  const [serverList, setServerList] = React.useState<PaginatedServerList | undefined>(undefined);
 
   // State for form
   const [showAddForm, setShowAddForm] = React.useState(false);
@@ -252,18 +365,11 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
     accountRequired: false
   });
 
-  // State for table controls
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('all');
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [itemsPerPage] = React.useState(5);
-  const [selectedServer, setSelectedServer] = React.useState<Server | null>(null);
-
   // Add server
   const handleAddServer = () => {
     if (formData.name && formData.ipAddress) {
       const newServer = {
-        id: servers.length + 1,
+        id: serverList.length + 1,
         name: formData.name,
         ipAddress: formData.ipAddress,
         isOnline: Math.random() > 0.5, // Random online status
@@ -271,7 +377,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
         registeredTimestamp: new Date(),
         accountRequired: formData.accountRequired
       };
-      setServers([...servers, newServer]);
+      setServerList([...serverList, newServer]);
       setFormData({ name: '', ipAddress: '', accountRequired: false });
       setShowAddForm(false);
     }
@@ -279,55 +385,58 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
 
   // Remove server
   const handleRemoveServer = (id: number) => {
-    setServers(servers.filter(server => server.id !== id));
+    setServerList(serverList.filter(server => server.id !== id));
     setSelectedServer(null);
   };
 
-  // Filter and search servers
-  const filteredServers = React.useMemo(() => {
-    return servers.filter(server => {
-      const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        server.ipAddress.includes(searchTerm);
-      const matchesStatus = statusFilter === 'all' ||
-        (statusFilter === 'online' && server.isOnline) ||
-        (statusFilter === 'offline' && !server.isOnline);
-      return matchesSearch && matchesStatus;
-    });
-  }, [servers, searchTerm, statusFilter]);
+  const moveItemToFirst = (id: number) => {
+    moveServerItemToFirst(id);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredServers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedServers = filteredServers.slice(startIndex, startIndex + itemsPerPage);
-
-  const formatTimestamp = (timestamp: Date) => {
-    return timestamp.toLocaleString();
+    setServerList(getPaginatedServerList(currentPage, pageSize));
   };
+
+  // Filter and search servers, The filter is handled by DB and query, not in client...
+  // const filteredServers = React.useMemo(() => {
+  //   return servers.filter(server => {
+  //     const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //       server.ipAddress.includes(searchTerm);
+  //     const matchesStatus = statusFilter === 'all' ||
+  //       (statusFilter === 'online' && server.isOnline) ||
+  //       (statusFilter === 'offline' && !server.isOnline);
+  //     return matchesSearch && matchesStatus;
+  //   });
+  // }, [servers, searchTerm, statusFilter]);
+
+  React.useEffect(() => {
+    setServerList(getPaginatedServerList(currentPage, pageSize));
+  }, [currentPage, pageSize])
 
   return (
     <>
       {/* Header */}
-      <div className="mb-6">
+      <div className="w-full">
         <h1 className="text-2xl font-bold mb-2 text-black">Servers Management</h1>
         <div className="flex items-center gap-1 mb-4">
           <div className="text-lg text-black border border-black p-1">
-            Total Servers: <span className="font-semibold">{servers.length}</span>
+            Total Servers: <span className="font-semibold">15</span>
           </div>
           <div className="text-lg text-black border border-black p-1">
             Online: <span className="font-semibold text-green-600">
-              {servers.filter(s => s.isOnline).length}
+              9
             </span>
           </div>
           <div className="text-lg text-black border border-black p-1">
             Offline: <span className="font-semibold text-red-600">
-              {servers.filter(s => !s.isOnline).length}
+              6
             </span>
           </div>
         </div>
       </div>
 
+      <div className="w-full border-black border-b-1 my-4" />
+
       {/* Add Server Button */}
-      <div className="mb-6">
+      <div className="mb-2">
         <button
           onClick={() => setShowAddForm(!showAddForm)}
           className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors"
@@ -338,10 +447,10 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
 
       {/* Add Server Form */}
       {showAddForm && (
-        <div className="mb-6 p-4 border border-black">
+        <div className="mb-2 p-2 border border-black">
           <h3 className="text-lg font-semibold mb-4 text-black">Add New Server</h3>
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div>
                 <label className="block text-black font-medium mb-1">Server Name</label>
                 <input
@@ -385,38 +494,23 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
         </div>
       )}
 
-      {/* Search and Filter Controls */}
-      <div className="w-full mb-6 flex flex-col gap-4">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Search servers by name or IP..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-black text-black"
-          />
-        </div>
-        <div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-black text-black"
-          >
-            <option value="all">All Status</option>
-            <option value="online">Online Only</option>
-            <option value="offline">Offline Only</option>
-          </select>
-        </div>
-      </div>
+      <div className="w-full border-black border-b-1 my-4" />
 
       {/* Server Details */}
       {selectedServer && (
-        <div className="mb-6 p-4 border border-black">
+        <div className="w-full max-w-4xl mb-2 p-2 border border-black relative">
           <h3 className="text-lg font-semibold mb-3 text-black">Server Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="absolute right-1 top-1 cursor-pointer" onClick={() => setSelectedServer(null)}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             <div>
               <strong className="text-black">ID:</strong> {selectedServer.id}
             </div>
+          </div>
+          <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             <div>
               <strong className="text-black">Name:</strong> {selectedServer.name}
             </div>
@@ -439,8 +533,40 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
               <strong className="text-black">Account Required:</strong> {selectedServer.accountRequired ? 'Yes' : 'No'}
             </div>
           </div>
+          <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+            <div>
+              <strong className="text-black">Capacity:</strong> {formatBytes(selectedServer.capacity)}
+            </div>
+            <div>
+              <strong className="text-black">FreeSpace:</strong> {formatBytes(selectedServer.freeSpace)}
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Search and Filter Controls */}
+      <div className="w-full mb-2 flex flex-col gap-2">
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Search servers by name or IP..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-black text-black"
+          />
+        </div>
+        <div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-black text-black"
+          >
+            <option value="all">All Status</option>
+            <option value="online">Online Only</option>
+            <option value="offline">Offline Only</option>
+          </select>
+        </div>
+      </div>
 
       {/* Servers Table */}
       <ResizableVerticalWrapper
@@ -460,7 +586,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
             </tr>
           </thead>
           <tbody>
-            {paginatedServers.map((server) => (
+            {serverList && serverList.items.map((server: Server, index: number) => (
               <tr key={server.id} className="border-b border-black ">
                 <td className="px-4 py-3 whitespace-nowrap text-black">{server.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-black font-mono">{server.ipAddress}</td>
@@ -484,16 +610,24 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setSelectedServer(selectedServer?.id === server.id ? null : server)}
-                      className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50"
+                      onClick={() => setSelectedServer(server)}
+                      className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
                     >
-                      {selectedServer?.id === server.id ? 'Hide' : 'Details'}
+                      Details
                     </button>
                     <button
                       onClick={() => handleRemoveServer(server.id)}
-                      className="px-2 py-1 text-sm border border-red-600 text-red-600 hover:bg-red-50"
+                      className="px-2 py-1 text-sm border border-red-600 text-red-600 hover:bg-red-50 cursor-pointer"
                     >
                       Remove
+                    </button>
+                    <button
+                      onClick={() => moveItemToFirst(server.id)}
+                      className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                      </svg>
                     </button>
                   </div>
                 </td>
@@ -504,38 +638,45 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
       </ResizableVerticalWrapper>
 
       {/* Pagination */}
-      <div className="mt-6 flex justify-center items-center gap-2">
-        <button
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Previous
-        </button>
+      {serverList && (
+        <div className="mt-6 flex justify-center items-center gap-2">
+          <button
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+          </button>
 
-        <div className="flex gap-1">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-            <button
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`px-3 py-1 border border-black ${currentPage === page
-                ? 'bg-black text-white'
-                : 'bg-white text-black hover:bg-gray-50'
-                }`}
-            >
-              {page}
-            </button>
-          ))}
+          <div className="flex gap-1">
+            {Array.from({ length: serverList.totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1 border border-black ${currentPage === page
+                  ? 'bg-black text-white'
+                  : 'bg-white text-black hover:bg-gray-50'
+                  }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(Math.min(serverList.totalPages, currentPage + 1))}
+            disabled={currentPage === serverList.totalPages}
+            className="p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
         </div>
+      )}
 
-        <button
-          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Next
-        </button>
-      </div>
     </>
   );
 }
