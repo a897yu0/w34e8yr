@@ -743,7 +743,6 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
   );
 };
 
-
 function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
   const path: string | undefined = props.path;
@@ -1167,8 +1166,12 @@ function Main(props: MainProps): React.JSX.Element {
     console.assert(sidebarResizerRef.current.clientWidth < sidebarContainerRef.current.clientWidth)
     const validWidth: number = (sidebarContainerRef.current.clientWidth - sidebarResizerRef.current.clientWidth);
 
+    console.log("sidebarContainerRef.current.clientWidth:", sidebarContainerRef.current.clientWidth);
+    console.log("sidebarResizerRef.current.clientWidth:", sidebarResizerRef.current.clientWidth);
+
     if (validWidth < resizableSidebarWidth) {
       setResizableSidebarWidth(validWidth);
+      saveInitialSidebarWidth(validWidth);
     }
 
     // console.log("validWidth:", validWidth);
@@ -1304,7 +1307,7 @@ function Main(props: MainProps): React.JSX.Element {
           "overflow-y-hidden",
         )}
         style={{
-          gridTemplateColumns: `${resizableSidebarWidth}px 7px 1fr`
+          gridTemplateColumns: `${resizableSidebarWidth}px 14px 1fr`
         }}
       >
 
