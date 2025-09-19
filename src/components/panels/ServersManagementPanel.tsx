@@ -66,6 +66,10 @@ function getPaginatedServerList(page: number, pageSize: number = 3): PaginatedSe
   };
 }
 
+function getUsagePercentage(capacity: number, freeSpace: number): number {
+  return (((capacity - freeSpace) / capacity) * 100);
+}
+
 function moveServerItemToFirst(id: number) {
 
   const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
@@ -533,7 +537,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
               <strong className="text-black">FreeSpace:</strong> {formatBytes(selectedServer.freeSpace)}
             </div>
             <div>
-              <strong className="text-black">FreeSpace:</strong> {(((selectedServer.capacity - selectedServer.freeSpace) / selectedServer.capacity) * 100).toFixed(1)} %
+              <strong className="text-black">Usage:</strong> {getUsagePercentage(selectedServer.capacity, selectedServer.freeSpace).toFixed(1)} %
             </div>
           </div>
         </div>
@@ -604,13 +608,18 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
                   {server.accountRequired ? 'Yes' : 'No'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-black">
-                  <CircleProgress
-                    percentage={((server.capacity - server.freeSpace) / server.capacity) * 100}
+                  {/* <CircleProgress
+                    percentage={getUsagePercentage(server.capacity, server.freeSpace)}
                     size={28}
                     strokeWidth={28 * 0.09}
                     backgroundColor="#f3f4f6"
                     showPercentage={true}
-                  />
+                  /> */}
+                  <div className="ml-2 inset-0 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-gray-700">
+                      {getUsagePercentage(server.capacity, server.freeSpace).toFixed(1)}%
+                    </span>
+                  </div>
                 </td>
 
                 <td className="px-4 py-3 whitespace-nowrap">
@@ -622,18 +631,18 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
                       Details
                     </button>
                     <button
-                      onClick={() => handleRemoveServer(server.id)}
-                      className="px-2 py-1 text-sm border border-red-600 text-red-600 hover:bg-red-50 cursor-pointer"
-                    >
-                      Remove
-                    </button>
-                    <button
                       onClick={() => moveItemToFirst(server.id)}
-                      className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                      className="px-0 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
                       </svg>
+                    </button>
+                    <button
+                      onClick={() => handleRemoveServer(server.id)}
+                      className="px-2 py-1 text-sm border border-red-600 text-red-600 hover:bg-red-50 cursor-pointer"
+                    >
+                      Remove
                     </button>
                   </div>
                 </td>
