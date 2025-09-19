@@ -438,26 +438,27 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
 
   // Add server
   const handleAddServer = () => {
-    if (formData.name && formData.ipAddress) {
-      const newServer = {
-        id: serverList.length + 1,
-        name: formData.name,
-        ipAddress: formData.ipAddress,
-        isOnline: Math.random() > 0.5, // Random online status
-        lastPingTimestamp: new Date(),
-        registeredTimestamp: new Date(),
-        accountRequired: formData.accountRequired
-      };
-      setServerList([...serverList, newServer]);
-      setFormData({ name: '', ipAddress: '', accountRequired: false });
-      setShowAddForm(false);
-    }
+    // if (formData.name && formData.ipAddress) {
+    //   const newServer = {
+    //     id: serverList.length + 1,
+    //     name: formData.name,
+    //     ipAddress: formData.ipAddress,
+    //     isOnline: Math.random() > 0.5, // Random online status
+    //     lastPingTimestamp: new Date(),
+    //     registeredTimestamp: new Date(),
+    //     accountRequired: formData.accountRequired
+    //   };
+    //   setServerList([...serverList, newServer]);
+    //   setFormData({ name: '', ipAddress: '', accountRequired: false });
+    //   setShowAddForm(false);
+    // }
   };
 
   // Remove server
   const handleRemoveServer = (id: number) => {
-    setServerList(serverList.filter(server => server.id !== id));
-    setSelectedServer(null);
+    id;
+    // setServerList(serverList.filter(server => server.id !== id));
+    // setSelectedServer(null);
   };
 
   const moveItemToFirst = (id: number) => {
@@ -611,6 +612,9 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
             <div>
               <strong className="text-black">FreeSpace:</strong> {formatBytes(selectedServer.freeSpace)}
             </div>
+            <div>
+              <strong className="text-black">FreeSpace:</strong> {(((selectedServer.capacity - selectedServer.freeSpace) / selectedServer.capacity) * 100).toFixed(1)} %
+            </div>
           </div>
         </div>
       )}
@@ -658,7 +662,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
             </tr>
           </thead>
           <tbody>
-            {serverList && serverList.items.map((server: Server, index: number) => (
+            {serverList && serverList.items.map((server: Server) => (
               <tr key={server.id} className="border-b border-black ">
                 <td className="px-4 py-3 whitespace-nowrap text-black">{server.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-black font-mono">{server.ipAddress}</td>
