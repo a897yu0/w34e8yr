@@ -4,6 +4,7 @@ import React from 'react';
 import type { AdminMainPanelProps } from '@/types/AdminMainPanelProps';
 import type { DialogContext } from '@/types/DialogContext';
 import type { AdminPageProps } from '@/types/AdminPageProps';
+import FallbackPage from './FallbackPage';
 
 interface SidebarDropdownMenu {
   [id: string]: boolean;
@@ -702,19 +703,6 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     );
   };
 
-  const MainPanelFallback = (): React.JSX.Element => {
-    return (
-      <div className="w-full h-full flex justify-center items-center">
-        {/* Animated dots */}
-        <div className="flex space-x-1">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
       {path && (
@@ -754,7 +742,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
               {(panelWithParams && (
                 <div className="absolute w-full h-full overflow-auto">
                   <div className="min-w-fit min-h-fit w-full h-full p-2">
-                    <React.Suspense fallback={<MainPanelFallback />}>
+                    <React.Suspense fallback={<FallbackPage />}>
                       <panelWithParams.panel params={panelWithParams.params} />
                     </React.Suspense>
                   </div>

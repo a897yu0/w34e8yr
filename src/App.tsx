@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import React from 'react';
 
 import type { DialogContext } from '@/types/DialogContext';
-import AdminPage from './components/pages/AdminPage';
+import FallbackPage from './components/pages/FallbackPage';
 
 
 interface HeaderProps {
@@ -139,13 +139,17 @@ function App(): React.JSX.Element {
     setDialog(ctx);
   };
 
+  const AdminPage: React.LazyExoticComponent<React.ComponentType<any>> = React.lazy(() => import('./components/pages/AdminPage'));
+
   return (
     <>
       <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
         <Header />
 
         <main className="w-full flex-1">
-          <AdminPage openDialog={openDialog} />
+          <React.Suspense fallback={<FallbackPage />}>
+            <AdminPage openDialog={openDialog} />
+          </React.Suspense>
         </main>
 
         <footer className="w-full bg-white m-0 border-black border-t-1">
