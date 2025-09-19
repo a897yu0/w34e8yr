@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import React from 'react';
 
+import type { MainPanelProps } from '@/types/MainPanelProps';
+
 interface Server {
   id: number;
   name: string;
@@ -20,8 +22,7 @@ interface ResizableVerticalWrapperProps {
   localStorageKey?: string;
 }
 
-interface ServersManagementPanelProps {
-
+interface ServersManagementPanelProps extends MainPanelProps {
 }
 
 const fakeServers: Server[] = [

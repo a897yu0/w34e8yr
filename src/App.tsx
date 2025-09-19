@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React from 'react';
 
-import ServersManagementPanel from './components/panels/ServersManagementPanel';
+import type { MainPanelProps } from './types/MainPanelProps';
 
 interface HeaderProps {
   isSidebarShown: boolean;
@@ -74,6 +74,9 @@ interface MainPanelWrapperProps {
   resetPath: () => void;
 }
 
+type MainPanelComponentType<T extends MainPanelProps = MainPanelProps> = React.ComponentType<T>;
+type MainPanelLazyExoticComponent = React.LazyExoticComponent<MainPanelComponentType>;
+
 interface MainPanelContext {
   icon?: React.ReactNode;
 
@@ -82,8 +85,12 @@ interface MainPanelContext {
 }
 
 interface MainPanelWithParams {
-  panel: React.JSX.Element;
+  panel: MainPanelLazyExoticComponent;
   params: string[];
+}
+
+interface MainProps {
+  openDialog: (ctx: DialogContext | null) => void;
 }
 
 const pathToMainPanelContext: { [path: string]: MainPanelContext; } = {};
@@ -736,18 +743,6 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
   );
 };
 
-function RegisteredServerPanel(): React.JSX.Element {
-  /**
-   * Features:
-   * List of accounts logged in with when logged in, where, which platform, email, ip, location, android or ios, chrome/safari etc...
-   */
-
-  return (
-    <div className="w-full h-full flex flex-col justify-center items-center">
-      RegisteredServerPanel
-    </div>
-  );
-}
 
 function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
@@ -758,10 +753,10 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
   const [panelWithParams, setPanelWithParams] = React.useState<MainPanelWithParams | undefined>(undefined);
 
-  const pathToPanel: Record<string, React.JSX.Element> = {
-    "servers/management": <ServersManagementPanel />,
-    "servers/registered/?": <RegisteredServerPanel />,
-    "servers/registered/?/info/?": <RegisteredServerPanel />,
+  const pathToPanel: Record<string, MainPanelLazyExoticComponent> = {
+    "servers/management": React.lazy(() => import('./components/panels/ServersManagementPanel')),
+    "servers/registered/?": React.lazy(() => import('./components/panels/RegisteredServerPanel')),
+    "servers/registered/?/info/?": React.lazy(() => import('./components/panels/RegisteredServerPanel')),
   };
 
   function matchPathWithParams(pattern: string, path: string): { match: boolean; params: string[]; } {
@@ -857,6 +852,19 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     );
   };
 
+  const MainPanelFallback = (): React.JSX.Element => {
+    return (
+      <div className="w-full h-full flex justify-center items-center">
+        {/* Animated dots */}
+        <div className="flex space-x-1">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
       {path && (
@@ -896,7 +904,9 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
               {(panelWithParams && (
                 <div className="absolute w-full h-full overflow-auto">
                   <div className="min-w-fit min-h-fit w-full h-full p-2">
-                    {panelWithParams.panel}
+                    <React.Suspense fallback={<MainPanelFallback />}>
+                      <panelWithParams.panel params={panelWithParams.params} />
+                    </React.Suspense>
                   </div>
                 </div>
               )) || (<div className="w-full h-full flex justify-center items-center"><span>Not found</span></div>)}
@@ -908,8 +918,10 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   );
 }
 
-function App(): React.JSX.Element {
-  const [dialog, setDialog] = React.useState<DialogContext | null>(null);
+function Main(props: MainProps): React.JSX.Element {
+  const openDialog: (ctx: DialogContext | null) => void = props.openDialog;
+
+  openDialog;
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
 
@@ -1239,6 +1251,7 @@ function App(): React.JSX.Element {
     };
   }, [isResizableSidebarDragging, handleSidebarResizerPointerMove, handleSidebarResizerPointerUp]);
 
+
   return (
     <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
       <Header isSidebarShown={isMobileSidebarShown} toggleSidebarShown={() => setIsMobileSidebarShown(prev => !prev)} />
@@ -1368,14 +1381,29 @@ function App(): React.JSX.Element {
           </ul>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function App(): React.JSX.Element {
+  const [dialog, setDialog] = React.useState<DialogContext | null>(null);
+
+  const openDialog = (ctx: DialogContext | null): void => {
+    if (!ctx) return;
+
+    setDialog(ctx);
+  };
+
+  return (
+    <>
+      <Main openDialog={openDialog} />
 
       {(dialog !== null) && (
         <Dialog
           onClose={() => setDialog(null)}
           ctx={dialog} />
       )}
-
-    </div >
+    </>
   );
 }
 
