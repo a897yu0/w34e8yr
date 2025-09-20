@@ -363,7 +363,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
           userData.adminPage.serverManagementPanel.serverTable.height = height;
         })}
       >
-        <table className="w-fit h-fit border-r-1 border-black relative">
+        <table className="w-fit h-fit relative">
           <thead className="sticky top-0 bg-gray-200 z-10">
             <tr className="w-full">
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Name</th>
