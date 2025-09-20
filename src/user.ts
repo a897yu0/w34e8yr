@@ -18,6 +18,8 @@ const defaultUserData: Readonly<UserData> = {
 
 let userData: UserData = structuredClone(defaultUserData);
 
+let timeout: NodeJS.Timeout | undefined = undefined;
+
 function parseServerDetails(data: any): ServerDetails | undefined {
   try {
     // Check if data exists and is an object
@@ -136,7 +138,13 @@ function isUserDataReady(): boolean {
 }
 
 function saveUserData(): void {
-  localStorage.setItem('user', JSON.stringify(userData));
+  if (!timeout) {
+    timeout = setTimeout(() => {
+      localStorage.setItem('user', JSON.stringify(userData));
+      timeout = undefined;
+    }, 1000);
+
+  }
 }
 
 function getDefaultUserData(): UserData {
