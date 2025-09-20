@@ -445,7 +445,9 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
         </table>
       </ResizableVerticalWrapper>
 
-      {serverList && <Paginator currentPage={currentPage} totalPages={serverList.totalPages} onPageChange={setCurrentPage} maxVisiblePages={3} />}
+      {serverList && (
+        <Paginator currentPage={currentPage} totalPages={serverList.totalPages} onPageChange={setCurrentPage} maxVisiblePages={3} />
+      )}
 
       <div className="mb-17"></div>
 
