@@ -20,6 +20,11 @@ export default defineConfig({
             return 'vendor';
           }
         },
+
+        entryFileNames: '[hash:16].js',
+        chunkFileNames: '[hash:16].js',
+        assetFileNames: '[hash:16].[ext]',
+        
       },
     },
   },
