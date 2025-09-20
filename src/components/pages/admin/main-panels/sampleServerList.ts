@@ -1,4 +1,4 @@
-import type { Server } from "@/types/Server";
+import type { Server } from "@/types/ServerData";
 
 const sampleServerList: Server[] = [
   {

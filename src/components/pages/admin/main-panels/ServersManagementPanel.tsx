@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import React from 'react';
 
-import type { AdminMainPanelProps } from '@/types/AdminMainPanelProps';
-import type { Server } from '@/types/Server';
+import type { AdminMainPanelProps } from '@/types/props/AdminMainPanelProps';
+import type { Server } from '@/types/ServerData';
 import sampleServerList from './sampleServerList';
 
 interface ResizableVerticalWrapperProps {

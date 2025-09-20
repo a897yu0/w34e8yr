@@ -1,10 +1,10 @@
 import clsx from 'clsx';
 import React from 'react';
 
-import type { AdminMainPanelProps } from '@/types/AdminMainPanelProps';
+import type { AdminMainPanelProps } from '@/types/props/AdminMainPanelProps';
 import type { DialogContext } from '@/types/DialogContext';
-import type { AdminPageProps } from '@/types/AdminPageProps';
-import FallbackPage from './FallbackPage';
+import type { AdminPageProps } from '@/types/props/AdminPageProps';
+import FallbackPage from '../FallbackPage';
 
 interface SidebarDropdownMenu {
   [id: string]: boolean;
@@ -605,9 +605,9 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   const [panelWithParams, setPanelWithParams] = React.useState<AdminMainPanelWithParams | undefined>(undefined);
 
   const pathToPanel: Record<string, AdminMainPanelLazyExoticComponent> = {
-    "servers/management": React.lazy(() => import('./admin-main-panels/ServersManagementPanel')),
-    "servers/registered/?": React.lazy(() => import('./admin-main-panels/RegisteredServerPanel')),
-    "servers/registered/?/info/?": React.lazy(() => import('./admin-main-panels/RegisteredServerPanel')),
+    "servers/management": React.lazy(() => import('./main-panels/ServersManagementPanel')),
+    "servers/registered/?": React.lazy(() => import('./main-panels/RegisteredServerPanel')),
+    "servers/registered/?/info/?": React.lazy(() => import('./main-panels/RegisteredServerPanel')),
   };
 
   function matchPathWithParams(pattern: string, path: string): { match: boolean; params: string[]; } {
@@ -653,13 +653,10 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
       if (panelWithParams) {
         setPanelWithParams(panelWithParams);
-
-        // console.log('panelWithParams:', panelWithParams);
       } else {
         setPanelWithParams(undefined);
       }
 
-      // console.log('ctx:', ctx);
     }
 
   }, [path]);
@@ -669,11 +666,8 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   //   throw new Error(`Invalid path: Unregistered main panel: ${path}`);
   // }
 
-
   const PathSegmentComponent = (props: { segment?: string; index?: number; isLast?: boolean; }) => (
-    <span className="cursor-pointer text-gray-700"
-    // onClick={() => console.log(`Clicked segment: ${props.segment} at index ${props.index}`)}
-    >
+    <span className="cursor-pointer text-gray-700">
       {props.segment}
     </span>
   );
@@ -685,18 +679,18 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   );
 
   const PathBreadcrumb = (props: { path: string; }) => {
-    const segments = props.path.split('/');
+    const segments: string[] = props.path.split('/');
 
     return (
       <div className="flex flex-row justify-start items-center flex-wrap">
-        {segments.map((segment, index) => (
+        {segments.map((segment: string, index: number) => (
           <React.Fragment key={index}>
             <PathSegmentComponent
               segment={segment}
               index={index}
-              isLast={index === segments.length - 1}
+              isLast={index === (segments.length - 1)}
             />
-            {index < segments.length - 1 && <PathSeparatorComponent />}
+            {index < (segments.length - 1) && <PathSeparatorComponent />}
           </React.Fragment>
         ))}
       </div>
@@ -757,9 +751,9 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 }
 
 function AdminPage(props: AdminPageProps): React.JSX.Element {
-  const openDialog: (ctx: DialogContext | null) => void = props.openDialog;
+  props;
 
-  openDialog;
+  // const openDialog: (ctx: DialogContext | null) => void = props.openDialog;
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
 
@@ -866,7 +860,6 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
     // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
     // window.history.pushState(undefined, '', url);  
-
 
   };
 

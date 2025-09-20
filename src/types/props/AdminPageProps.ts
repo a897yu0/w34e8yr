@@ -1,4 +1,4 @@
-import type { DialogContext } from "./DialogContext";
+import type { DialogContext } from "../DialogContext";
 
 
 interface AdminPageProps {
