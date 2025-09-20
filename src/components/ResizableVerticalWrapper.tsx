@@ -18,6 +18,8 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
   const userHeight: number = props.userHeight;
   const setUserHeight: (height: number) => void = props.setUserHeight;
 
+  const className: string | undefined = props.className;
+
   if (minHeight < 0) {
     throw new Error(`Minimum height (${minHeight}) cannot be negative`);
   }
@@ -127,43 +129,51 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
   }, [isResizableTableDragging, handleTableResizerPointerMove, handleTableResizerPointerUp]);
 
   return (
-    <div className="w-full h-fit flex flex-col justify-between items-center">
-      <div
-        ref={tableContainerRef}
-        className="w-full overflow-auto border border-black relative"
-        style={{
-          height: `${height}px`
-        }}
-      >
-        <div className="absolute w-fit h-fit">
-          {children}
+    <div className={className}>
+      <div className="w-full h-fit flex flex-col justify-between items-center">
+        <div className="w-full h-7 flex flex-row justify-end items-center gap-1">
+          <div
+            className="h-full aspect-square cursor-pointer"
+            onClick={() => handleManualReduction()}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+            </svg>
+          </div>
+          <div
+            className="h-full aspect-square cursor-pointer"
+            onClick={() => handleManualExpansion()}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </div>
         </div>
-      </div>
 
-      <div
-        ref={tableResizerRef}
-        className={clsx(
-          "w-full h-1 cursor-row-resize ",
-          isResizableTableDragging ? 'bg-blue-500' : 'bg-gray-400',
-        )}
-        onMouseDown={handleTableResizerPointerDown}
-        onTouchStart={handleTableResizerPointerDown}
-      >
-      </div>
-
-      <div className="w-full h-7 flex flex-row justify-end items-center gap-1">
-        <div className="h-full aspect-square cursor-pointer" onClick={() => handleManualReduction()}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
-          </svg>
+        <div
+          ref={tableContainerRef}
+          className="w-full overflow-auto border-t-1 border-x-1 border-black relative"
+          style={{
+            height: `${height}px`
+          }}
+        >
+          <div className="absolute w-fit h-fit">
+            {children}
+          </div>
         </div>
-        <div className="h-full aspect-square cursor-pointer" onClick={() => handleManualExpansion()}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-          </svg>
-        </div>
-      </div>
 
+        <div
+          ref={tableResizerRef}
+          className={clsx(
+            "w-full h-1 cursor-row-resize ",
+            isResizableTableDragging ? 'bg-blue-500' : 'bg-gray-400',
+          )}
+          onMouseDown={handleTableResizerPointerDown}
+          onTouchStart={handleTableResizerPointerDown}
+        >
+        </div>
+
+      </div>
     </div>
   );
 }

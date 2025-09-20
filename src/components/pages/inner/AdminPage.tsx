@@ -621,7 +621,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   const [panelWithParams, setPanelWithParams] = React.useState<AdminMainPanelWithParams | undefined>(undefined);
 
   const pathToPanel: Record<string, AdminMainPanelLazyExoticComponent> = {
-    "servers/management": React.lazy(() => import('@/components/admin/main-panels/ServersManagementPanel')),
+    "servers/management": React.lazy(() => import('@/components/admin/main-panels/ServerManagementPanel')),
     "servers/registered/?": React.lazy(() => import('@/components/admin/main-panels/RegisteredServerPanel')),
     "servers/registered/?/info/?": React.lazy(() => import('@/components/admin/main-panels/RegisteredServerPanel')),
   };

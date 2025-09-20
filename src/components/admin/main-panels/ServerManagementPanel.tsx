@@ -11,9 +11,6 @@ import { getDefaultUserData, getUserData, setUserData } from '@/user';
 import sampleServerList from './sampleServerList';
 import clsx from 'clsx';
 
-interface ServersManagementPanelProps extends AdminMainPanelProps {
-}
-
 interface PaginatedServerList {
   items: ServerDetails[];
 
@@ -82,10 +79,10 @@ function moveServerItemToFirst(id: number) {
 /**
  * Features:
  * Current server count
- * Add/Remove servers with name, IP address
- * Server table (Search, Pagination, Filter) with name, IP address, online status, last ping-pong timestamp, registered timestamp, detail, Account required in server
+ * Add/Remove servers with name, Server address
+ * Server table (Search, Pagination, Filter) with name, Server address, online status, last ping-pong timestamp, registered timestamp, detail, Account required in server
  */
-function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.Element {
+function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
 
   // State for table controls
@@ -102,27 +99,29 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
   const [serverList, setServerList] = React.useState<PaginatedServerList | undefined>(undefined);
 
   // State for form
-  const [showAddForm, setShowAddForm] = React.useState(false);
-  const [formData, setFormData] = React.useState({
+  const [showAddFormToAddServer, setShowAddFormToAddServer] = React.useState(false);
+  const [formDataToAddServer, setFormDataToAddServer] = React.useState({
     name: '',
-    ipAddress: '',
+    address: '',
+    protocol: '',
+    port: '',
     accountRequired: false
   });
 
   // Add server
   const handleAddServer = () => {
-    // if (formData.name && formData.ipAddress) {
+    // if (formData.name && formData.serverAddress) {
     //   const newServer = {
     //     id: serverList.length + 1,
     //     name: formData.name,
-    //     ipAddress: formData.ipAddress,
+    //     serverAddress: formData.serverAddress,
     //     isOnline: Math.random() > 0.5, // Random online status
     //     lastPingTimestamp: new Date(),
     //     registeredTimestamp: new Date(),
     //     accountRequired: formData.accountRequired
     //   };
     //   setServerList([...serverList, newServer]);
-    //   setFormData({ name: '', ipAddress: '', accountRequired: false });
+    //   setFormData({ name: '', serverAddress: '', accountRequired: false });
     //   setShowAddForm(false);
     // }
   };
@@ -144,7 +143,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
   // const filteredServers = React.useMemo(() => {
   //   return servers.filter(server => {
   //     const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       server.ipAddress.includes(searchTerm);
+  //       server.serverAddress.includes(searchTerm);
   //     const matchesStatus = statusFilter === 'all' ||
   //       (statusFilter === 'online' && server.isOnline) ||
   //       (statusFilter === 'offline' && !server.isOnline);
@@ -160,7 +159,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
     <>
       {/* Header */}
       <div className="w-full">
-        <h1 className="text-2xl font-bold mb-2 text-black">Servers Management</h1>
+        <h1 className="text-2xl font-bold mb-2 text-black">Server Management</h1>
         <div className="flex items-center gap-1 mb-4">
           <div className="text-lg text-black border border-black p-1">
             Total Servers: <span className="font-semibold">15</span>
@@ -183,52 +182,81 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
       {/* Add Server Button */}
       <div className="mb-2">
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors"
+          onClick={() => setShowAddFormToAddServer(!showAddFormToAddServer)}
+          className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
         >
-          {showAddForm ? 'Cancel' : 'Add Server'}
+          {showAddFormToAddServer ? 'Cancel' : 'Add Server'}
         </button>
       </div>
 
       {/* Add Server Form */}
-      {showAddForm && (
-        <div className="mb-2 p-2 border border-black">
-          <h3 className="text-lg font-semibold mb-4 text-black">Add New Server</h3>
+      {showAddFormToAddServer && (
+        <div className="max-w-md mb-2 p-2 border border-black">
+          {/* <h3 className="text-lg font-semibold mb-4 text-black">Add New Server</h3> */}
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div>
+            <div className="w-full flex flex-col gap-2">
+              <div className="w-full">
                 <label className="block text-black font-medium mb-1">Server Name</label>
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-black text-black"
+                  value={formDataToAddServer.name}
+                  onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-black text-black min-h-[2.5rem]"
                   placeholder="Enter server name"
                 />
               </div>
-              <div>
-                <label className="block text-black font-medium mb-1">IP Address</label>
+              <div className="w-full">
+                <label className="block text-black font-medium mb-1">Address</label>
                 <input
                   type="text"
-                  value={formData.ipAddress}
-                  onChange={(e) => setFormData({ ...formData, ipAddress: e.target.value })}
-                  className="w-full px-3 py-2 border border-black text-black"
-                  placeholder="192.168.1.1"
+                  value={formDataToAddServer.address}
+                  onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, address: e.target.value })}
+                  className="w-full px-3 py-2 border border-black text-black min-h-[2.5rem]"
+                  placeholder="192.168.1.1 or www.example.com"
                 />
               </div>
+              <div className="w-full flex flex-row gap-1">
+                <div className="flex flex-col h-full">
+                  <label className="block text-black font-medium mb-1">Protocol</label>
+                  <select
+                    value={formDataToAddServer.protocol || 'http'}
+                    onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, protocol: e.target.value })}
+                    className="w-full px-3 py-2 border border-black text-black min-h-[2.6rem]"
+                  >
+                    <option value="http">HTTP</option>
+                    <option value="https">HTTPS</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                {(formDataToAddServer.protocol === 'custom') && (
+                  <div className="flex-1 flex flex-col">
+                    <label className="block text-black font-medium mb-1">
+                      Custom Port
+                    </label>
+                    <input
+                      type="text"
+                      value={formDataToAddServer.port || ''}
+                      onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, port: e.target.value })}
+                      className="w-full px-3 py-2 border border-black text-black min-h-[2.5rem]"
+                      placeholder="Enter port number"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <input
                 type="checkbox"
                 id="accountRequired"
-                checked={formData.accountRequired}
-                onChange={(e) => setFormData({ ...formData, accountRequired: e.target.checked })}
+                checked={formDataToAddServer.accountRequired}
+                onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, accountRequired: e.target.checked })}
                 className="mr-2"
               />
               <label htmlFor="accountRequired" className="text-black">
                 Account Required
               </label>
-            </div>
+            </div> */}
+
             <button
               onClick={handleAddServer}
               className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors"
@@ -260,7 +288,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
               <strong className="text-black">Name:</strong> {selectedServer.name}
             </div>
             <div>
-              <strong className="text-black">IP Address:</strong> {selectedServer.ipAddress}
+              <strong className="text-black">IP Address:</strong> {selectedServer.address}
             </div>
             <div>
               <strong className="text-black">Status:</strong>
@@ -293,16 +321,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
       )}
 
       {/* Search and Filter Controls */}
-      <div className="w-full mb-2 flex flex-col gap-2">
-        <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Search servers by name or IP..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-black text-black"
-          />
-        </div>
+      <div className="w-full mb-1 flex flex-row gap-2">
         <div>
           <select
             value={statusFilter}
@@ -314,15 +333,27 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
             <option value="offline">Offline Only</option>
           </select>
         </div>
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Search servers by name or IP..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-black text-black"
+          />
+        </div>
       </div>
 
       {/* Server Table */}
       <ResizableVerticalWrapper
         minHeight={77}
-        defaultHeight={getDefaultUserData().adminPage.serversManagementPanel.serverTable.height}
-        userHeight={getUserData().adminPage.serversManagementPanel.serverTable.height}
+        defaultHeight={getDefaultUserData().adminPage.serverManagementPanel.serverTable.height}
+        userHeight={getUserData().adminPage.serverManagementPanel.serverTable.height}
+
+        className="mb-1"
+
         setUserHeight={(height: number) => setUserData((userData: UserData) => {
-          userData.adminPage.serversManagementPanel.serverTable.height = height;
+          userData.adminPage.serverManagementPanel.serverTable.height = height;
         })}
       >
         <table className="w-fit h-fit border-r-1 border-black relative">
@@ -344,7 +375,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
                 (index % 2 == 0) ? 'bg-white' : 'bg-gray-100'
               )}>
                 <td className="px-4 py-3 whitespace-nowrap text-black">{server.name}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-black font-mono">{server.ipAddress}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-black font-mono">{server.address}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <span className={clsx(
                     "px-2 py-1 text-sm border",
@@ -409,9 +440,10 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
 
       {serverList && <Paginator currentPage={currentPage} totalPages={serverList.totalPages} onPageChange={setCurrentPage} maxVisiblePages={3} />}
 
+      <div className="mb-17"></div>
+
     </>
   );
 }
 
-export default ServersManagementPanel;
-
+export default ServerManagementPanel;

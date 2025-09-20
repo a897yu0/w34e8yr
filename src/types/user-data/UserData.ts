@@ -7,7 +7,7 @@ interface UserData {
     sidebar: {
       width: number;
     };
-    serversManagementPanel: {
+    serverManagementPanel: {
       serverTable: {
         height: number;
       };

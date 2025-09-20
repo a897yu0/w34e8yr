@@ -1,5 +1,8 @@
+import type { AdminMainPanelProps } from "@/types/props/admin/AdminMainPanelProps";
 
-function RegisteredServerPanel(): React.JSX.Element {
+function RegisteredServerPanel(props: AdminMainPanelProps): React.JSX.Element {
+  props;
+
   /**
    * Features:
    * List of accounts logged in with when logged in, where, which platform, email, ip, location, android or ios, chrome/safari etc...

@@ -8,7 +8,7 @@ const defaultUserData: Readonly<UserData> = {
     sidebar: {
       width: 277,  // TODO: Make configurable with .env
     },
-    serversManagementPanel: {
+    serverManagementPanel: {
       serverTable: {
         height: 177,  // TODO: Make configurable with .env
       },
@@ -77,7 +77,7 @@ function parseServerDetails(data: any): ServerDetails | undefined {
       id: data.id,
 
       name: data.name.trim(),
-      ipAddress: data.ipAddress.trim(),
+      address: data.ipAddress.trim(),
       isOnline: data.isOnline,
       lastPingTimestamp: lastPing,
       registeredTimestamp: registered,
@@ -126,9 +126,9 @@ function isUserDataReady(): boolean {
       sidebar: {
         width: getValidNumber(unknownUserData?.adminPage?.sidebar?.width, defaultUserData.adminPage.sidebar.width),
       },
-      serversManagementPanel: {
+      serverManagementPanel: {
         serverTable: {
-          height: getValidNumber(unknownUserData?.adminPage?.serversManagementPanel?.serverTable?.height, defaultUserData.adminPage.serversManagementPanel.serverTable.height),
+          height: getValidNumber(unknownUserData?.adminPage?.serverManagementPanel?.serverTable?.height, defaultUserData.adminPage.serverManagementPanel.serverTable.height),
         },
       },
     },
