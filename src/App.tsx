@@ -112,7 +112,7 @@ function App(): React.JSX.Element {
   };
 
   const EntryPage: PageLazyExoticComponent = React.lazy(() => import('@/components/pages/EntryPage'));
-  const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/inner/admin/AdminPage'));
+  const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/inner/AdminPage'));
 
   React.useEffect(() => {
     setInnerPage(AdminPage);

@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/AdminMainPanelProps';
-import type { Server } from '@/types/ServerData';
+import type { ServerDetails } from '@/types/ServerData';
 import sampleServerList from './sampleServerList';
 
 interface ResizableVerticalWrapperProps {
@@ -18,7 +18,7 @@ interface ServersManagementPanelProps extends AdminMainPanelProps {
 }
 
 interface PaginatedServerList {
-  items: Server[];
+  items: ServerDetails[];
 
   currentPage: number;
   totalPages: number;
@@ -74,7 +74,7 @@ function moveServerItemToFirst(id: number) {
 
   const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
 
-  sampleServerList.forEach((server: Server) => {
+  sampleServerList.forEach((server: ServerDetails) => {
     if (server.id !== id) return;
 
     server.id = (sortedServers[0].id + 1);
@@ -344,7 +344,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
   const [statusFilter, setStatusFilter] = React.useState('all');
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState<number>(7);
-  const [selectedServer, setSelectedServer] = React.useState<Server | null>(null);
+  const [selectedServer, setSelectedServer] = React.useState<ServerDetails | null>(null);
 
   setPageSize;
 
@@ -586,7 +586,7 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
             </tr>
           </thead>
           <tbody>
-            {serverList && serverList.items.map((server: Server) => (
+            {serverList && serverList.items.map((server: ServerDetails) => (
               <tr key={server.id} className="border-b border-black ">
                 <td className="px-4 py-3 whitespace-nowrap text-black">{server.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-black font-mono">{server.ipAddress}</td>

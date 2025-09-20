@@ -4,7 +4,7 @@ import React from 'react';
 import type { AdminMainPanelProps } from '@/types/props/AdminMainPanelProps';
 import type { DialogContext } from '@/types/DialogContext';
 import type { AdminPageProps } from '@/types/props/AdminPageProps';
-import FallbackPage from '../../FallbackPage';
+import FallbackPage from '../FallbackPage';
 
 interface SidebarDropdownMenu {
   [id: string]: boolean;
@@ -605,9 +605,9 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   const [panelWithParams, setPanelWithParams] = React.useState<AdminMainPanelWithParams | undefined>(undefined);
 
   const pathToPanel: Record<string, AdminMainPanelLazyExoticComponent> = {
-    "servers/management": React.lazy(() => import('./main-panels/ServersManagementPanel')),
-    "servers/registered/?": React.lazy(() => import('./main-panels/RegisteredServerPanel')),
-    "servers/registered/?/info/?": React.lazy(() => import('./main-panels/RegisteredServerPanel')),
+    "servers/management": React.lazy(() => import('@/components/admin/main-panels/ServersManagementPanel')),
+    "servers/registered/?": React.lazy(() => import('@/components/admin/main-panels/RegisteredServerPanel')),
+    "servers/registered/?/info/?": React.lazy(() => import('@/components/admin/main-panels/RegisteredServerPanel')),
   };
 
   function matchPathWithParams(pattern: string, path: string): { match: boolean; params: string[]; } {
