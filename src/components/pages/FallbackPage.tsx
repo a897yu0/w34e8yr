@@ -1,4 +1,4 @@
-import type { FallbackPageProps } from "@/types/props/FallbackPageProps";
+import type { FallbackPageProps } from "@/types/props/pages/FallbackPageProps";
 
 function FallbackPage(props: FallbackPageProps): React.JSX.Element {
   props;

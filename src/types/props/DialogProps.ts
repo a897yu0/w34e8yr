@@ -1,4 +1,4 @@
-import type { DialogContext } from "../DialogContext";
+import type { DialogContext } from "@/types/DialogContext";
 
 interface DialogProps {
   onClose: () => void;

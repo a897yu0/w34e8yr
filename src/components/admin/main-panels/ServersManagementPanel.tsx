@@ -1,17 +1,19 @@
 import clsx from 'clsx';
 import React from 'react';
 
-import type { AdminMainPanelProps } from '@/types/props/AdminMainPanelProps';
-import type { ServerDetails } from '@/types/ServerData';
+import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
+import type { ServerDetails } from '@/types/user-data/ServerDetails';
 import sampleServerList from './sampleServerList';
+import { getDefaultUserData, getUserData, setUserData } from '@/user';
+import type { UserData } from '@/types/user-data/UserData';
 
 interface ResizableVerticalWrapperProps {
-  initHeight: number;
   minHeight: number;
+  defaultHeight: number;
+  userHeight: number;
+  setUserHeight: (height: number) => void;
 
   children: React.JSX.Element;
-
-  localStorageKey?: string;
 }
 
 interface ServersManagementPanelProps extends AdminMainPanelProps {
@@ -22,6 +24,15 @@ interface PaginatedServerList {
 
   currentPage: number;
   totalPages: number;
+}
+
+function getValueInCorrectRange(minValue: number, value: number): number {
+  if (minValue < 0) {
+    throw new Error(`Minimum value (${minValue}) cannot be negative`);
+  }
+
+  console.assert(minValue >= 0);
+  return Math.max(value, minValue);
 }
 
 function formatBytes(bytes: number, decimals: number = 2): string {
@@ -154,8 +165,10 @@ function moveServerItemToFirst(id: number) {
 // };
 
 function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.JSX.Element {
-  const initHeight: number = props.initHeight;
   const minHeight: number = props.minHeight;
+  // const defaultHeight: number = props.defaultHeight;
+  const userHeight: number = props.userHeight;
+  const setUserHeight: (height: number) => void = props.setUserHeight;
 
   if (minHeight < 0) {
     throw new Error(`Minimum height (${minHeight}) cannot be negative`);
@@ -163,39 +176,13 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
 
   const children: React.JSX.Element = props.children;
 
-  const localStorageKey: string | undefined = props.localStorageKey;
-
-  const getInitialHeightInCorrectRange = (minHeight: number, height: number): number => {
-    if (minHeight < 0) {
-      throw new Error(`Minimum height (${minHeight}) cannot be negative`);
-    }
-
-    if (localStorageKey) {
-      const item: string | null = localStorage.getItem(localStorageKey);
-
-      if (item) {
-        height = parseInt(item, 10);
-      }
-
-    }
-
-    console.assert(minHeight >= 0);
-    return Math.max(height, minHeight);
-  }
-
-  const saveInitialHeight = (height: number): void => {
-    if (localStorageKey) {
-      localStorage.setItem(localStorageKey, height.toString());
-    }
-  }
-
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
   const tableResizerRef = React.useRef<HTMLDivElement>(null);
 
   // const initHeight: number = 177;
   // const minHeight: number = 77;
 
-  const [resizableTableHeight, setResizableTableHeight] = React.useState<number>(getInitialHeightInCorrectRange(minHeight, initHeight));
+  const [height, setHeight] = React.useState<number>(getValueInCorrectRange(minHeight, userHeight));
   const [isResizableTableDragging, setIsResizableTableDragging] = React.useState<boolean>(false);
 
   const handleTableResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -232,8 +219,8 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
     console.assert(minHeight >= 0);
     const newHeight = Math.max(height, minHeight);
 
-    setResizableTableHeight(newHeight);
-    saveInitialHeight(newHeight);
+    setHeight(newHeight);
+    setUserHeight(newHeight);
 
   }, [isResizableTableDragging, minHeight]);
 
@@ -242,22 +229,22 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
   }, []);
 
   const handleManualExpansion = () => {
-    setResizableTableHeight((prevHeight: number) => {
+    setHeight((prevHeight: number) => {
       const newHeight: number = (prevHeight + 77);
 
       console.assert(newHeight >= 0);
-      saveInitialHeight(newHeight);
+      setUserHeight(newHeight);
       return newHeight;
     });
   };
 
   const handleManualReduction = () => {
-    setResizableTableHeight((prevHeight: number) => {
+    setHeight((prevHeight: number) => {
       console.assert(minHeight >= 0);
       const newHeight: number = Math.max(prevHeight - 77, minHeight);
 
       console.assert(newHeight >= 0);
-      saveInitialHeight(newHeight);
+      setUserHeight(newHeight);
       return newHeight;
     });
   };
@@ -293,7 +280,7 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
         ref={tableContainerRef}
         className="w-full overflow-auto border border-black relative"
         style={{
-          height: `${resizableTableHeight}px`
+          height: `${height}px`
         }}
       >
         <div className="absolute w-fit h-fit">
@@ -336,7 +323,6 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
  * Server table (Search, Pagination, Filter) with name, IP address, online status, last ping-pong timestamp, registered timestamp, detail, Account required in server
  */
 function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.Element {
-
   props;
 
   // State for table controls
@@ -567,10 +553,15 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
         </div>
       </div>
 
-      {/* Servers Table */}
+      {/* Server Table */}
       <ResizableVerticalWrapper
-        initHeight={177} minHeight={77}
-        localStorageKey="6698a24e-4233-473a-b0a1-1b3bd697e94a"
+        minHeight={77}
+        defaultHeight={getDefaultUserData().adminPage.serversManagementPanel.serverTable.height}
+        userHeight={getUserData().adminPage.serversManagementPanel.serverTable.height}
+        setUserHeight={(height: number) => setUserData((userData: UserData) => {
+          userData.adminPage.serversManagementPanel.serverTable.height = height;
+        })}
+
       >
         <table className="w-fit h-fit border-r-1 border-black ">
           <thead>

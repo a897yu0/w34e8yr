@@ -1,10 +1,13 @@
 import type React from "react";
 
-import type { EntryPageProps } from "@/types/props/EntryPageProps";
+import type { EntryPageProps } from "@/types/props/pages/EntryPageProps";
+import { saveUserData } from "@/user";
 
 function EntryPage(props: EntryPageProps): React.JSX.Element {
   props;
 
+  const handleLocalUse: () => void = props.handleLocalUse;
+  
   return (
     <div className={`w-full h-full bg-white`}>
       {/* Background with subtle pattern */}
@@ -60,6 +63,7 @@ function EntryPage(props: EntryPageProps): React.JSX.Element {
               {/* Local use button */}
               <button
                 className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-4 px-6 rounded-xl transform hover:scale-105 transition-all duration-200 ease-in-out flex items-center justify-center space-x-3 border border-gray-200 cursor-pointer"
+                onClick={() => handleLocalUse()}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

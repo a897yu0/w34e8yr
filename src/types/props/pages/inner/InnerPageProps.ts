@@ -1,5 +1,5 @@
-import type { DialogContext } from "../DialogContext";
-import type { PageProps } from "./PageProps";
+import type { DialogContext } from "@/types/DialogContext";
+import type { PageProps } from "@/types/props/pages/PageProps";
 
 interface InnerPageProps extends PageProps {
   openDialog: (ctx: DialogContext | null) => void;

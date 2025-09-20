@@ -3,23 +3,27 @@ import React from 'react';
 
 import type { DialogContext } from '@/types/DialogContext';
 import type { DialogProps } from '@/types/props/DialogProps';
-import type { PageProps } from './types/props/PageProps';
-import type { InnerPageProps } from '@/types/props/InnerPageProps';
+import type { EntryPageProps } from './types/props/pages/EntryPageProps';
+import type { InnerPageProps } from '@/types/props/pages/inner/InnerPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
 import Dialog from '@/components/Dialog';
+
+import {
+  isUserDataReady,
+  saveUserData,
+} from '@/user';
 
 interface HeaderProps {
 }
 
-type PageComponentType<T extends PageProps = PageProps> = React.ComponentType<T>;
+type EntryPageComponentType<T extends EntryPageProps = EntryPageProps> = React.ComponentType<T>;
 type InnerPageComponentType<T extends InnerPageProps = InnerPageProps> = React.ComponentType<T>;
-type PageLazyExoticComponent = React.LazyExoticComponent<PageComponentType>;
+type EntryPageLazyExoticComponent = React.LazyExoticComponent<EntryPageComponentType>;
 type InnerPageLazyExoticComponent = React.LazyExoticComponent<InnerPageComponentType>;
 
 const MemorizedDialog = React.memo<DialogProps>(Dialog);
 
 function Header(props: HeaderProps): React.JSX.Element {
-
   props;
 
   const [avatarLoaded, setAvatarLoaded] = React.useState<boolean>(false);
@@ -99,11 +103,9 @@ function Header(props: HeaderProps): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
-  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false);
+  const [isUserReady, setIsUserReady] = React.useState<boolean>(isUserDataReady());
 
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
-
-  const [InnerPage, setInnerPage] = React.useState<InnerPageLazyExoticComponent | undefined>(undefined);
 
   const openDialog = (ctx: DialogContext | null): void => {
     if (!ctx) return;
@@ -111,21 +113,22 @@ function App(): React.JSX.Element {
     setDialog(ctx);
   };
 
-  const EntryPage: PageLazyExoticComponent = React.lazy(() => import('@/components/pages/EntryPage'));
+  const EntryPage: EntryPageLazyExoticComponent = React.lazy(() => import('@/components/pages/EntryPage'));
   const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/inner/AdminPage'));
 
-  React.useEffect(() => {
-    setInnerPage(AdminPage);
-  }, []);
+  const handleLocalUseInEntryPage = () => {
+    saveUserData();
+    setIsUserReady(true);
+  }
 
   return (
     <>
       <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
-        {isLoggedIn && <Header />}
+        {isUserReady && <Header />}
 
         <main className="w-full flex-1">
           <React.Suspense fallback={<FallbackPage />}>
-            {!isLoggedIn ? <EntryPage /> : (InnerPage && <InnerPage openDialog={openDialog} />)}
+            {!isUserReady ? <EntryPage handleLocalUse={handleLocalUseInEntryPage} /> : <AdminPage openDialog={openDialog} />}
           </React.Suspense>
         </main>
 
