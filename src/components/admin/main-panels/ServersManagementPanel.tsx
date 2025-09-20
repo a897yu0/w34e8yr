@@ -9,6 +9,7 @@ import Paginator from '@/components/Paginator';
 import { getDefaultUserData, getUserData, setUserData } from '@/user';
 
 import sampleServerList from './sampleServerList';
+import clsx from 'clsx';
 
 interface ServersManagementPanelProps extends AdminMainPanelProps {
 }
@@ -323,11 +324,10 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
         setUserHeight={(height: number) => setUserData((userData: UserData) => {
           userData.adminPage.serversManagementPanel.serverTable.height = height;
         })}
-
       >
-        <table className="w-fit h-fit border-r-1 border-black ">
-          <thead>
-            <tr className="border-b border-black">
+        <table className="w-fit h-fit border-r-1 border-black relative">
+          <thead className="sticky top-0 bg-gray-200 z-10">
+            <tr className="w-full">
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Name</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">IP Address</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Status</th>
@@ -339,8 +339,10 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
             </tr>
           </thead>
           <tbody>
-            {serverList && serverList.items.map((server: ServerDetails) => (
-              <tr key={server.id} className="border-b border-black ">
+            {serverList && serverList.items.map((server: ServerDetails, index: number) => (
+              <tr key={server.id} className={clsx(
+                (index % 2 == 0) ? 'bg-white' : 'bg-gray-100'
+              )}>
                 <td className="px-4 py-3 whitespace-nowrap text-black">{server.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-black font-mono">{server.ipAddress}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
