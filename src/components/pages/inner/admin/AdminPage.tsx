@@ -4,7 +4,7 @@ import React from 'react';
 import type { AdminMainPanelProps } from '@/types/props/AdminMainPanelProps';
 import type { DialogContext } from '@/types/DialogContext';
 import type { AdminPageProps } from '@/types/props/AdminPageProps';
-import FallbackPage from '../FallbackPage';
+import FallbackPage from '../../FallbackPage';
 
 interface SidebarDropdownMenu {
   [id: string]: boolean;

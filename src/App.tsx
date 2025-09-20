@@ -3,11 +3,18 @@ import React from 'react';
 
 import type { DialogContext } from '@/types/DialogContext';
 import type { DialogProps } from '@/types/props/DialogProps';
+import type { PageProps } from './types/props/PageProps';
+import type { InnerPageProps } from '@/types/props/InnerPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
 import Dialog from '@/components/Dialog';
 
 interface HeaderProps {
 }
+
+type PageComponentType<T extends PageProps = PageProps> = React.ComponentType<T>;
+type InnerPageComponentType<T extends InnerPageProps = InnerPageProps> = React.ComponentType<T>;
+type PageLazyExoticComponent = React.LazyExoticComponent<PageComponentType>;
+type InnerPageLazyExoticComponent = React.LazyExoticComponent<InnerPageComponentType>;
 
 const MemorizedDialog = React.memo<DialogProps>(Dialog);
 
@@ -92,9 +99,11 @@ function Header(props: HeaderProps): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
+  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false);
+
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
-  const [page, setPage] = React.useState<React.LazyExoticComponent<React.ComponentType<any>> | undefined>(undefined);
+  const [InnerPage, setInnerPage] = React.useState<InnerPageLazyExoticComponent | undefined>(undefined);
 
   const openDialog = (ctx: DialogContext | null): void => {
     if (!ctx) return;
@@ -102,17 +111,21 @@ function App(): React.JSX.Element {
     setDialog(ctx);
   };
 
-  const EntryPage: React.LazyExoticComponent<React.ComponentType<any>> = React.lazy(() => import('@/components/pages/EntryPage'));
-  const AdminPage: React.LazyExoticComponent<React.ComponentType<any>> = React.lazy(() => import('@/components/pages/admin/AdminPage'));
+  const EntryPage: PageLazyExoticComponent = React.lazy(() => import('@/components/pages/EntryPage'));
+  const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/inner/admin/AdminPage'));
+
+  React.useEffect(() => {
+    setInnerPage(AdminPage);
+  }, []);
 
   return (
     <>
       <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
-        <Header />
+        {isLoggedIn && <Header />}
 
         <main className="w-full flex-1">
           <React.Suspense fallback={<FallbackPage />}>
-            <AdminPage openDialog={openDialog} />
+            {!isLoggedIn ? <EntryPage /> : (InnerPage && <InnerPage openDialog={openDialog} />)}
           </React.Suspense>
         </main>
 

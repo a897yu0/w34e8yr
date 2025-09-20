@@ -1,8 +1,6 @@
-import type { DialogContext } from "../DialogContext";
+import type { InnerPageProps } from "./InnerPageProps";
 
-
-interface AdminPageProps {
-  openDialog: (ctx: DialogContext | null) => void;
+interface AdminPageProps extends InnerPageProps {
 }
 
 export type { AdminPageProps };
