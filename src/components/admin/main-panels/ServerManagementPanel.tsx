@@ -179,18 +179,8 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       <div className="w-full border-black border-b-1 my-4" />
 
-      {/* Add Server Button */}
-      <div className="mb-2">
-        <button
-          onClick={() => setShowAddFormToAddServer(!showAddFormToAddServer)}
-          className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
-        >
-          {showAddFormToAddServer ? 'Cancel' : 'Add Server'}
-        </button>
-      </div>
-
       {/* Add Server Form */}
-      {showAddFormToAddServer && (
+      {showAddFormToAddServer ? (
         <div className="max-w-md mb-2 p-2 border border-black">
           {/* <h3 className="text-lg font-semibold mb-4 text-black">Add New Server</h3> */}
           <div className="space-y-4">
@@ -257,13 +247,30 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
               </label>
             </div> */}
 
-            <button
-              onClick={handleAddServer}
-              className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors"
-            >
-              Add Server
-            </button>
+            <div className="flex flex-row gap-1">
+              <button
+                onClick={handleAddServer}
+                className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Add Server
+              </button>
+              <button
+                onClick={() => setShowAddFormToAddServer(false)}
+                className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
+        </div>
+      ) : (
+        <div className="mb-2">
+          <button
+            onClick={() => setShowAddFormToAddServer(true)}
+            className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Add Server
+          </button>
         </div>
       )}
 
@@ -322,13 +329,13 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       {/* Search and Filter Controls */}
       <div className="w-full mb-1 flex flex-row gap-2">
-        <div>
+        <div className="w-fit">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-black text-black"
           >
-            <option value="all">All Status</option>
+            <option selected value="all">All Status</option>
             <option value="online">Online Only</option>
             <option value="offline">Offline Only</option>
           </select>
@@ -336,7 +343,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
         <div className="flex-1">
           <input
             type="text"
-            placeholder="Search servers by name or IP..."
+            placeholder="Search servers by name or address"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-3 py-2 border border-black text-black"
@@ -360,7 +367,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
           <thead className="sticky top-0 bg-gray-200 z-10">
             <tr className="w-full">
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Name</th>
-              <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">IP Address</th>
+              <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Address</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Status</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Last Ping</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Registered</th>
