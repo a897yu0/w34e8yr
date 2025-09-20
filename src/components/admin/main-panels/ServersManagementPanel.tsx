@@ -213,6 +213,10 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
       return;
     }
 
+    if (clientY < containerRect.top) {
+      return;
+    }
+
     console.assert(containerRect.top <= clientY);
     const height = (clientY - containerRect.top);
 
