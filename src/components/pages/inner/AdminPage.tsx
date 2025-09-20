@@ -2,7 +2,6 @@ import clsx from 'clsx';
 import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
-import type { DialogContext } from '@/types/DialogContext';
 import type { AdminPageProps } from '@/types/props/pages/inner/AdminPageProps';
 import FallbackPage from '../FallbackPage';
 import { getDefaultUserData, getUserData, setUserData } from '@/user';

@@ -1,13 +1,12 @@
 import type React from "react";
 
 import type { EntryPageProps } from "@/types/props/pages/EntryPageProps";
-import { saveUserData } from "@/user";
 
 function EntryPage(props: EntryPageProps): React.JSX.Element {
   props;
 
   const handleLocalUse: () => void = props.handleLocalUse;
-  
+
   return (
     <div className={`w-full h-full bg-white`}>
       {/* Background with subtle pattern */}
