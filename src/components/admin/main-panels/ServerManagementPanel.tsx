@@ -103,8 +103,8 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
   const [formDataToAddServer, setFormDataToAddServer] = React.useState({
     name: '',
     address: '',
-    protocol: '',
-    port: '',
+    // protocol: '',
+    // port: '',
     accountRequired: false
   });
 
@@ -215,7 +215,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
                   placeholder="192.168.1.1 or www.example.com"
                 />
               </div>
-              <div className="w-full flex flex-row gap-1">
+              {/* <div className="w-full flex flex-row gap-1">
                 <div className="flex flex-col h-full">
                   <label className="block text-black font-medium mb-1">Protocol</label>
                   <select
@@ -242,7 +242,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
                     />
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
             {/* <div className="flex items-center">
               <input

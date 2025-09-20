@@ -36,7 +36,7 @@ function parseServerDetails(data: any): ServerDetails | undefined {
       return undefined;
     }
 
-    if ((typeof data.ipAddress !== 'string') || data.ipAddress.trim() === '') {
+    if ((typeof data.endpoint !== 'string') || data.endpoint.trim() === '') {
       return undefined;
     }
 
@@ -77,7 +77,8 @@ function parseServerDetails(data: any): ServerDetails | undefined {
       id: data.id,
 
       name: data.name.trim(),
-      address: data.ipAddress.trim(),
+      address: data.endpoint.trim(),
+
       isOnline: data.isOnline,
       lastPingTimestamp: lastPing,
       registeredTimestamp: registered,

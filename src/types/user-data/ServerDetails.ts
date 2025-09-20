@@ -5,7 +5,6 @@ interface ServerDetails {
 
   name: string;
   address: string;
-  port: number;
 
   isOnline: boolean;
   lastPingTimestamp: Date;
