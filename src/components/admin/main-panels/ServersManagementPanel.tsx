@@ -346,10 +346,10 @@ function ServersManagementPanel(props: ServersManagementPanelProps): React.JSX.E
                 <td className="px-4 py-3 whitespace-nowrap text-black">{server.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-black font-mono">{server.ipAddress}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`px-2 py-1 text-sm border ${server.isOnline
-                    ? 'bg-green-50 border-green-600 text-green-600'
-                    : 'bg-red-50 border-red-600 text-red-600'
-                    }`}>
+                  <span className={clsx(
+                    "px-2 py-1 text-sm border",
+                    server.isOnline ? 'bg-green-50 border-green-600 text-green-600' : 'bg-red-50 border-red-600 text-red-600'
+                  )}>
                     {server.isOnline ? 'Online' : 'Offline'}
                   </span>
                 </td>
