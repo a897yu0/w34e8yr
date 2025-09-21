@@ -160,16 +160,16 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
       {/* Header */}
       <div className="w-full">
         <h1 className="text-2xl font-bold mb-2 text-black">Server Management</h1>
-        <div className="flex items-center gap-1 mb-4">
-          <div className="text-lg text-black border border-black p-1">
+        <div className="flex items-center gap-5 mb-4">
+          <div className="text-lg text-black">
             Total Servers: <span className="font-semibold">15</span>
           </div>
-          <div className="text-lg text-black border border-black p-1">
+          <div className="text-lg text-black">
             Online: <span className="font-semibold text-green-600">
               9
             </span>
           </div>
-          <div className="text-lg text-black border border-black p-1">
+          <div className="text-lg text-black">
             Offline: <span className="font-semibold text-red-600">
               6
             </span>
@@ -205,48 +205,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
                   placeholder="192.168.1.1 or www.example.com"
                 />
               </div>
-              {/* <div className="w-full flex flex-row gap-1">
-                <div className="flex flex-col h-full">
-                  <label className="block text-black font-medium mb-1">Protocol</label>
-                  <select
-                    value={formDataToAddServer.protocol || 'http'}
-                    onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, protocol: e.target.value })}
-                    className="w-full px-3 py-2 border border-black text-black min-h-[2.6rem]"
-                  >
-                    <option value="http">HTTP</option>
-                    <option value="https">HTTPS</option>
-                    <option value="custom">Custom</option>
-                  </select>
-                </div>
-                {(formDataToAddServer.protocol === 'custom') && (
-                  <div className="flex-1 flex flex-col">
-                    <label className="block text-black font-medium mb-1">
-                      Custom Port
-                    </label>
-                    <input
-                      type="text"
-                      value={formDataToAddServer.port || ''}
-                      onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, port: e.target.value })}
-                      className="w-full px-3 py-2 border border-black text-black min-h-[2.5rem]"
-                      placeholder="Enter port number"
-                    />
-                  </div>
-                )}
-              </div> */}
             </div>
-            {/* <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="accountRequired"
-                checked={formDataToAddServer.accountRequired}
-                onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, accountRequired: e.target.checked })}
-                className="mr-2"
-              />
-              <label htmlFor="accountRequired" className="text-black">
-                Account Required
-              </label>
-            </div> */}
-
             <div className="flex flex-row gap-1">
               <button
                 onClick={handleAddServer}
@@ -284,11 +243,6 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
-          </div>
-          <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <div>
-              <strong className="text-black">ID:</strong> {selectedServer.id}
-            </div>
           </div>
           <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             <div>
@@ -351,7 +305,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
         </div>
       </div>
 
-      {/* Server Table */}
+      {/* Server Summary Table */}
       <ResizableVerticalWrapper
         minHeight={77}
         defaultHeight={getDefaultUserData().adminPage.serverManagementPanel.serverTable.height}
@@ -401,13 +355,6 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
                   {server.accountRequired ? 'Yes' : 'No'}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-black">
-                  {/* <CircleProgress
-                    percentage={getUsagePercentage(server.capacity, server.freeSpace)}
-                    size={28}
-                    strokeWidth={28 * 0.09}
-                    backgroundColor="#f3f4f6"
-                    showPercentage={true}
-                  /> */}
                   <div className="ml-2 inset-0 flex items-center justify-center">
                     <span className="text-sm font-semibold text-gray-700">
                       {getUsagePercentage(server.capacity, server.freeSpace).toFixed(1)}%
