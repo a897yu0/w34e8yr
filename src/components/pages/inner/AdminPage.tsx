@@ -138,7 +138,7 @@ function SidebarWrapper(props: SidebarItemsWrapperProps): React.JSX.Element {
 
   return (
     <ul className={clsx(
-      'font-medium',
+      'w-auto font-medium',
       !root && 'border-black border-l-2 ml-2',
       hidden && 'hidden'
     )}>
@@ -200,7 +200,7 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
   return (
     <li>
       <div className={clsx(
-        "flex items-center p-1 text-black group cursor-pointer",
+        "w-full flex items-center p-1 text-black group cursor-pointer",
         ((currentPath && (currentPath === path)) && "bg-gray-200") || "hover:bg-gray-100",
       )} onClick={() => {
         if (onClick && path) {
@@ -215,7 +215,7 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
         <div className="shrink-0 w-6 h-6 text-black transition duration-75 group-hover:text-gray-800">
           {icon}
         </div>
-        <span className="flex-1 ms-3 text-black whitespace-nowrap">{text}</span>
+        <span className="w-full flex-1 ms-3 text-black text-nowrap overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
         {badge && (
           <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
             {badge}
@@ -260,8 +260,8 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
   }, []);
 
   return (
-    <li>
-      <button type="button" className="flex items-center w-full p-1 text-base text-black transition duration-75 group hover:bg-gray-100 cursor-pointer" onClick={() => toggleDropdownMenu(id)}>
+    <li className="">
+      <button type="button" className="w-full flex items-center p-1 text-base text-black transition duration-75 group hover:bg-gray-100 cursor-pointer" onClick={() => toggleDropdownMenu(id)}>
         <div className="shrink-0 w-6 h-6 flex justify-center items-center text-black transition duration-75 group-hover:text-gray-800">
           {icon}
         </div>
@@ -338,7 +338,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
 
   return (
     <aside id="sidebar-multi-level-sidebar"
-      className="bg-white min-w-fit min-h-full"
+      className="w-full min-w-fit min-h-full bg-white"
       aria-label="Sidebar">
       <SidebarWrapper
         currentPath={currentPath}
