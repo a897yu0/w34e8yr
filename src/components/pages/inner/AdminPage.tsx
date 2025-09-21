@@ -198,9 +198,9 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
   }, []);
 
   return (
-    <li>
+    <li className="w-full h-full">
       <div className={clsx(
-        "w-full flex items-center p-1 text-black group cursor-pointer",
+        "w-full h-full flex flex-row flex-nowrap justify-center items-stretch p-1 text-black group cursor-pointer",
         ((currentPath && (currentPath === path)) && "bg-gray-200") || "hover:bg-gray-100",
       )} onClick={() => {
         if (onClick && path) {
@@ -215,7 +215,9 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
         <div className="shrink-0 w-6 h-6 text-black transition duration-75 group-hover:text-gray-800">
           {icon}
         </div>
-        <span className="w-full flex-1 ms-3 text-black text-nowrap overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
+        <div className="w-full h-full flex-1 ms-3 relative">
+          <span className="absolute top-0 w-full text-black text-nowrap overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
+        </div>
         {badge && (
           <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
             {badge}
