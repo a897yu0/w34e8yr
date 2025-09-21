@@ -364,7 +364,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
         })}
       >
         <table className="w-fit h-fit relative">
-          <thead className="sticky top-0 bg-gray-200 z-10">
+          <thead className="sticky top-0 bg-gray-200">
             <tr className="w-full">
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Name</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Address</th>
