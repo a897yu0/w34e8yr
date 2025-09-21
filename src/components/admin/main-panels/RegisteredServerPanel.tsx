@@ -12,37 +12,46 @@ function RegisteredServerPanel(props: AdminMainPanelProps): React.JSX.Element {
     <>
       {/* Header */}
       <div className="w-full">
-        <h1 className="text-2xl font-bold mb-2 text-black">Registered Server</h1>
-        <div className="flex flex-col items-start gap-5 mb-4">
-          <div className="flex flex-row flex-wrap gap-2">
-            <div className="text-lg text-black text-nowrap">
-              Name: <span className="font-semibold">backup-storage-02</span>
+        <h1 className="text-2xl font-bold mb-5">Registered Server</h1>
+        <div className="@container flex flex-col items-start">
+          <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Name: </strong>
+              <span>backup-storage-02</span>
             </div>
-            <div className="text-lg text-black text-nowrap">
-              IP Address: <span className="font-semibold">10.0.3.21</span>
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>IP Address: </strong>
+              <span>10.0.3.21</span>
             </div>
-            <div className="text-lg text-black text-nowrap">
-              Status: <span className="font-semibold">Offline</span>
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Status: </strong>
+              <span>Offline</span>
             </div>
-            <div className="text-lg text-black text-nowrap">
-              Last Ping: <span className="font-semibold">1/14/2024, 10:15:00 PM</span>
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Last Ping: </strong>
+              <span>1/14/2024, 10:15:00 PM</span>
             </div>
-            <div className="text-lg text-black text-nowrap">
-              Registered: <span className="font-semibold">1/2/2024, 4:50:00 PM</span>
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Registered: </strong>
+              <span>1/2/2024, 4:50:00 PM</span>
             </div>
-            <div className="text-lg text-black text-nowrap">
-              Account Required: <span className="font-semibold">No</span>
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Account Required: </strong>
+              <span>No</span>
             </div>
           </div>
-          <div className="flex flex-row flex-wrap gap-2">
-            <div className="text-lg text-black text-nowrap">
-              Capacity: <span className="font-semibold">50 TB</span>
+          <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Capacity: </strong>
+              <span>50 TB</span>
             </div>
-            <div className="text-lg text-black text-nowrap">
-              FreeSpace: <span className="font-semibold">40 TB</span>
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>FreeSpace: </strong>
+              <span>40 TB</span>
             </div>
-            <div className="text-lg text-black text-nowrap">
-              Usage: <span className="font-semibold">20.0 %</span>
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Usage: </strong>
+              <span>20.0 %</span>
             </div>
           </div>
         </div>

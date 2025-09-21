@@ -237,45 +237,55 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       {/* Server Details */}
       {selectedServer && (
-        <div className="w-full max-w-4xl mb-2 p-2 border border-black relative">
-          <h3 className="text-lg font-semibold mb-3 text-black">Server Details</h3>
+        <div className="@container w-full max-w-4xl mb-2 p-2 border border-black relative">
+          <h3 className="text-lg font-semibold mb-5 text-black">Server Details</h3>
           <div className="absolute right-1 top-1 cursor-pointer" onClick={() => setSelectedServer(null)}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
           </div>
-          <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <div>
-              <strong className="text-black">Name:</strong> {selectedServer.name}
+          <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Name:</strong>
+              <span>{selectedServer.name}</span>
             </div>
-            <div>
-              <strong className="text-black">IP Address:</strong> {selectedServer.address}
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>IP Address:</strong>
+              <span>{selectedServer.address}</span>
             </div>
-            <div>
-              <strong className="text-black">Status:</strong>
-              <span className={selectedServer.isOnline ? 'text-green-600' : 'text-red-600'}>
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Status:</strong>
+              <span className={clsx(
+                selectedServer.isOnline ? 'text-green-600' : 'text-red-600',
+              )}>
                 {selectedServer.isOnline ? ' Online' : ' Offline'}
               </span>
             </div>
-            <div>
-              <strong className="text-black">Last Ping:</strong> {formatTimestamp(selectedServer.lastPingTimestamp)}
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Last Ping:</strong>
+              <span>{formatTimestamp(selectedServer.lastPingTimestamp)}</span>
             </div>
-            <div>
-              <strong className="text-black">Registered:</strong> {formatTimestamp(selectedServer.registeredTimestamp)}
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Registered:</strong>
+              <span>{formatTimestamp(selectedServer.registeredTimestamp)}</span>
             </div>
-            <div>
-              <strong className="text-black">Account Required:</strong> {selectedServer.accountRequired ? 'Yes' : 'No'}
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Account Required:</strong>
+              <span>{selectedServer.accountRequired ? 'Yes' : 'No'}</span>
             </div>
           </div>
-          <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            <div>
-              <strong className="text-black">Capacity:</strong> {formatBytes(selectedServer.capacity)}
+          <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Capacity:</strong>
+              <span>{formatBytes(selectedServer.capacity)}</span>
             </div>
-            <div>
-              <strong className="text-black">FreeSpace:</strong> {formatBytes(selectedServer.freeSpace)}
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>FreeSpace:</strong>
+              <span>{formatBytes(selectedServer.freeSpace)}</span>
             </div>
-            <div>
-              <strong className="text-black">Usage:</strong> {getUsagePercentage(selectedServer.capacity, selectedServer.freeSpace).toFixed(1)} %
+            <div className="flex flex-row flex-wrap gap-1">
+              <strong>Usage:</strong>
+              <span>{getUsagePercentage(selectedServer.capacity, selectedServer.freeSpace).toFixed(1)} %</span>
             </div>
           </div>
         </div>
