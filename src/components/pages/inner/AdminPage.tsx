@@ -351,13 +351,14 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
         <SidebarDropdownItem
           name="servers"
 
-          dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z" />
             </svg>
           }
           text="Servers"
+
+          dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
         >
           <SidebarItem
             name="management"
@@ -372,12 +373,12 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
           <SidebarDropdownItem
             name="registered"
 
-            dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
             text="Registered"
-
             count={4}
+
+            dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
           >
-            <SidebarItem
+            <SidebarDropdownItem
               name="52.187.187.79"
 
               icon={
@@ -388,7 +389,61 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
               text="52.187.187.79"
 
               args={[]}
-            />
+
+              dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
+
+            >
+              <SidebarItem
+                name="user-storages"
+
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+                  </svg>
+                }
+                text="User Storages"
+              />
+              <SidebarItem
+                name="block-devices"
+
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z" />
+                  </svg>
+                }
+                text="Block Devices"
+              />
+              <SidebarItem
+                name="blobs"
+
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                  </svg>
+                }
+                text="Blobs"
+              />
+              <SidebarItem
+                name="uploads-downloads"
+
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+                  </svg>
+                }
+                text="Uploads & Downloads"
+              />
+              <SidebarItem
+                name="logging"
+
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" />
+                  </svg>
+                }
+                text="Logging"
+              />
+            </SidebarDropdownItem>
             <SidebarItem
               name="205.141.230.240"
 
@@ -429,6 +484,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
         </SidebarDropdownItem>
         <SidebarItem
           name="versions"
+
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
@@ -450,7 +506,6 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
         <SidebarDropdownItem
           name="e-commerce"
 
-          dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
           icon={
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full flex-shrink-0 ">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
@@ -459,6 +514,8 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
           text="E-commerce"
           badge="Good" badgeColor="bg-orange-200"
           count={999}
+
+          dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
         >
           <SidebarItem
             name="products"
@@ -487,13 +544,14 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
           <SidebarDropdownItem
             name="e-commerce"
 
-            dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
             icon={
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full flex-shrink-0 ">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
               </svg>
             }
             text="E-commerce"
+
+            dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
           >
             <SidebarItem
               name="products"
@@ -625,9 +683,14 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   const [panelWithParams, setPanelWithParams] = React.useState<AdminMainPanelWithParams | undefined>(undefined);
 
   const pathToPanel: Record<string, AdminMainPanelLazyExoticComponent> = {
-    "servers/management": React.lazy(() => import('@/components/admin/main-panels/ServerManagementPanel')),
-    "servers/registered/?": React.lazy(() => import('@/components/admin/main-panels/RegisteredServerPanel')),
-    "servers/registered/?/info/?": React.lazy(() => import('@/components/admin/main-panels/RegisteredServerPanel')),
+    "servers/management": React.lazy(() => import('@/components/admin/main-panels/servers/ServerManagementPanel')),
+    "servers/registered/?": React.lazy(() => import('@/components/admin/main-panels/servers/RegisteredServerPanel')),
+    // "servers/registered/?/info/?": React.lazy(() => import('@/components/admin/main-panels/servers/RegisteredServerPanel')),
+    "servers/registered/?/user-storages": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerUserStoragesPanel')),
+    "servers/registered/?/block-devices": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerBlockDevicesPanel')),
+    "servers/registered/?/blobs": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerBlobsPanel')),
+    "servers/registered/?/uploads-downloads": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerUploadsDownloadsPanel')),
+    "servers/registered/?/logging": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerLoggingPanel')),
   };
 
   function matchPathWithParams(pattern: string, path: string): { match: boolean; params: string[]; } {
