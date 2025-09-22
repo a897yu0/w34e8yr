@@ -357,7 +357,7 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
   const textEllipsis: boolean | undefined = props.textEllipsis;
   const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
-  console.log("textEllipsis:", textEllipsis);
+  // console.log("textEllipsis:", textEllipsis);
 
   const onItemClick: ((path: string) => void) | undefined = props.onItemClick;
 
