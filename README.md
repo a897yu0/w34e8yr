@@ -76,3 +76,4 @@ export default tseslint.config([
 - Sync with platform accounts (like google) or own id/password
     - Record the history (login timestamp, action history)
 - In production, disable console.assert 
+- Store state of sidebar to user-data
