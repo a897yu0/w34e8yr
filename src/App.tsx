@@ -113,8 +113,6 @@ function App(): React.JSX.Element {
     setDialog(ctx);
   };
 
-  console.log("hello");
-
   const EntryPage: EntryPageLazyExoticComponent = React.lazy(() => import('@/components/pages/EntryPage'));
   const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/inner/AdminPage'));
 
