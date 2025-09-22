@@ -11,9 +11,15 @@ interface SidebarDropdownMenu {
   [id: string]: boolean;
 }
 
-interface SidebarItemProps {
+interface SidebarDefaultProps {
   currentPath?: string;
 
+  textEllipsis?: boolean;
+
+  toggleSidebarShown?: () => void;
+}
+
+interface SidebarItemProps extends SidebarDefaultProps {
   parentPath?: string;
   name?: string;
 
@@ -27,32 +33,27 @@ interface SidebarItemProps {
   args?: string[];
 
   onClick?: (path: string) => void;
-
-  toggleSidebarShown?: () => void;
 }
 
 interface SidebarWrapperProps {
-  currentPath?: string;
-
   onItemClick?: (path: string) => void;
-
-  toggleSidebarShown?: () => void;
 }
 
-interface SidebarDropdownItemProps extends SidebarItemProps, SidebarWrapperProps {
-  dropdownMenu: SidebarDropdownMenu; toggleDropdownMenu: (id: string) => void;
+interface SidebarDropdownItemProps extends SidebarDefaultProps, SidebarItemProps, SidebarWrapperProps {
+  dropdownMenu: SidebarDropdownMenu;
+  toggleDropdownMenu: (id: string) => void;
 
   children?: React.ReactNode;
 }
 
-interface SidebarItemsWrapperProps extends SidebarWrapperProps {
+interface SidebarItemsWrapperProps extends SidebarDefaultProps, SidebarWrapperProps {
   root?: boolean;
   hidden?: boolean;
 
   children: React.ReactNode;
 }
 
-interface SidebarProps extends SidebarWrapperProps {
+interface SidebarProps extends SidebarDefaultProps, SidebarWrapperProps {
   dropdownMenu: SidebarDropdownMenu;
   toggleDropdownMenu: (id: string) => void;
 }
@@ -125,16 +126,24 @@ function getValueInCorrectRange(minValue: number, maxValue: number, value: numbe
 }
 
 function SidebarWrapper(props: SidebarItemsWrapperProps): React.JSX.Element {
+  props;
+
   const currentPath: string | undefined = props.currentPath;
+  const textEllipsis: boolean | undefined = props.textEllipsis;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const onItemClick: ((path: string) => void) | undefined = props.onItemClick;
-
-  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const root: boolean | undefined = props.root;;
   const hidden: boolean | undefined = props.hidden;;
 
   const children: React.ReactNode = props.children;
+
+  const defaultProps: SidebarDefaultProps = {
+    currentPath: currentPath,
+    textEllipsis: textEllipsis,
+    toggleSidebarShown: toggleSidebarShown,
+  }
 
   return (
     <ul className={clsx(
@@ -145,17 +154,19 @@ function SidebarWrapper(props: SidebarItemsWrapperProps): React.JSX.Element {
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child) && (child.type === SidebarDropdownItem || child.type === SidebarWrapper)) {
           return React.cloneElement(child, {
-            currentPath: currentPath,
+            ...defaultProps,
+
             onItemClick: onItemClick,
-            toggleSidebarShown: toggleSidebarShown,
+
             ...(child.props as any), // Preserve existing props
           });
         }
         if (React.isValidElement(child) && (child.type === SidebarItem)) {
           return React.cloneElement(child, {
-            currentPath: currentPath,
+            ...defaultProps,
+
             onClick: onItemClick,
-            toggleSidebarShown: toggleSidebarShown,
+
             ...(child.props as any), // Preserve existing props
           });
         }
@@ -166,7 +177,11 @@ function SidebarWrapper(props: SidebarItemsWrapperProps): React.JSX.Element {
 };
 
 function SidebarItem(props: SidebarItemProps): React.JSX.Element {
+  props;
+
   const currentPath: string | undefined = props.currentPath;
+  const textEllipsis: boolean | undefined = props.textEllipsis;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const parentPath: string | undefined = props.parentPath;
   const name: string | undefined = props.name;
@@ -183,7 +198,6 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
   const args: string[] | undefined = props.args;
 
   const onClick: ((path: string) => void) | undefined = props.onClick;
-  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   React.useEffect(() => {
     if (path) {
@@ -200,7 +214,7 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
   return (
     <li className="w-full h-full">
       <div className={clsx(
-        "w-full h-full flex flex-row flex-nowrap justify-center items-stretch p-1 text-black group cursor-pointer",
+        "w-full h-full flex flex-row flex-nowrap justify-center items-stretch p-1 group cursor-pointer",
         ((currentPath && (currentPath === path)) && "bg-gray-200") || "hover:bg-gray-100",
       )} onClick={() => {
         if (onClick && path) {
@@ -212,14 +226,18 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
         }
       }}
       >
-        <div className="shrink-0 w-6 h-6 text-black transition duration-75 group-hover:text-gray-800">
+        <div className="shrink-0 w-6 h-6 flex justify-center items-center transition duration-75 group-hover:text-gray-800">
           {icon}
         </div>
-        <div className="w-full h-full flex-1 ms-3 relative">
-          <span className="absolute top-0 w-full text-black text-nowrap overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
-        </div>
+        {textEllipsis ? (
+          <div className="w-full h-full flex-1 ms-1 relative">
+            <span className="absolute top-0 left-0 w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
+          </div>
+        ) : (
+          <span className="w-full ms-1 text-nowrap overflow-hidden whitespace-nowrap">{text}</span>
+        )}
         {badge && (
-          <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
+          <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium ${badgeColor || "bg-gray-200"} rounded-full`}>
             {badge}
           </span>
         )}
@@ -227,20 +245,22 @@ function SidebarItem(props: SidebarItemProps): React.JSX.Element {
           <span className="inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">{count}</span>
         )}
       </div>
-    </li>
+    </li >
   );
 };
 
 function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element {
+  props;
+
   const currentPath: string | undefined = props.currentPath;
+  const textEllipsis: boolean | undefined = props.textEllipsis;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const parentPath: string | undefined = props.parentPath;
   const name: string | undefined = props.name;
 
   const path: string | undefined = getPath(parentPath, name);
 
-  const dropdownMenu: SidebarDropdownMenu = props.dropdownMenu;
-  const toggleDropdownMenu: (id: string) => void = props.toggleDropdownMenu;
   const icon: React.ReactNode | undefined = props.icon;
   const text: string = props.text;
   const badge: string | undefined = props.badge;
@@ -252,7 +272,9 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
   const args: string[] | undefined = props.args;
 
   const onItemClick: ((path: string) => void) | undefined = props.onItemClick;
-  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
+
+  const dropdownMenu: SidebarDropdownMenu = props.dropdownMenu;
+  const toggleDropdownMenu: (id: string) => void = props.toggleDropdownMenu;
 
   // const id: string = React.useMemo(() => generateUUID(), []);
   const id: string = (path || React.useMemo(() => generateUUID(), []));
@@ -262,14 +284,27 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
   }, []);
 
   return (
-    <li className="">
-      <button type="button" className="w-full flex items-center p-1 text-base text-black transition duration-75 group hover:bg-gray-100 cursor-pointer" onClick={() => toggleDropdownMenu(id)}>
-        <div className="shrink-0 w-6 h-6 flex justify-center items-center text-black transition duration-75 group-hover:text-gray-800">
+    <li className="w-full h-full">
+      <div
+        className="w-full flex flex-row flex-nowrap justify-center items-stretch p-1 text-base transition duration-75 group hover:bg-gray-100 cursor-pointer"
+        onClick={() => toggleDropdownMenu(id)}
+      >
+        <div className="shrink-0 w-6 h-6 flex justify-center items-center transition duration-75 group-hover:text-gray-800">
           {icon}
         </div>
-        <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{text}</span>
+        {textEllipsis ? (
+          <div className="w-full h-full ms-1 relative">
+            <div className="absolute top-0 left-0 w-full">
+              <div className="w-full h-full flex flex-row justify-start items-center">
+                <span className="w-fit text-nowrap overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <span className="w-full ms-1 text-nowrap overflow-hidden whitespace-nowrap">{text}</span>
+        )}
         {badge && (
-          <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium text-black ${badgeColor || "bg-gray-200"} rounded-full`}>
+          <span className={`inline-flex items-center justify-center h-3 py-3 px-2 ms-1 text-sm font-medium ${badgeColor || "bg-gray-200"} rounded-full`}>
             {badge}
           </span>
         )}
@@ -289,11 +324,14 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
             )}
           </div>
         )}
-      </button>
+      </div>
       <SidebarWrapper
         currentPath={currentPath}
-        onItemClick={onItemClick}
+        textEllipsis={textEllipsis}
         toggleSidebarShown={toggleSidebarShown}
+
+        onItemClick={onItemClick}
+
         hidden={!dropdownMenu[id]}
       >
         {React.Children.map(children, (child) => {
@@ -301,6 +339,7 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
             return React.cloneElement(child, {
               parentPath: path,
               args: [...(parentArgs ?? []), ...(args ?? [])],
+
               ...(child.props as any), // Preserve existing props
             });
           }
@@ -312,12 +351,15 @@ function SidebarDropdownItem(props: SidebarDropdownItemProps): React.JSX.Element
 };
 
 function Sidebar(props: SidebarProps): React.JSX.Element {
+  props;
 
   const currentPath: string | undefined = props.currentPath;
+  const textEllipsis: boolean | undefined = props.textEllipsis;
+  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
+
+  console.log("textEllipsis:", textEllipsis);
 
   const onItemClick: ((path: string) => void) | undefined = props.onItemClick;
-
-  const toggleSidebarShown: (() => void) | undefined = props.toggleSidebarShown;
 
   const dropdownMenu: SidebarDropdownMenu = props.dropdownMenu;
   const toggleDropdownMenu: (id: string) => void = props.toggleDropdownMenu;
@@ -344,8 +386,11 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
       aria-label="Sidebar">
       <SidebarWrapper
         currentPath={currentPath}
-        onItemClick={onItemClick}
+        textEllipsis={textEllipsis}
         toggleSidebarShown={toggleSidebarShown}
+
+        onItemClick={onItemClick}
+
         root
       >
         <SidebarDropdownItem
@@ -667,6 +712,32 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
             </svg>
           }
           text="Sign Up"
+        />
+        <SidebarDropdownItem
+          name="SidebarDropdownItemTextEllipsisTextEllipsisTextEllipsis"
+
+          icon={
+            <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z" />
+              <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z" />
+              <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
+            </svg>
+          }
+          text="SidebarDropdownItemTextEllipsisTextEllipsisTextEllipsis"
+
+          dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
+        />
+        <SidebarItem
+          name="SidebarItemTextEllipsisTextEllipsisTextEllipsis"
+
+          icon={
+            <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z" />
+              <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z" />
+              <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
+            </svg>
+          }
+          text="SidebarItemTextEllipsisTextEllipsisTextEllipsis"
         />
       </SidebarWrapper>
     </aside>
@@ -1072,10 +1143,9 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
   const sidebarProps: SidebarProps = {
     currentPath: currentMainPanelPath,
+    toggleSidebarShown: () => setIsMobileSidebarShown(prev => !prev),
 
     onItemClick: clickSidebarItem,
-
-    toggleSidebarShown: () => setIsMobileSidebarShown(prev => !prev),
 
     dropdownMenu: sidebarDropdownMenu,
     toggleDropdownMenu: toggleSidebarDropdownMenu,
@@ -1214,7 +1284,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
             width: `${sidebarWidth}px`
           }}
         >
-          <Sidebar {...sidebarProps} />
+          <Sidebar {...sidebarProps} textEllipsis={true} />
         </div>
         {/* Mobile Sidebar */}
         <div className={clsx(
@@ -1222,7 +1292,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
           !isMobileSidebarShown && "hidden",
         )}>
           <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto bg-white">
-            <Sidebar {...sidebarProps} />
+            <Sidebar {...sidebarProps} textEllipsis={false} />
           </div>
           <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
         </div>
