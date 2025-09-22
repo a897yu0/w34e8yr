@@ -299,7 +299,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-black text-black"
           >
-            <option selected value="all">All Status</option>
+            <option value="all">All Status</option>
             <option value="online">Online Only</option>
             <option value="offline">Offline Only</option>
           </select>
