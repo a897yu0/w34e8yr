@@ -1337,26 +1337,32 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
         </div>
         {/* Mobile Sidebar */}
         <div className={clsx(
-          "block md:hidden absolute inset-0 flex flex-row z-10",
+          "md:hidden absolute flex flex-row",
+          "inset-0 z-10",
           !isMobileSidebarShown && "hidden",
         )}>
           <div className="w-full sm:w-fit h-full overflow-y-scroll overflow-x-auto bg-white">
             <Sidebar {...sidebarProps} textEllipsis={false} />
           </div>
-          <div className="bg-black opacity-30 flex-1 h-full" onClick={() => setIsMobileSidebarShown(prev => !prev)} />
+          <div className={clsx(
+            "flex-1 h-full",
+            "bg-black opacity-30",
+          )} onClick={() => setIsMobileSidebarShown(prev => !prev)} />
         </div>
 
         <div
           ref={sidebarResizerRef}
           className={clsx(
-            "hidden md:flex bg-transparent cursor-col-resize h-full",
+            "hidden md:flex h-full",
+            "bg-transparent cursor-col-resize",
           )}
           onMouseDown={handleSidebarResizerPointerDown}
           onTouchStart={handleSidebarResizerPointerDown}
         >
           <div
             className={clsx(
-              "w-full h-full flex justify-center items-center",
+              "w-full h-full",
+              "flex justify-center items-center",
               "border-black border-x-1"
             )}
           >
@@ -1370,7 +1376,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
         </div>
 
         {/* Main content area: This area displays the main panels */}
-        <div className="absolute md:relative w-full md:flex-1 h-full overflow-hidden">
+        <div className="absolute md:relative w-full h-full md:flex-1 overflow-hidden">
           <MainPanelWrapper path={currentMainPanelPath} resetPath={() => resetCurrentMainPanelPath()} />
         </div>
 
