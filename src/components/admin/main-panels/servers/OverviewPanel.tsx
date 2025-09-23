@@ -1,17 +1,19 @@
+import clsx from 'clsx';
 import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
 import type { ServerData } from '@/types/data/ServerData';
-import type { UserData } from '@/types/data/UserData';
+
 import ResizableVerticalWrapper from '@/components/ResizableVerticalWrapper';
 import Paginator from '@/components/Paginator';
 
+import type { UserData } from '@/types/data/UserData';
 import { defaultUserData, useUserDataContext } from '@/data/user';
 
-import sampleServerList from './sampleServerList';
-import clsx from 'clsx';
-import { defaultLayoutData, layoutData, setLayoutData } from '@/data/layout';
 import type { LayoutData } from '@/types/data/LayoutData';
+import { defaultLayoutData, layoutData, setLayoutData } from '@/data/layout';
+
+import sampleServerList from './sampleServerList';
 
 interface PaginatedServerList {
   items: ServerData[];
@@ -90,7 +92,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   const openPanel: (path: string) => void = props.openPanel;
 
   const { data: userData, set: setUserData } = useUserDataContext();
-  userData;
+  defaultUserData;
+  userData as UserData;
   setUserData;
 
   // State for table controls
