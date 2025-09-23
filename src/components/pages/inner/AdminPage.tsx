@@ -3,9 +3,9 @@ import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
 import type { AdminPageProps } from '@/types/props/pages/inner/AdminPageProps';
-import FallbackPage from '../FallbackPage';
-import { getDefaultUserData, getUserData, setUserData } from '@/user';
 import type { UserData } from '@/types/user-data/UserData';
+import FallbackPage from '@/components/pages/FallbackPage';
+import { getDefaultUserData, getUserData, setUserData } from '@/user';
 
 interface SidebarDropdownMenu {
   [id: string]: boolean;

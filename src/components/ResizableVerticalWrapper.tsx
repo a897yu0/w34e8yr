@@ -73,6 +73,7 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
     console.assert(minHeight >= 0);
     const newHeight = Math.max(height, minHeight);
 
+    console.assert(newHeight >= 0);
     setHeight(newHeight);
     setUserHeight(newHeight);
 
