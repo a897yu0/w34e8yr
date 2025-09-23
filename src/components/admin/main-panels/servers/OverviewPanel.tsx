@@ -169,12 +169,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   }, [serverTableCurrentPage, serverTablePageSize]);
 
   const openServerDetails = (server: ServerData) => {
-    if (serverDetailsRef.current) {
-      const rect: DOMRect = serverDetailsRef.current.getBoundingClientRect();
-
-      if (rect.top < 0) {
-        serverDetailsRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
+    if (serverDetailsRef.current && serverDetailsRef.current.getBoundingClientRect().top < 0) {
+      serverDetailsRef.current.scrollIntoView({ behavior: 'smooth' });
     }
 
     setSelectedServer(server);
