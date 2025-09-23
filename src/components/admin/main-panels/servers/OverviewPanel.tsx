@@ -6,7 +6,7 @@ import type { UserData } from '@/types/user-data/UserData';
 import ResizableVerticalWrapper from '@/components/ResizableVerticalWrapper';
 import Paginator from '@/components/Paginator';
 
-import { getDefaultUserData, getUserData, setUserData } from '@/user';
+import { defaultUserData, useUserDataContext } from '@/user';
 
 import sampleServerList from './sampleServerList';
 import clsx from 'clsx';
@@ -85,14 +85,18 @@ function moveServerItemToFirst(id: number) {
 function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
 
+  const openPanel: (path: string) => void = props.openPanel;
+
+  const { data: userData, set: setUserData } = useUserDataContext();
+
   // State for table controls
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('all');
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState<number>(7);
+  const [serverTableSearchTerm, setServerTableSearchTerm] = React.useState('');
+  const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
+  const [serverTableCurrentPage, setServerTableCurrentPage] = React.useState(1);
+  const [serverTablePageSize, setServerTablePageSize] = React.useState<number>(7);
   const [selectedServer, setSelectedServer] = React.useState<ServerDetails | null>(null);
 
-  setPageSize;
+  setServerTablePageSize;
 
   // Mock server data
   // The order is pre-sorted when this list get from DB. and the pagination is handled by partially, not paginated at the client.
@@ -136,7 +140,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   const moveItemToFirst = (id: number) => {
     moveServerItemToFirst(id);
 
-    setServerList(getPaginatedServerList(currentPage, pageSize));
+    setServerList(getPaginatedServerList(serverTableCurrentPage, serverTablePageSize));
   };
 
   // Filter and search servers, The filter is handled by DB and query, not in client...
@@ -152,8 +156,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   // }, [servers, searchTerm, statusFilter]);
 
   React.useEffect(() => {
-    setServerList(getPaginatedServerList(currentPage, pageSize));
-  }, [currentPage, pageSize])
+    setServerList(getPaginatedServerList(serverTableCurrentPage, serverTablePageSize));
+  }, [serverTableCurrentPage, serverTablePageSize])
 
   return (
     <>
@@ -244,7 +248,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
           </div>
-          <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+          <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
             <div className="flex flex-row flex-wrap gap-1">
               <strong>Name:</strong>
               <span>{selectedServer.name}</span>
@@ -274,7 +278,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
               <span>{selectedServer.accountRequired ? 'Yes' : 'No'}</span>
             </div>
           </div>
-          <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+          <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
             <div className="flex flex-row flex-wrap gap-1">
               <strong>Capacity:</strong>
               <span>{formatBytes(selectedServer.capacity)}</span>
@@ -289,29 +293,54 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
             </div>
           </div>
           <div className="pt-4">
-            <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+            <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
               <button
-                // onClick={() => }
-                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >User Storages</button>
+                onClick={() => openPanel('servers/user-storages')}
+                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                </svg>
+                User Storages
+              </button>
               <button
-                // onClick={() => }
-                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >Block Devices</button>
+                onClick={() => openPanel('servers/block-devices')}
+                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                </svg>
+                Block Devices
+              </button>
               <button
-                // onClick={() => }
-                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >Blobs</button>
+                onClick={() => openPanel('servers/blobs')}
+                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                </svg>
+                Blobs
+              </button>
             </div>
-            <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+            <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
               <button
-                // onClick={() => }
-                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >Uploads & Downloads</button>
+                onClick={() => openPanel('servers/uploads-downloads')}
+                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                </svg>
+                Uploads & Downloads
+              </button>
               <button
-                // onClick={() => }
-                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >Logging</button>
+                onClick={() => openPanel('servers/logging')}
+                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                </svg>
+                Logging
+              </button>
             </div>
           </div>
         </div>
@@ -321,8 +350,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
       <div className="w-full mb-1 flex flex-row gap-2">
         <div className="w-fit">
           <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            value={serverTableStatusFilter}
+            onChange={(e) => setServerTableStatusFilter(e.target.value)}
             className="px-3 py-2 border border-black text-black"
           >
             <option value="all">All Status</option>
@@ -334,8 +363,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
           <input
             type="text"
             placeholder="Search servers by name or address"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={serverTableSearchTerm}
+            onChange={(e) => setServerTableSearchTerm(e.target.value)}
             className="w-full px-3 py-2 border border-black text-black"
           />
         </div>
@@ -344,8 +373,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
       {/* Server Summary Table */}
       <ResizableVerticalWrapper
         minHeight={77}
-        defaultHeight={getDefaultUserData().adminPage.serverManagementPanel.serverTable.height}
-        userHeight={getUserData().adminPage.serverManagementPanel.serverTable.height}
+        defaultHeight={defaultUserData.adminPage.serverManagementPanel.serverTable.height}
+        userHeight={userData.adminPage.serverManagementPanel.serverTable.height}
 
         className="mb-1"
 
@@ -429,7 +458,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
       </ResizableVerticalWrapper>
 
       {serverList && (
-        <Paginator currentPage={currentPage} totalPages={serverList.totalPages} onPageChange={setCurrentPage} maxVisiblePages={3} />
+        <Paginator currentPage={serverTableCurrentPage} totalPages={serverList.totalPages} onPageChange={setServerTableCurrentPage} maxVisiblePages={3} />
       )}
 
       <div className="mb-17"></div>

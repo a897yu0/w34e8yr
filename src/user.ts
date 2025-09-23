@@ -1,6 +1,13 @@
 
 import type { ServerDetails } from "@/types/user-data/ServerDetails";
 import type { UserData } from "@/types/user-data/UserData";
+import React from "react";
+
+interface UserDataContextValueType {
+  data: UserData;
+
+  set(f: (data: UserData) => void): void;
+}
 
 const defaultUserData: Readonly<UserData> = {
   serverList: [],
@@ -18,9 +25,7 @@ const defaultUserData: Readonly<UserData> = {
   },
 };
 
-let userData: UserData = structuredClone(defaultUserData);
-
-let timeout: NodeJS.Timeout | undefined = undefined;
+const UserDataContext = React.createContext<UserDataContextValueType>(null as any);
 
 function getValidBoolean(value: any): boolean | undefined {
   if (typeof value !== 'boolean') {
@@ -250,16 +255,16 @@ function parseServerList(data: any): ServerDetails[] {
     .filter((serverDetail: ServerDetails | undefined) => (serverDetail !== undefined));
 }
 
-function isUserDataReady(): boolean {
+function loadUserData(): UserData | undefined {
   const strUserData: string | null = localStorage.getItem('user');
 
   if (!strUserData) {
-    return false;
+    return undefined;
   }
 
   const unknownUserData: any = JSON.parse(strUserData);
 
-  userData = {
+  return {
     serverList: parseServerList(unknownUserData?.serverList),
     selectedServerId: getValidPositiveIntegerOrDefault(
       unknownUserData?.selectedServerId,
@@ -283,32 +288,10 @@ function isUserDataReady(): boolean {
       },
     },
   };
-
-  return true;
 }
 
-function saveUserData(): void {
-  if (!timeout) {
-    timeout = setTimeout(() => {
-      localStorage.setItem('user', JSON.stringify(userData));
-      timeout = undefined;
-    }, 1000);
-
-  }
-}
-
-function getDefaultUserData(): UserData {
-  return defaultUserData;
-}
-
-function getUserData(): UserData {
-  return userData;
-}
-
-function setUserData(f: (userData: UserData) => void): void {
-  f(userData);
-
-  saveUserData();
+function saveUserData(data: UserData): void {
+  localStorage.setItem('user', JSON.stringify(data));
 }
 
 getValidBoolean;
@@ -326,4 +309,9 @@ getValidPositiveIntegerOrDefault;
 getValidStringOrDefault;
 getValidDateOrDefault;
 
-export { isUserDataReady, saveUserData, getDefaultUserData, getUserData, setUserData };
+function useUserDataContext(): UserDataContextValueType {
+  return React.useContext(UserDataContext);
+}
+
+export { defaultUserData, loadUserData, saveUserData, UserDataContext, useUserDataContext };
+export type { UserDataContextValueType };

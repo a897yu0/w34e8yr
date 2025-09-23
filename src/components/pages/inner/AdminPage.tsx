@@ -5,7 +5,7 @@ import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProp
 import type { AdminPageProps } from '@/types/props/pages/inner/AdminPageProps';
 import type { UserData } from '@/types/user-data/UserData';
 import FallbackPage from '@/components/pages/FallbackPage';
-import { getDefaultUserData, getUserData, setUserData } from '@/user';
+import { defaultUserData, useUserDataContext } from '@/user';
 
 interface SidebarDropdownMenu {
   [id: string]: boolean;
@@ -1006,6 +1006,8 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
   // const openDialog: (ctx: DialogContext | null) => void = props.openDialog;
 
+  const { data: userData, set: setUserData } = useUserDataContext();
+
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
 
   const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<SidebarDropdownMenu>({});
@@ -1015,8 +1017,8 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
   const maxSidebarWidth: number = window.innerWidth;
   const minSidebarWidth: number = Math.min(maxSidebarWidth, 177);
-  const defaultSidebarWidth: number = getDefaultUserData().adminPage.sidebar.width;
-  const userSidebarWidth: number = getUserData().adminPage.sidebar.width;
+  const defaultSidebarWidth: number = defaultUserData.adminPage.sidebar.width;
+  const userSidebarWidth: number = userData.adminPage.sidebar.width;
 
   // console.log("defaultSidebarWidth:", defaultSidebarWidth);
 

@@ -9,9 +9,12 @@ import FallbackPage from '@/components/pages/FallbackPage';
 import Dialog from '@/components/Dialog';
 
 import {
-  isUserDataReady,
+  defaultUserData,
+  loadUserData,
   saveUserData,
+  UserDataContext,
 } from '@/user';
+import type { UserData } from './types/user-data/UserData';
 
 interface HeaderProps {
 }
@@ -102,10 +105,12 @@ function Header(props: HeaderProps): React.JSX.Element {
   );
 }
 
-function App(): React.JSX.Element {
-  const [isUserReady, setIsUserReady] = React.useState<boolean>(isUserDataReady());
+let timeoutForSavingUserData: NodeJS.Timeout | undefined = undefined;
 
+function App(): React.JSX.Element {
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
+
+  const [userData, setUserData] = React.useState<UserData | undefined>(loadUserData());
 
   const openDialog = (ctx: DialogContext | null): void => {
     if (!ctx) return;
@@ -117,20 +122,68 @@ function App(): React.JSX.Element {
   const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/inner/AdminPage'));
 
   const handleLocalUseInEntryPage = () => {
-    saveUserData();
-    setIsUserReady(true);
+    setUserData((userData: UserData | undefined) => {
+      if (userData) {
+        return userData;
+      }
+
+      userData = structuredClone(defaultUserData);
+      saveUserData(userData);
+      return userData;
+    });
+  }
+
+  const setUserDataWithSaving = (f: (data: UserData) => void) => {
+    setUserData((data: UserData | undefined) => {
+      if (!data) {
+        return;
+      }
+      f(data);
+
+      return data;
+    });
+
+    if (!timeoutForSavingUserData) {
+      timeoutForSavingUserData = setTimeout(() => {
+
+        setUserData((data: UserData | undefined) => {
+          if (!data) {
+            return;
+          }
+          saveUserData(data);
+          return data;
+        });
+
+        timeoutForSavingUserData = undefined;
+      }, 1000);
+
+    }
   }
 
   return (
     <>
       <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
-        {isUserReady && <Header />}
+        {userData ? (
+          <UserDataContext.Provider value={{
+            data: userData,
 
-        <main className="w-full flex-1">
-          <React.Suspense fallback={<FallbackPage />}>
-            {!isUserReady ? <EntryPage handleLocalUse={handleLocalUseInEntryPage} /> : <AdminPage openDialog={openDialog} />}
-          </React.Suspense>
-        </main>
+            set: setUserDataWithSaving,
+          }}>
+            <Header />
+
+            <main className="w-full flex-1">
+              <React.Suspense fallback={<FallbackPage />}>
+                <AdminPage openDialog={openDialog} />
+              </React.Suspense>
+            </main>
+          </UserDataContext.Provider>
+        ) : (
+          <main className="w-full flex-1">
+            <React.Suspense fallback={<FallbackPage />}>
+              <EntryPage handleLocalUse={handleLocalUseInEntryPage} />
+            </React.Suspense>
+          </main>
+        )}
 
         <footer className="w-full bg-white m-0 border-black border-t-1">
           <div className="w-full mx-auto p-1 md:flex md:items-center md:justify-between">

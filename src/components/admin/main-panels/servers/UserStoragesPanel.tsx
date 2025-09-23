@@ -1,9 +1,22 @@
 import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
+import type { ServerDetails } from '@/types/user-data/ServerDetails';
+
+import { useUserDataContext } from '@/user';
 
 function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
+
+  const [currentServer, setCurrentServer] = React.useState<ServerDetails | undefined>(undefined);
+
+  useUserDataContext;
+  currentServer; setCurrentServer;
+
+
+  React.useEffect(() => {
+
+  }, [])
 
   return (
     <>
@@ -11,7 +24,7 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
       <div className="w-full">
         <h1 className="text-2xl font-bold mb-5">User Storages</h1>
         <div className="@container flex flex-col items-start">
-          <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+          <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
             <div className="flex flex-row flex-wrap gap-1">
               <strong>Name: </strong>
               <span>backup-storage-02</span>
@@ -37,7 +50,7 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
               <span>No</span>
             </div>
           </div>
-          <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+          <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
             <div className="flex flex-row flex-wrap gap-1">
               <strong>Capacity: </strong>
               <span>50 TB</span>
