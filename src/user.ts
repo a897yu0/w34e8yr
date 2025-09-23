@@ -41,7 +41,7 @@ function getValidNumber(value: any): number | undefined {
 function getValidPositiveNumber(value: any): number | undefined {
   const n: number | undefined = getValidNumber(value);
 
-  if (!n || !Number.isInteger(n) || (n <= 0)) {
+  if (!n || (n <= 0)) {
     return undefined;
   }
 
@@ -52,6 +52,16 @@ function getValidInteger(value: any): number | undefined {
   const n: number | undefined = getValidNumber(value);
 
   if (!n || !Number.isInteger(n)) {
+    return undefined;
+  }
+
+  return n;
+}
+
+function getValidPositiveInteger(value: any): number | undefined {
+  const n: number | undefined = getValidInteger(value);
+
+  if (!n || (n <= 0)) {
     return undefined;
   }
 
@@ -108,6 +118,16 @@ function getValidPositiveNumberOrDefault(value: any, defaultValue: number): numb
 
 function getValidIntegerOrDefault(value: any, defaultValue: number): number {
   const n: number | undefined = getValidInteger(value);
+
+  if (!n) {
+    return defaultValue;
+  }
+
+  return value;
+}
+
+function getValidPositiveIntegerOrDefault(value: any, defaultValue: number): number {
+  const n: number | undefined = getValidPositiveInteger(value);
 
   if (!n) {
     return defaultValue;
@@ -241,7 +261,7 @@ function isUserDataReady(): boolean {
 
   userData = {
     serverList: parseServerList(unknownUserData?.serverList),
-    selectedServerId: getValidIntegerOrDefault(
+    selectedServerId: getValidPositiveIntegerOrDefault(
       unknownUserData?.selectedServerId,
       defaultUserData.selectedServerId,
     ),
@@ -295,12 +315,14 @@ getValidBoolean;
 getValidNumber;
 getValidPositiveNumber;
 getValidInteger;
+getValidPositiveInteger;
 getValidString;
 getValidDate;
 getValidBooleanOrDefault;
 getValidNumberOrDefault;
 getValidPositiveNumberOrDefault;
 getValidIntegerOrDefault;
+getValidPositiveIntegerOrDefault;
 getValidStringOrDefault;
 getValidDateOrDefault;
 
