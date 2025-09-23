@@ -59,8 +59,6 @@ interface SidebarProps extends SidebarDefaultProps, SidebarWrapperProps {
 }
 
 interface MainPanelWrapperProps {
-  path: string | undefined;
-  resetPath: () => void;
 }
 
 type AdminMainPanelComponentType<T extends AdminMainPanelProps = AdminMainPanelProps> = React.ComponentType<T>;
@@ -75,6 +73,7 @@ interface AdminMainPanelContext {
 
 interface AdminMainPanelWithPathArgs {
   panel: AdminMainPanelLazyExoticComponent;
+
   pathArgs: string[];
 }
 
@@ -794,10 +793,15 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
   );
 };
 
-function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
+function useMainPanelWrapper(props: MainPanelWrapperProps): {
+  Component: () => React.JSX.Element;
+  currentPanelPath: string | undefined;
+  openPanel: (path: string | undefined) => void;
+  resetPanel: () => void;
+} {
+  props;
 
-  const path: string | undefined = props.path;
-  const resetPath: () => void = props.resetPath;
+  const [currentPanelPath, setCurrentPanelPath] = React.useState<string | undefined>(undefined);
 
   const [ctx, setCtx] = React.useState<AdminMainPanelContext | undefined>(undefined);
 
@@ -851,7 +855,10 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     return null;
   }
 
-  React.useEffect(() => {
+  const openPanel = (path: string | undefined): void => {
+
+    const url: URL = new URL(window.location.href);
+
     if (path) {
       const ctx: AdminMainPanelContext | undefined = pathToPanelContext[path];
       setCtx(ctx);
@@ -864,9 +871,40 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
         setPanelWithPathArgs(undefined);
       }
 
+      url.searchParams.set('main', path);
+
+    } else {
+      url.searchParams.delete('main');
     }
 
-  }, [path]);
+    window.history.replaceState(undefined, '', url);
+
+    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
+    // window.history.pushState(undefined, '', url);  
+
+    setCurrentPanelPath(path);
+  };
+
+  const resetPanel = (): void => {
+    openPanel(undefined);
+  };
+
+  // React.useEffect(() => {
+  //   if (path) {
+  //     const ctx: AdminMainPanelContext | undefined = pathToPanelContext[path];
+  //     setCtx(ctx);
+
+  //     const panelWithPathArgs: AdminMainPanelWithPathArgs | null = findMatchingPanelWithPathArgs(path);
+
+  //     if (panelWithPathArgs) {
+  //       setPanelWithPathArgs(panelWithPathArgs);
+  //     } else {
+  //       setPanelWithPathArgs(undefined);
+  //     }
+
+  //   }
+
+  // }, [path]);
 
 
   // if (path && !mainPanelPaths[path]) {
@@ -902,9 +940,9 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     );
   };
 
-  return (
+  const Component: () => React.JSX.Element = React.useCallback((): React.JSX.Element => (
     <div className="w-full h-full flex flex-col overflow-hidden">
-      {path && (
+      {currentPanelPath && (
         <>
           <div className="w-full flex flex-row justify-between items-center flex-wrap bg-gray-200 border-black border-b-1">
             <div className="w-full  flex-shrink-0 flex flex-row justify-between items-center flex-wrap p-1">
@@ -916,10 +954,10 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
                     </svg>
                   )}
                 </div>
-                <PathBreadcrumb path={path} />
+                <PathBreadcrumb path={currentPanelPath} />
               </div>
               <div className="flex-1 flex flex-row justify-end items-center">
-                <div className="w-6 h-6 cursor-pointer" onClick={() => resetPath()}>
+                <div className="w-6 h-6 cursor-pointer" onClick={() => resetPanel()}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                   </svg>
@@ -942,7 +980,13 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
                 <div className="absolute w-full h-full overflow-auto">
                   <div className="min-w-fit min-h-fit w-full h-full p-2">
                     <React.Suspense fallback={<FallbackPage />}>
-                      <panelWithPathArgs.panel args={panelWithPathArgs.pathArgs} />
+                      <panelWithPathArgs.panel
+                        args={ctx?.args}
+                        pathArgs={panelWithPathArgs.pathArgs}
+
+                        openPanel={openPanel}
+                        resetPanel={resetPanel}
+                      />
                     </React.Suspense>
                   </div>
                 </div>
@@ -952,7 +996,9 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
         </>
       )}
     </div>
-  );
+  ), [currentPanelPath, ctx, panelWithPathArgs]);
+
+  return { Component, currentPanelPath, openPanel, resetPanel };
 }
 
 function AdminPage(props: AdminPageProps): React.JSX.Element {
@@ -982,6 +1028,14 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
     throw new Error(`Maximum sidebar width (${maxSidebarWidth}) cannot be less than minimum sidebar width (${minSidebarWidth})`);
   }
 
+  const {
+    Component: MainPanelWrapper,
+    currentPanelPath: currentMainPanelPath,
+    openPanel: openMainPanel,
+    resetPanel: resetMainPanel,
+  } = useMainPanelWrapper({});
+  resetMainPanel;
+
   const setUserSidebarWidth = (width: number): void => {
     setUserData((userData: UserData) => {
       userData.adminPage.sidebar.width = width;
@@ -991,30 +1045,15 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
   const [sidebarWidth, setSidebarWidth] = React.useState<number>(getValueInCorrectRange(minSidebarWidth, maxSidebarWidth, userSidebarWidth));
   const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
 
-  const [currentMainPanelPath, setCurrentMainPanelPath] = React.useState<string | undefined>(undefined);
-
   const loadCurrentMainPanel = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const mainPanelPath: string | null = urlParams.get('main');
 
     if (mainPanelPath) {
-      setCurrentMainPanelPath(mainPanelPath);
+      openMainPanel(mainPanelPath);
     } else {
-      setCurrentMainPanelPath(undefined);
+      openMainPanel(undefined);
     }
-  };
-
-  const resetCurrentMainPanelPath = () => {
-    setCurrentMainPanelPath(undefined);
-
-    const url: URL = new URL(window.location.href);
-    url.searchParams.delete('main');
-
-    window.history.replaceState(undefined, '', url);
-
-    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
-    // window.history.pushState(undefined, '', url);  
-
   };
 
   const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
@@ -1029,18 +1068,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
       throw new Error(`Invalid path: Cannot contain whitespace or be empty: ${path}`);
     }
 
-    // console.log(path, args);
-
-    setCurrentMainPanelPath(path);
-
-    const url: URL = new URL(window.location.href);
-    url.searchParams.set('main', path);
-
-    window.history.replaceState(undefined, '', url);
-
-    // Don't push, because prevent to go back to previous state. If it is enabled, the user was tired with long history about this.
-    // window.history.pushState(undefined, '', url);  
-
+    openMainPanel(path);
   };
 
   const toggleSidebar = () => {
@@ -1377,7 +1405,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
         {/* Main content area: This area displays the main panels */}
         <div className="absolute md:relative w-full h-full md:flex-1 overflow-hidden">
-          <MainPanelWrapper path={currentMainPanelPath} resetPath={() => resetCurrentMainPanelPath()} />
+          <MainPanelWrapper />
         </div>
 
       </div>
