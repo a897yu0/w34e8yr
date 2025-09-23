@@ -1045,23 +1045,53 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
   const [sidebarWidth, setSidebarWidth] = React.useState<number>(getValueInCorrectRange(minSidebarWidth, maxSidebarWidth, userSidebarWidth));
   const [isResizableSidebarDragging, setIsResizableSidebarDragging] = React.useState<boolean>(false);
 
+  const toggleSidebarDropdownMenu = (id: string): void => {
+    setSidebarDropdownMenu((prevMenu: SidebarDropdownMenu) => ({
+      ...prevMenu,
+      [id]: !prevMenu[id],
+    }));
+
+    // console.log("id:", id);
+  };
+
+  const loadSidebarDropdownMenu = (path: string): void => {
+    let id: string = '';
+
+    const menu: string[] = [];
+
+    path.split('/').slice(0, -1).forEach((path: string, index: number) => {
+      if (id !== '') {
+        id += '/';
+      }
+      id += path;
+
+      menu[index] = id;
+    });
+
+    setSidebarDropdownMenu((prevMenu: SidebarDropdownMenu) => {
+      menu.forEach((id: string) => {
+        prevMenu = {
+          ...prevMenu,
+          [id]: true,
+        };
+      });
+
+      return prevMenu;
+    });
+  }
+
   const loadCurrentMainPanel = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const mainPanelPath: string | null = urlParams.get('main');
 
     if (mainPanelPath) {
       openMainPanel(mainPanelPath);
+
+      loadSidebarDropdownMenu(mainPanelPath);
     } else {
       openMainPanel(undefined);
     }
   };
-
-  const toggleSidebarDropdownMenu: (id: string) => void = React.useCallback((id: string): void => {
-    setSidebarDropdownMenu((prevMenu: SidebarDropdownMenu) => ({
-      ...prevMenu,
-      [id]: !prevMenu[id],
-    }));
-  }, []);
 
   const clickSidebarItem = (path: string) => {
     if (!isValidPathComponent(path)) {
