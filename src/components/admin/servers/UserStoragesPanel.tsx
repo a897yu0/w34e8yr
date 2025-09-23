@@ -1,0 +1,60 @@
+import React from 'react';
+
+import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
+import type { ServerData } from '@/types/data/ServerData';
+
+import ServerDetails from '@/components/ServerDetails';
+
+import { useUserDataContext } from '@/data/user';
+
+function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
+  props;
+
+  const [currentServer, setCurrentServer] = React.useState<ServerData | undefined>(undefined);
+
+  useUserDataContext;
+  currentServer; setCurrentServer;
+
+
+  React.useEffect(() => {
+
+  }, [])
+
+  return (
+    <>
+      {/* Header */}
+      <div className="w-full">
+        <h1 className="text-2xl font-bold mb-5">User Storages</h1>
+      </div>
+
+      <div className="w-full border-black border-b-1 my-4" />
+
+      {/* Server Details */}
+      <div className="max-w-4xl w-full">
+        <div className="@container flex flex-col items-start">
+          <ServerDetails
+            server={{
+              id: 5,
+
+              name: 'office-public',
+              address: '192.168.1.101',
+              
+              isOnline: false,
+              lastPingTimestamp: new Date('2024-01-14T15:20:00'),
+              registeredTimestamp: new Date('2024-01-05T11:30:00'),
+              accountRequired: false,
+
+              capacity: 4327819519847,
+              freeSpace: 434578903425,
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="w-full border-black border-b-1 my-4" />
+
+    </>
+  );
+}
+
+export default UserStoragesPanel;

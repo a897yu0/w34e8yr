@@ -5,7 +5,7 @@ interface ServerData {
 
   name: string;
   address: string;
-
+  
   isOnline: boolean;
   lastPingTimestamp: Date;
   registeredTimestamp: Date;

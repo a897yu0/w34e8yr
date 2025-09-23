@@ -816,17 +816,17 @@ function useMainPanelWrapper(props: MainPanelWrapperProps): {
   const panelTopRef = React.useRef<HTMLDivElement>(null);
 
   const pathToPanel: Record<string, AdminMainPanelLazyExoticComponent> = {
-    "servers/overview": React.lazy(() => import('@/components/admin/main-panels/servers/OverviewPanel')),
-    "servers/user-storages": React.lazy(() => import('@/components/admin/main-panels/servers/UserStoragesPanel')),
-    "servers/block-devices": React.lazy(() => import('@/components/admin/main-panels/servers/BlockDevicesPanel')),
+    "servers/overview": React.lazy(() => import('@/components/admin/servers/OverviewPanel')),
+    "servers/user-storages": React.lazy(() => import('@/components/admin/servers/UserStoragesPanel')),
+    "servers/block-devices": React.lazy(() => import('@/components/admin/servers/BlockDevicesPanel')),
 
-    "servers/registered/?": React.lazy(() => import('@/components/admin/main-panels/servers/RegisteredServerPanel')),
+    "servers/registered/?": React.lazy(() => import('@/components/admin/servers/RegisteredServerPanel')),
     // "servers/registered/?/info/?": React.lazy(() => import('@/components/admin/main-panels/servers/RegisteredServerPanel')),
-    "servers/registered/?/user-storages": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerUserStoragesPanel')),
-    "servers/registered/?/block-devices": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerBlockDevicesPanel')),
-    "servers/registered/?/blobs": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerBlobsPanel')),
-    "servers/registered/?/uploads-downloads": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerUploadsDownloadsPanel')),
-    "servers/registered/?/logging": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerLoggingPanel')),
+    "servers/registered/?/user-storages": React.lazy(() => import('@/components/admin/servers/registered/RegisteredServerUserStoragesPanel')),
+    "servers/registered/?/block-devices": React.lazy(() => import('@/components/admin/servers/registered/RegisteredServerBlockDevicesPanel')),
+    "servers/registered/?/blobs": React.lazy(() => import('@/components/admin/servers/registered/RegisteredServerBlobsPanel')),
+    "servers/registered/?/uploads-downloads": React.lazy(() => import('@/components/admin/servers/registered/RegisteredServerUploadsDownloadsPanel')),
+    "servers/registered/?/logging": React.lazy(() => import('@/components/admin/servers/registered/RegisteredServerLoggingPanel')),
   };
 
   function matchPathWithPathArgs(pattern: string, path: string): { match: boolean; pathArgs: string[]; } {

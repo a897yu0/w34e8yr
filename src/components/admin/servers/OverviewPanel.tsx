@@ -6,12 +6,15 @@ import type { ServerData } from '@/types/data/ServerData';
 
 import ResizableVerticalWrapper from '@/components/ResizableVerticalWrapper';
 import Paginator from '@/components/Paginator';
+import ServerDetails from '@/components/ServerDetails';
 
 import type { UserData } from '@/types/data/UserData';
 import { defaultUserData, useUserDataContext } from '@/data/user';
 
 import type { LayoutData } from '@/types/data/LayoutData';
 import { defaultLayoutData, layoutData, setLayoutData } from '@/data/layout';
+
+import { formatTimestamp, getUsagePercentage } from '@/utils';
 
 import sampleServerList from './sampleServerList';
 
@@ -21,22 +24,6 @@ interface PaginatedServerList {
   currentPage: number;
   totalPages: number;
 }
-
-function formatBytes(bytes: number, decimals: number = 2): string {
-  if (bytes === 0) return '0 Bytes';
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
-
-function formatTimestamp(timestamp: Date): string {
-  return timestamp.toLocaleString();
-};
 
 function getPaginatedServerList(page: number, pageSize: number = 3): PaginatedServerList {
   if (pageSize <= 0) {
@@ -62,10 +49,6 @@ function getPaginatedServerList(page: number, pageSize: number = 3): PaginatedSe
     currentPage: currentPage,
     totalPages: totalPages,
   };
-}
-
-function getUsagePercentage(capacity: number, freeSpace: number): number {
-  return (((capacity - freeSpace) / capacity) * 100);
 }
 
 function moveServerItemToFirst(id: number) {
@@ -269,61 +252,12 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
       <div className="w-full border-black border-b-1 my-4" />
 
       {/* Server Details */}
-      <div ref={serverDetailsRef} className="@container w-full max-w-4xl">
-        {selectedServer && (
+      {selectedServer && (
+        <div ref={serverDetailsRef} className="@container w-full max-w-4xl">
           <div className="mb-2 p-2 border border-black relative">
-            <h3 className="text-lg font-semibold mb-5 text-black">Server Details</h3>
-            <div className="absolute right-1 top-1 cursor-pointer" onClick={() => setSelectedServer(null)}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
-            </div>
-            <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>Name:</strong>
-                <span>{selectedServer.name}</span>
-              </div>
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>IP Address:</strong>
-                <span>{selectedServer.address}</span>
-              </div>
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>Status:</strong>
-                <span className={clsx(
-                  selectedServer.isOnline ? 'text-green-600' : 'text-red-600',
-                )}>
-                  {selectedServer.isOnline ? ' Online' : ' Offline'}
-                </span>
-              </div>
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>Last Ping:</strong>
-                <span>{formatTimestamp(selectedServer.lastPingTimestamp)}</span>
-              </div>
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>Registered:</strong>
-                <span>{formatTimestamp(selectedServer.registeredTimestamp)}</span>
-              </div>
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>Account Required:</strong>
-                <span>{selectedServer.accountRequired ? 'Yes' : 'No'}</span>
-              </div>
-            </div>
-            <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>Capacity:</strong>
-                <span>{formatBytes(selectedServer.capacity)}</span>
-              </div>
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>FreeSpace:</strong>
-                <span>{formatBytes(selectedServer.freeSpace)}</span>
-              </div>
-              <div className="flex flex-row flex-wrap gap-1">
-                <strong>Usage:</strong>
-                <span>{getUsagePercentage(selectedServer.capacity, selectedServer.freeSpace).toFixed(1)} %</span>
-              </div>
-            </div>
+            <ServerDetails server={selectedServer} resetSelection={() => setSelectedServer(null)} />
             <div className="pt-4">
-              <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+              <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
                 <button
                   onClick={() => openPanel('servers/user-storages')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
@@ -352,7 +286,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                   Blobs
                 </button>
               </div>
-              <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+              <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
                 <button
                   onClick={() => openPanel('servers/uploads-downloads')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
@@ -374,8 +308,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Search and Filter Controls */}
       <div className="w-full mb-1 flex flex-row gap-2">
