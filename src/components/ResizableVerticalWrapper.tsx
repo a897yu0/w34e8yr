@@ -3,20 +3,12 @@ import React from "react";
 
 import type { ResizableVerticalWrapperProps } from "@/types/props/ResizableVerticalWrapperProps";
 
-function getValueInCorrectRange(minValue: number, value: number): number {
-  if (minValue < 0) {
-    throw new Error(`Minimum value (${minValue}) cannot be negative`);
-  }
-
-  console.assert(minValue >= 0);
-  return Math.max(value, minValue);
-}
-
 function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.JSX.Element {
+  const defaultLayoutHeight: number = props.defaultLayoutHeight;
+  const layoutHeight: number = props.layoutHeight;
+  const setLayoutHeight: (height: number) => void = props.setLayoutHeight;
+  
   const minHeight: number = props.minHeight;
-  // const defaultHeight: number = props.defaultHeight;
-  const userHeight: number = props.userHeight;
-  const setUserHeight: (height: number) => void = props.setUserHeight;
 
   const className: string | undefined = props.className;
 
@@ -29,13 +21,10 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
   const tableResizerRef = React.useRef<HTMLDivElement>(null);
 
-  // const initHeight: number = 177;
-  // const minHeight: number = 77;
+  const [height, setHeight] = React.useState<number>(Math.max(defaultLayoutHeight, layoutHeight));
+  const [isDragging, setIsDragging] = React.useState<boolean>(false);
 
-  const [height, setHeight] = React.useState<number>(getValueInCorrectRange(minHeight, userHeight));
-  const [isResizableTableDragging, setIsResizableTableDragging] = React.useState<boolean>(false);
-
-  const handleTableResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
+  const handleResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
     // Don't preventDefault here for touch events
     if ('touches' in e) {
       // Just start dragging, preventDefault will happen in touchmove
@@ -43,11 +32,11 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
       e.preventDefault(); // Only prevent for mouse events
     }
 
-    setIsResizableTableDragging(true);
+    setIsDragging(true);
   }, []);
 
-  const handleTableResizerPointerMove = React.useCallback((e: MouseEvent | TouchEvent) => {
-    if (!isResizableTableDragging || !tableContainerRef.current) {
+  const handleResizerPointerMove = React.useCallback((e: MouseEvent | TouchEvent) => {
+    if (!isDragging || !tableContainerRef.current) {
       return;
     }
 
@@ -75,12 +64,12 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
 
     console.assert(newHeight >= 0);
     setHeight(newHeight);
-    setUserHeight(newHeight);
+    setLayoutHeight(newHeight);
 
-  }, [isResizableTableDragging, minHeight]);
+  }, [isDragging, minHeight]);
 
-  const handleTableResizerPointerUp = React.useCallback(() => {
-    setIsResizableTableDragging(false);
+  const handleResizerPointerUp = React.useCallback(() => {
+    setIsDragging(false);
   }, []);
 
   const handleManualExpansion = () => {
@@ -88,7 +77,7 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
       const newHeight: number = (prevHeight + 77);
 
       console.assert(newHeight >= 0);
-      setUserHeight(newHeight);
+      setLayoutHeight(newHeight);
       return newHeight;
     });
   };
@@ -99,18 +88,18 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
       const newHeight: number = Math.max(prevHeight - 77, minHeight);
 
       console.assert(newHeight >= 0);
-      setUserHeight(newHeight);
+      setLayoutHeight(newHeight);
       return newHeight;
     });
   };
 
   // Resizable sidebar handlers
   React.useEffect(() => {
-    if (isResizableTableDragging) {
-      document.addEventListener('mousemove', handleTableResizerPointerMove);
-      document.addEventListener('mouseup', handleTableResizerPointerUp);
-      document.addEventListener('touchmove', handleTableResizerPointerMove, { passive: false });
-      document.addEventListener('touchend', handleTableResizerPointerUp);
+    if (isDragging) {
+      document.addEventListener('mousemove', handleResizerPointerMove);
+      document.addEventListener('mouseup', handleResizerPointerUp);
+      document.addEventListener('touchmove', handleResizerPointerMove, { passive: false });
+      document.addEventListener('touchend', handleResizerPointerUp);
 
       document.body.style.cursor = 'row-resize';
       document.body.style.userSelect = 'none';
@@ -118,16 +107,16 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleTableResizerPointerMove);
-      document.removeEventListener('mouseup', handleTableResizerPointerUp);
-      document.removeEventListener('touchmove', handleTableResizerPointerMove);
-      document.removeEventListener('touchend', handleTableResizerPointerUp);
+      document.removeEventListener('mousemove', handleResizerPointerMove);
+      document.removeEventListener('mouseup', handleResizerPointerUp);
+      document.removeEventListener('touchmove', handleResizerPointerMove);
+      document.removeEventListener('touchend', handleResizerPointerUp);
 
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       document.body.style.touchAction = '';
     };
-  }, [isResizableTableDragging, handleTableResizerPointerMove, handleTableResizerPointerUp]);
+  }, [isDragging, handleResizerPointerMove, handleResizerPointerUp]);
 
   return (
     <div className={className}>
@@ -167,10 +156,10 @@ function ResizableVerticalWrapper(props: ResizableVerticalWrapperProps): React.J
           ref={tableResizerRef}
           className={clsx(
             "w-full h-1 cursor-row-resize ",
-            isResizableTableDragging ? 'bg-blue-500' : 'bg-gray-400',
+            isDragging ? 'bg-blue-500' : 'bg-gray-400',
           )}
-          onMouseDown={handleTableResizerPointerDown}
-          onTouchStart={handleTableResizerPointerDown}
+          onMouseDown={handleResizerPointerDown}
+          onTouchStart={handleResizerPointerDown}
         >
         </div>
 

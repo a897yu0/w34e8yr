@@ -1,14 +1,14 @@
 import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
-import type { ServerDetails } from '@/types/user-data/ServerDetails';
+import type { ServerData } from '@/types/data/ServerData';
 
-import { useUserDataContext } from '@/user';
+import { useUserDataContext } from '@/data/user';
 
 function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
 
-  const [currentServer, setCurrentServer] = React.useState<ServerDetails | undefined>(undefined);
+  const [currentServer, setCurrentServer] = React.useState<ServerData | undefined>(undefined);
 
   useUserDataContext;
   currentServer; setCurrentServer;

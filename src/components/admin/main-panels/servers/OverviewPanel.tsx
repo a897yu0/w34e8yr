@@ -1,18 +1,20 @@
 import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
-import type { ServerDetails } from '@/types/user-data/ServerDetails';
-import type { UserData } from '@/types/user-data/UserData';
+import type { ServerData } from '@/types/data/ServerData';
+import type { UserData } from '@/types/data/UserData';
 import ResizableVerticalWrapper from '@/components/ResizableVerticalWrapper';
 import Paginator from '@/components/Paginator';
 
-import { defaultUserData, useUserDataContext } from '@/user';
+import { defaultUserData, useUserDataContext } from '@/data/user';
 
 import sampleServerList from './sampleServerList';
 import clsx from 'clsx';
+import { defaultLayoutData, layoutData, setLayoutData } from '@/data/layout';
+import type { LayoutData } from '@/types/data/LayoutData';
 
 interface PaginatedServerList {
-  items: ServerDetails[];
+  items: ServerData[];
 
   currentPage: number;
   totalPages: number;
@@ -68,7 +70,7 @@ function moveServerItemToFirst(id: number) {
 
   const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
 
-  sampleServerList.forEach((server: ServerDetails) => {
+  sampleServerList.forEach((server: ServerData) => {
     if (server.id !== id) return;
 
     server.id = (sortedServers[0].id + 1);
@@ -88,13 +90,15 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   const openPanel: (path: string) => void = props.openPanel;
 
   const { data: userData, set: setUserData } = useUserDataContext();
+  userData;
+  setUserData;
 
   // State for table controls
   const [serverTableSearchTerm, setServerTableSearchTerm] = React.useState('');
   const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
   const [serverTableCurrentPage, setServerTableCurrentPage] = React.useState(1);
   const [serverTablePageSize, setServerTablePageSize] = React.useState<number>(7);
-  const [selectedServer, setSelectedServer] = React.useState<ServerDetails | null>(null);
+  const [selectedServer, setSelectedServer] = React.useState<ServerData | null>(null);
 
   setServerTablePageSize;
 
@@ -372,14 +376,15 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       {/* Server Summary Table */}
       <ResizableVerticalWrapper
+        defaultLayoutHeight={defaultLayoutData.adminPage.serverManagementPanel.serverTable.height}
+        layoutHeight={layoutData.adminPage.serverManagementPanel.serverTable.height}
+
         minHeight={77}
-        defaultHeight={defaultUserData.adminPage.serverManagementPanel.serverTable.height}
-        userHeight={userData.adminPage.serverManagementPanel.serverTable.height}
 
         className="mb-1"
 
-        setUserHeight={(height: number) => setUserData((userData: UserData) => {
-          userData.adminPage.serverManagementPanel.serverTable.height = height;
+        setLayoutHeight={(height: number) => setLayoutData((layoutData: LayoutData) => {
+          layoutData.adminPage.serverManagementPanel.serverTable.height = height;
         })}
       >
         <table className="w-fit h-fit relative">
@@ -396,7 +401,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
             </tr>
           </thead>
           <tbody>
-            {serverList && serverList.items.map((server: ServerDetails, index: number) => (
+            {serverList && serverList.items.map((server: ServerData, index: number) => (
               <tr key={server.id} className={clsx(
                 (index % 2 == 0) ? 'bg-white' : 'bg-gray-100'
               )}>

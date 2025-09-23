@@ -75,5 +75,4 @@ export default tseslint.config([
 ### TODO
 - Sync with platform accounts (like google) or own id/password
     - Record the history (login timestamp, action history)
-- In production, disable console.assert 
-- Store state of sidebar to user-data
+- Navigation for admin page header, not browser.

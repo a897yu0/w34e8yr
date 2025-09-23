@@ -3,9 +3,15 @@ import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
 import type { AdminPageProps } from '@/types/props/pages/inner/AdminPageProps';
-import type { UserData } from '@/types/user-data/UserData';
+
 import FallbackPage from '@/components/pages/FallbackPage';
-import { defaultUserData, useUserDataContext } from '@/user';
+
+import type { UserData } from '@/types/data/UserData';
+import { defaultUserData, useUserDataContext } from '@/data/user';
+
+import type { LayoutData } from '@/types/data/LayoutData';
+import { defaultLayoutData, layoutData, setLayoutData } from '@/data/layout';
+import type { DialogContext } from '@/types/DialogContext';
 
 interface SidebarDropdownMenu {
   [id: string]: boolean;
@@ -1004,9 +1010,13 @@ function useMainPanelWrapper(props: MainPanelWrapperProps): {
 function AdminPage(props: AdminPageProps): React.JSX.Element {
   props;
 
-  // const openDialog: (ctx: DialogContext | null) => void = props.openDialog;
+  const openDialog: (ctx: DialogContext | null) => void = props.openDialog;
+  openDialog;
 
   const { data: userData, set: setUserData } = useUserDataContext();
+  defaultUserData;
+  userData as UserData;
+  setUserData;
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
 
@@ -1017,8 +1027,8 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
   const maxSidebarWidth: number = window.innerWidth;
   const minSidebarWidth: number = Math.min(maxSidebarWidth, 177);
-  const defaultSidebarWidth: number = defaultUserData.adminPage.sidebar.width;
-  const userSidebarWidth: number = userData.adminPage.sidebar.width;
+  const defaultSidebarWidth: number = defaultLayoutData.adminPage.sidebar.width;
+  const userSidebarWidth: number = layoutData.adminPage.sidebar.width;
 
   // console.log("defaultSidebarWidth:", defaultSidebarWidth);
 
@@ -1038,9 +1048,9 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
   } = useMainPanelWrapper({});
   resetMainPanel;
 
-  const setUserSidebarWidth = (width: number): void => {
-    setUserData((userData: UserData) => {
-      userData.adminPage.sidebar.width = width;
+  const setLayoutSidebarWidth = (width: number): void => {
+    setLayoutData((layoutData: LayoutData) => {
+      layoutData.adminPage.sidebar.width = width;
     });
   }
 
@@ -1118,7 +1128,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
       const newWidth = getValueInCorrectRange(minSidebarWidth, maxSidebarWidth, userSidebarWidth);
 
       console.assert(newWidth > 0);
-      setUserSidebarWidth(newWidth);
+      setLayoutSidebarWidth(newWidth);
       return newWidth;
     });
   };
@@ -1133,7 +1143,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
     console.assert(newWidth > 0);
     setSidebarWidth(newWidth);
-    setUserSidebarWidth(newWidth);
+    setLayoutSidebarWidth(newWidth);
   };
 
   const handleSidebarResizerPointerDown = React.useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -1152,7 +1162,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
       const minWidth = Math.min(window.innerWidth, minSidebarWidth);
       const newWidth = Math.max(minWidth - (sidebarResizerRef.current?.clientWidth || 0), minWidth);
 
-      setUserSidebarWidth(newWidth);
+      setLayoutSidebarWidth(newWidth);
       return newWidth;
     });
 
@@ -1182,7 +1192,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
     console.assert(minSidebarWidth >= 0);
     if (width < minSidebarWidth) {
       setSidebarWidth(0);
-      setUserSidebarWidth(0);
+      setLayoutSidebarWidth(0);
     } else {
       console.assert(minSidebarWidth >= 0);
       const maxWidth = (Math.min(containerRect.width, maxSidebarWidth) - (sidebarResizerRef.current?.clientWidth || 0));
@@ -1190,7 +1200,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
       console.assert(newWidth >= 0);
       setSidebarWidth(newWidth);
-      setUserSidebarWidth(newWidth);
+      setLayoutSidebarWidth(newWidth);
 
       // console.log("constrainedWidth:", constrainedWidth);
     }
@@ -1215,14 +1225,14 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
       if (768 <= windowInnerWidth) {
         if (windowInnerWidth < minSidebarWidth) {
           setSidebarWidth(0);
-          setUserSidebarWidth(0);
+          setLayoutSidebarWidth(0);
         }
 
         setSidebarWidth((prevWidth: number) => {
           const newWidth = (windowInnerWidth < prevWidth) ? (windowInnerWidth - (sidebarResizerRef.current?.clientWidth || 0)) : prevWidth;
 
           console.assert(newWidth >= 0);
-          setUserSidebarWidth(newWidth);
+          setLayoutSidebarWidth(newWidth);
           return newWidth;
         });
       }
@@ -1244,7 +1254,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
     if (validWidth < sidebarWidth) {
       setSidebarWidth(validWidth);
-      setUserSidebarWidth(validWidth);
+      setLayoutSidebarWidth(validWidth);
     }
 
     // console.log("validWidth:", validWidth);
@@ -1330,7 +1340,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
   return (
     <div className="w-full h-full flex flex-col">
 
-      {/* Subheader: Sidebar button, Quick access, Favorites */}
+      {/* Header for admin page: Sidebar button, Quick access, Favorites */}
       <div className="w-full h-8 flex flex-row justify-start items-center bg-white border-b-1 border-black" >
         <div className="h-full flex flex-row justify-start items-center">
           <div className="h-full flex flex-col justify-center cursor-pointer" onClick={() => toggleSidebar()}>

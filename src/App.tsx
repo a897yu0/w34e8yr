@@ -9,13 +9,13 @@ import type { EntryPageProps } from './types/props/pages/EntryPageProps';
 import type { InnerPageProps } from '@/types/props/pages/inner/InnerPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
 
-import type { UserData } from '@/types/user-data/UserData';
+import type { UserData } from '@/types/data/UserData';
 import {
   defaultUserData,
   loadUserData,
   saveUserData,
   UserDataContext,
-} from '@/user';
+} from '@/data/user';
 
 interface HeaderProps {
 }
@@ -111,7 +111,7 @@ let timeoutForSavingUserData: NodeJS.Timeout | undefined = undefined;
 function App(): React.JSX.Element {
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
-  const [userData, setUserData] = React.useState<UserData | undefined>(loadUserData());
+  const [userData, setUserData] = React.useState<UserData | undefined>(undefined);
 
   const openDialog = (ctx: DialogContext | null): void => {
     if (!ctx) return;
@@ -132,7 +132,7 @@ function App(): React.JSX.Element {
       saveUserData(userData);
       return userData;
     });
-  }
+  };
 
   const setUserDataWithSaving = (f: (data: UserData) => void) => {
     setUserData((data: UserData | undefined) => {
@@ -159,7 +159,11 @@ function App(): React.JSX.Element {
       }, 1000);
 
     }
-  }
+  };
+
+  React.useEffect(() => {
+    setUserData(loadUserData());
+  }, []);
 
   return (
     <>

@@ -1,0 +1,64 @@
+import type { LayoutData } from "../types/data/LayoutData";
+import { getValidPositiveNumberOrDefault } from "../validators";
+
+const defaultLayoutData: Readonly<LayoutData> = {
+  adminPage: {
+    sidebar: {
+      width: 277,  // TODO: Make configurable with .env
+    },
+    serverManagementPanel: {
+      serverTable: {
+        height: 177,  // TODO: Make configurable with .env
+      },
+    },
+  },
+};
+
+function loadLayoutData(): LayoutData | undefined {
+  const strLayoutData: string | null = localStorage.getItem('layout');
+
+  if (!strLayoutData) {
+    return undefined;
+  }
+
+  const unknownLayoutData: any = JSON.parse(strLayoutData);
+
+  return {
+    adminPage: {
+      sidebar: {
+        width: getValidPositiveNumberOrDefault(
+          unknownLayoutData?.adminPage?.sidebar?.width,
+          defaultLayoutData.adminPage.sidebar.width,
+        ),
+      },
+      serverManagementPanel: {
+        serverTable: {
+          height: getValidPositiveNumberOrDefault(
+            unknownLayoutData?.adminPage?.serverManagementPanel?.serverTable?.height,
+            defaultLayoutData.adminPage.serverManagementPanel.serverTable.height,
+          ),
+        },
+      },
+    },
+  };
+}
+
+let timeout: NodeJS.Timeout | null = null;
+let layoutData: LayoutData = loadLayoutData() || structuredClone(defaultLayoutData);
+
+function saveLayoutData(data: LayoutData): void {
+  localStorage.setItem('layout', JSON.stringify(data));
+}
+
+function setLayoutData(f: (data: LayoutData) => void): void {
+  f(layoutData);
+
+  if (!timeout) {
+    timeout = setTimeout(() => {
+      saveLayoutData(layoutData);
+      timeout = null;
+    }, 1000);
+  }
+}
+
+export { defaultLayoutData, layoutData, saveLayoutData, setLayoutData };

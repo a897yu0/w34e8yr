@@ -1,9 +1,10 @@
 interface ResizableVerticalWrapperProps {
-  minHeight: number;
-  defaultHeight: number;
-  userHeight: number;
-  setUserHeight: (height: number) => void;
+  defaultLayoutHeight: number;
+  layoutHeight: number;
+  setLayoutHeight: (height: number) => void;
 
+  minHeight: number;
+  
   className?: string;
 
   children: React.JSX.Element;
