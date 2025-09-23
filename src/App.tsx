@@ -3,18 +3,19 @@ import React from 'react';
 
 import type { DialogContext } from '@/types/DialogContext';
 import type { DialogProps } from '@/types/props/DialogProps';
+import Dialog from '@/components/Dialog';
+
 import type { EntryPageProps } from './types/props/pages/EntryPageProps';
 import type { InnerPageProps } from '@/types/props/pages/inner/InnerPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
-import Dialog from '@/components/Dialog';
 
+import type { UserData } from '@/types/user-data/UserData';
 import {
   defaultUserData,
   loadUserData,
   saveUserData,
   UserDataContext,
 } from '@/user';
-import type { UserData } from './types/user-data/UserData';
 
 interface HeaderProps {
 }
@@ -163,7 +164,13 @@ function App(): React.JSX.Element {
   return (
     <>
       <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
-        {userData ? (
+        {!userData ? (
+          <main className="w-full flex-1">
+            <React.Suspense fallback={<FallbackPage />}>
+              <EntryPage handleLocalUse={handleLocalUseInEntryPage} />
+            </React.Suspense>
+          </main>
+        ) : (
           <UserDataContext.Provider value={{
             data: userData,
 
@@ -177,12 +184,6 @@ function App(): React.JSX.Element {
               </React.Suspense>
             </main>
           </UserDataContext.Provider>
-        ) : (
-          <main className="w-full flex-1">
-            <React.Suspense fallback={<FallbackPage />}>
-              <EntryPage handleLocalUse={handleLocalUseInEntryPage} />
-            </React.Suspense>
-          </main>
         )}
 
         <footer className="w-full bg-white m-0 border-black border-t-1">
