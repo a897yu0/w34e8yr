@@ -82,7 +82,7 @@ function moveServerItemToFirst(id: number) {
  * Add/Remove servers with name, Server address
  * Server table (Search, Pagination, Filter) with name, Server address, online status, last ping-pong timestamp, registered timestamp, detail, Account required in server
  */
-function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
+function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
 
   // State for table controls
@@ -159,7 +159,7 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
     <>
       {/* Header */}
       <div className="w-full">
-        <h1 className="text-2xl font-bold mb-2 text-black">Server Management</h1>
+        <h1 className="text-2xl font-bold mb-2 text-black">Overview</h1>
         <div className="flex items-center gap-5 mb-4">
           <div className="text-lg text-black">
             Total Servers: <span className="font-semibold">15</span>
@@ -412,4 +412,4 @@ function ServerManagementPanel(props: AdminMainPanelProps): React.JSX.Element {
   );
 }
 
-export default ServerManagementPanel;
+export default OverviewPanel;

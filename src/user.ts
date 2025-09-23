@@ -1,8 +1,10 @@
-import type { ServerDetails } from "./types/user-data/ServerDetails";
-import type { UserData } from "./types/user-data/UserData";
+
+import type { ServerDetails } from "@/types/user-data/ServerDetails";
+import type { UserData } from "@/types/user-data/UserData";
 
 const defaultUserData: Readonly<UserData> = {
   serverList: [],
+  selectedServerId: Number.MAX_SAFE_INTEGER,
 
   adminPage: {
     sidebar: {
@@ -20,6 +22,120 @@ let userData: UserData = structuredClone(defaultUserData);
 
 let timeout: NodeJS.Timeout | undefined = undefined;
 
+function getValidBoolean(value: any): boolean | undefined {
+  if (typeof value !== 'boolean') {
+    return undefined;
+  }
+
+  return value as boolean;
+}
+
+function getValidNumber(value: any): number | undefined {
+  if ((typeof value === 'number') && !isNaN(value) && isFinite(value)) {
+    return value;
+  }
+
+  return undefined;
+}
+
+function getValidPositiveNumber(value: any): number | undefined {
+  const n: number | undefined = getValidNumber(value);
+
+  if (!n || !Number.isInteger(n) || (n <= 0)) {
+    return undefined;
+  }
+
+  return n;
+}
+
+function getValidInteger(value: any): number | undefined {
+  const n: number | undefined = getValidNumber(value);
+
+  if (!n || !Number.isInteger(n)) {
+    return undefined;
+  }
+
+  return n;
+}
+
+function getValidString(value: any): string | undefined {
+  if ((typeof value !== 'string') || value.trim() === '') {
+    return undefined;
+  }
+
+  return value as string;
+}
+
+function getValidDate(value: any): Date | undefined {
+  const date = new Date(value);
+
+  if (isNaN(date.getTime())) {
+    return undefined;
+  }
+
+  return date;
+}
+
+function getValidBooleanOrDefault(value: any, defaultValue: boolean): boolean {
+  const f: boolean | undefined = getValidBoolean(value);
+
+  if (!f) {
+    return defaultValue;
+  }
+
+  return f;
+}
+
+function getValidNumberOrDefault(value: any, defaultValue: number): number {
+  const n: number | undefined = getValidNumber(value);
+
+  if (!n) {
+    return defaultValue;
+  }
+
+  return value;
+}
+
+function getValidPositiveNumberOrDefault(value: any, defaultValue: number): number {
+  const n: number | undefined = getValidPositiveNumber(value);
+
+  if (!n) {
+    return defaultValue;
+  }
+
+  return value;
+}
+
+function getValidIntegerOrDefault(value: any, defaultValue: number): number {
+  const n: number | undefined = getValidInteger(value);
+
+  if (!n) {
+    return defaultValue;
+  }
+
+  return value;
+}
+
+function getValidStringOrDefault(value: any, defaultValue: string): string {
+  const str: string | undefined = getValidString(value);
+
+  if (!str) {
+    return defaultValue;
+  }
+
+  return str;
+}
+
+function getValidDateOrDefault(value: any, defaultValue: Date): Date {
+  const date = getValidDate(value);
+
+  if (!date) {
+    return defaultValue;
+  }
+
+  return date;
+}
+
 function parseServerDetails(data: any): ServerDetails | undefined {
   try {
     // Check if data exists and is an object
@@ -27,68 +143,79 @@ function parseServerDetails(data: any): ServerDetails | undefined {
       return undefined;
     }
 
-    // Validate each field with strict type checking
-    if ((typeof data.id !== 'number') || !Number.isInteger(data.id)) {
+    const id: number | undefined = getValidInteger(data.id);
+
+    if (!id) {
       return undefined;
     }
 
-    if ((typeof data.name !== 'string') || data.name.trim() === '') {
+    const name: string | undefined = getValidString(data.name);
+
+    if (!name) {
       return undefined;
     }
 
-    if ((typeof data.endpoint !== 'string') || data.endpoint.trim() === '') {
+    const address: string | undefined = getValidString(data.address);
+
+    if (!address) {
       return undefined;
     }
 
-    if (typeof data.isOnline !== 'boolean') {
+    const isOnline: boolean | undefined = getValidBoolean(data.isOnline);
+
+    if (!isOnline) {
       return undefined;
     }
 
-    // Validate dates - they could be strings that need parsing
-    const lastPing = new Date(data.lastPingTimestamp);
-    if (isNaN(lastPing.getTime())) {
+    const lastPingTimestamp: Date | undefined = getValidDate(data.lastPingTimestamp);
+
+    if (!lastPingTimestamp) {
       return undefined;
     }
 
-    const registered = new Date(data.registeredTimestamp);
-    if (isNaN(registered.getTime())) {
+    const registeredTimestamp: Date | undefined = getValidDate(data.registeredTimestamp);
+
+    if (!registeredTimestamp) {
       return undefined;
     }
 
-    if (typeof data.accountRequired !== 'boolean') {
+    const accountRequired: boolean | undefined = getValidBoolean(data.accountRequired);
+
+    if (!accountRequired) {
       return undefined;
     }
 
-    if ((typeof data.capacity !== 'number') || data.capacity < 0 || !Number.isFinite(data.capacity)) {
+    const capacity: number | undefined = getValidPositiveNumber(data.capacity);
+
+    if (!capacity) {
       return undefined;
     }
 
-    if ((typeof data.freeSpace !== 'number') || data.freeSpace < 0 || !Number.isFinite(data.freeSpace)) {
+    const freeSpace: number | undefined = getValidPositiveNumber(data.freeSpace);
+
+    if (!freeSpace) {
       return undefined;
     }
 
-    // Additional business logic validation
-    if (data.freeSpace > data.capacity) {
-      return undefined; // Free space can't be more than capacity
+    if (freeSpace > capacity) {
+      return undefined;
     }
 
-    // If all validations pass, create the object
     return {
-      id: data.id,
+      id: id,
 
-      name: data.name.trim(),
-      address: data.endpoint.trim(),
+      name: name,
+      address: address,
 
-      isOnline: data.isOnline,
-      lastPingTimestamp: lastPing,
-      registeredTimestamp: registered,
-      accountRequired: data.accountRequired,
+      isOnline: isOnline,
+      lastPingTimestamp: lastPingTimestamp,
+      registeredTimestamp: registeredTimestamp,
+      accountRequired: accountRequired,
 
-      capacity: data.capacity,
-      freeSpace: data.freeSpace,
+      capacity: capacity,
+      freeSpace: freeSpace,
     };
   } catch (error) {
-    // Any unexpected error returns undefined
     return undefined;
   }
 }
@@ -103,14 +230,6 @@ function parseServerList(data: any): ServerDetails[] {
     .filter((serverDetail: ServerDetails | undefined) => (serverDetail !== undefined));
 }
 
-function getValidNumber(value: any, defaultValue: number): number {
-  if ((typeof value === 'number') && !isNaN(value) && isFinite(value)) {
-    return value;
-  }
-
-  return defaultValue;
-}
-
 function isUserDataReady(): boolean {
   const strUserData: string | null = localStorage.getItem('user');
 
@@ -122,14 +241,24 @@ function isUserDataReady(): boolean {
 
   userData = {
     serverList: parseServerList(unknownUserData?.serverList),
+    selectedServerId: getValidIntegerOrDefault(
+      unknownUserData?.selectedServerId,
+      defaultUserData.selectedServerId,
+    ),
 
     adminPage: {
       sidebar: {
-        width: getValidNumber(unknownUserData?.adminPage?.sidebar?.width, defaultUserData.adminPage.sidebar.width),
+        width: getValidPositiveNumberOrDefault(
+          unknownUserData?.adminPage?.sidebar?.width,
+          defaultUserData.adminPage.sidebar.width,
+        ),
       },
       serverManagementPanel: {
         serverTable: {
-          height: getValidNumber(unknownUserData?.adminPage?.serverManagementPanel?.serverTable?.height, defaultUserData.adminPage.serverManagementPanel.serverTable.height),
+          height: getValidPositiveNumberOrDefault(
+            unknownUserData?.adminPage?.serverManagementPanel?.serverTable?.height,
+            defaultUserData.adminPage.serverManagementPanel.serverTable.height,
+          ),
         },
       },
     },
@@ -161,5 +290,18 @@ function setUserData(f: (userData: UserData) => void): void {
 
   saveUserData();
 }
+
+getValidBoolean;
+getValidNumber;
+getValidPositiveNumber;
+getValidInteger;
+getValidString;
+getValidDate;
+getValidBooleanOrDefault;
+getValidNumberOrDefault;
+getValidPositiveNumberOrDefault;
+getValidIntegerOrDefault;
+getValidStringOrDefault;
+getValidDateOrDefault;
 
 export { isUserDataReady, saveUserData, getDefaultUserData, getUserData, setUserData };

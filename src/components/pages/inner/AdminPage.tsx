@@ -73,9 +73,9 @@ interface AdminMainPanelContext {
   args?: string[];
 }
 
-interface AdminMainPanelWithParams {
+interface AdminMainPanelWithPathArgs {
   panel: AdminMainPanelLazyExoticComponent;
-  params: string[];
+  pathArgs: string[];
 }
 
 const pathToPanelContext: { [path: string]: AdminMainPanelContext; } = {};
@@ -406,14 +406,64 @@ function Sidebar(props: SidebarProps): React.JSX.Element {
           dropdownMenu={dropdownMenu} toggleDropdownMenu={toggleDropdownMenu}
         >
           <SidebarItem
-            name="management"
+            name="overview"
 
             icon={
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
               </svg>
             }
-            text="Management"
+            text="Overview"
+          />
+          <SidebarItem
+            name="user-storages"
+
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+              </svg>
+            }
+            text="User Storages"
+          />
+          <SidebarItem
+            name="block-devices"
+
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z" />
+              </svg>
+            }
+            text="Block Devices"
+          />
+          <SidebarItem
+            name="blobs"
+
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+              </svg>
+            }
+            text="Blobs"
+          />
+          <SidebarItem
+            name="uploads-downloads"
+
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+              </svg>
+            }
+            text="Uploads & Downloads"
+          />
+          <SidebarItem
+            name="logging"
+
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-full">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" />
+              </svg>
+            }
+            text="Logging"
           />
           <SidebarDropdownItem
             name="registered"
@@ -751,10 +801,13 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
   const [ctx, setCtx] = React.useState<AdminMainPanelContext | undefined>(undefined);
 
-  const [panelWithParams, setPanelWithParams] = React.useState<AdminMainPanelWithParams | undefined>(undefined);
+  const [panelWithPathArgs, setPanelWithPathArgs] = React.useState<AdminMainPanelWithPathArgs | undefined>(undefined);
 
   const pathToPanel: Record<string, AdminMainPanelLazyExoticComponent> = {
-    "servers/management": React.lazy(() => import('@/components/admin/main-panels/servers/ServerManagementPanel')),
+    "servers/overview": React.lazy(() => import('@/components/admin/main-panels/servers/OverviewPanel')),
+    "servers/user-storages": React.lazy(() => import('@/components/admin/main-panels/servers/UserStoragesPanel')),
+    "servers/block-devices": React.lazy(() => import('@/components/admin/main-panels/servers/BlockDevicesPanel')),
+
     "servers/registered/?": React.lazy(() => import('@/components/admin/main-panels/servers/RegisteredServerPanel')),
     // "servers/registered/?/info/?": React.lazy(() => import('@/components/admin/main-panels/servers/RegisteredServerPanel')),
     "servers/registered/?/user-storages": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerUserStoragesPanel')),
@@ -764,12 +817,12 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
     "servers/registered/?/logging": React.lazy(() => import('@/components/admin/main-panels/servers/registered/RegisteredServerLoggingPanel')),
   };
 
-  function matchPathWithParams(pattern: string, path: string): { match: boolean; params: string[]; } {
+  function matchPathWithPathArgs(pattern: string, path: string): { match: boolean; pathArgs: string[]; } {
     const patternParts = pattern.split('/');
     const pathParts = path.split('/');
 
     if (patternParts.length !== pathParts.length) {
-      return { match: false, params: [] };
+      return { match: false, pathArgs: [] };
     }
 
     const params: string[] = [];
@@ -781,18 +834,18 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
       if (patternPart === '?') {
         params.push(pathPart); // Capture the wildcard value
       } else if (patternPart !== pathPart) {
-        return { match: false, params: [] };
+        return { match: false, pathArgs: [] };
       }
     }
 
-    return { match: true, params };
+    return { match: true, pathArgs: params };
   }
 
-  function findMatchingPanelWithParams(path: string): AdminMainPanelWithParams | null {
+  function findMatchingPanelWithPathArgs(path: string): AdminMainPanelWithPathArgs | null {
     for (const [pattern, panel] of Object.entries(pathToPanel)) {
-      const { match, params }: { match: boolean; params: string[]; } = matchPathWithParams(pattern, path);
+      const { match, pathArgs }: { match: boolean; pathArgs: string[]; } = matchPathWithPathArgs(pattern, path);
       if (match) {
-        return { panel, params };
+        return { panel, pathArgs };
       }
     }
     return null;
@@ -803,12 +856,12 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
       const ctx: AdminMainPanelContext | undefined = pathToPanelContext[path];
       setCtx(ctx);
 
-      const panelWithParams: AdminMainPanelWithParams | null = findMatchingPanelWithParams(path);
+      const panelWithPathArgs: AdminMainPanelWithPathArgs | null = findMatchingPanelWithPathArgs(path);
 
-      if (panelWithParams) {
-        setPanelWithParams(panelWithParams);
+      if (panelWithPathArgs) {
+        setPanelWithPathArgs(panelWithPathArgs);
       } else {
-        setPanelWithParams(undefined);
+        setPanelWithPathArgs(undefined);
       }
 
     }
@@ -821,9 +874,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
   // }
 
   const PathSegmentComponent = (props: { segment?: string; index?: number; isLast?: boolean; }) => (
-    <span className="cursor-pointer text-gray-700">
-      {props.segment}
-    </span>
+    <span className="cursor-pointer text-gray-700">{props.segment}</span>
   );
 
   const PathSeparatorComponent = () => (
@@ -844,7 +895,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
               index={index}
               isLast={index === (segments.length - 1)}
             />
-            {index < (segments.length - 1) && <PathSeparatorComponent />}
+            {(index < (segments.length - 1)) && <PathSeparatorComponent />}
           </React.Fragment>
         ))}
       </div>
@@ -879,9 +930,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
             {ctx && ctx.args && (ctx.args.length > 0) && (
               <div className="w-full bg-white border-black- border-b-1 p-1 flex flex-row flex-wrap justify-start items-start gap-1">
                 {ctx.args.map((value: string, index: number) => (
-                  <div key={index} className="border">
-                    {value}
-                  </div>
+                  <div key={index} className="border">{value}</div>
                 ))}
               </div>
             )}
@@ -889,11 +938,11 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
 
           <div className="w-full h-full flex justify-start items-center bg-white">
             <div className="w-full h-full relative">
-              {(panelWithParams && (
+              {(panelWithPathArgs && (
                 <div className="absolute w-full h-full overflow-auto">
                   <div className="min-w-fit min-h-fit w-full h-full p-2">
                     <React.Suspense fallback={<FallbackPage />}>
-                      <panelWithParams.panel params={panelWithParams.params} />
+                      <panelWithPathArgs.panel params={panelWithPathArgs.pathArgs} />
                     </React.Suspense>
                   </div>
                 </div>
