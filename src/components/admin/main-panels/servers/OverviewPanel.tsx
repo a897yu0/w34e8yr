@@ -257,9 +257,9 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
       <div className="w-full border-black border-b-1 my-4" />
 
       {/* Server Details */}
-      <div ref={serverDetailsRef} className="@container w-full max-w-4xl mb-2 p-2 border border-black relative">
+      <div ref={serverDetailsRef} className="@container w-full max-w-4xl">
         {selectedServer && (
-          <>
+          <div className="mb-2 p-2 border border-black relative">
             <h3 className="text-lg font-semibold mb-5 text-black">Server Details</h3>
             <div className="absolute right-1 top-1 cursor-pointer" onClick={() => setSelectedServer(null)}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -361,7 +361,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                 </button>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
 
