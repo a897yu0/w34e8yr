@@ -89,6 +89,8 @@ function moveServerItemToFirst(id: number) {
 function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
 
+  const panelTopRef: React.RefObject<HTMLDivElement | null> = props.panelTopRef;
+
   const openPanel: (path: string) => void = props.openPanel;
 
   const { data: userData, set: setUserData } = useUserDataContext();
@@ -172,9 +174,15 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
     setSelectedServer(server);
 
     setTimeout(() => {
-      if (serverDetailsRef.current) {
-        if (serverDetailsRef.current.getBoundingClientRect().top < 0) {
-          serverDetailsRef.current.scrollIntoView({ behavior: 'smooth' });
+      if (serverDetailsRef.current && panelTopRef.current) {
+        // console.log("panelTopRef y:", panelTopRef.current.getBoundingClientRect().y);
+        // console.log("serverDetailsRef y:", serverDetailsRef.current.getBoundingClientRect().y);
+        if (serverDetailsRef.current.getBoundingClientRect().y < panelTopRef.current.getBoundingClientRect().y) {
+          serverDetailsRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',  // Vertical Alignment
+            inline: 'start',  // Horizontal Alignment
+          });
         }
       }
     }, 1);

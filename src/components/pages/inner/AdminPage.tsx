@@ -813,6 +813,8 @@ function useMainPanelWrapper(props: MainPanelWrapperProps): {
 
   const [panelWithPathArgs, setPanelWithPathArgs] = React.useState<AdminMainPanelWithPathArgs | undefined>(undefined);
 
+  const panelTopRef = React.useRef<HTMLDivElement>(null);
+
   const pathToPanel: Record<string, AdminMainPanelLazyExoticComponent> = {
     "servers/overview": React.lazy(() => import('@/components/admin/main-panels/servers/OverviewPanel')),
     "servers/user-storages": React.lazy(() => import('@/components/admin/main-panels/servers/UserStoragesPanel')),
@@ -983,15 +985,16 @@ function useMainPanelWrapper(props: MainPanelWrapperProps): {
           <div className="w-full h-full flex justify-start items-center bg-white">
             <div className="w-full h-full relative">
               {(panelWithPathArgs && (
-                <div className="absolute w-full h-full overflow-auto">
+                <div ref={panelTopRef} className="absolute w-full h-full overflow-auto">
                   <div className="min-w-fit min-h-fit w-full h-full p-2">
                     <React.Suspense fallback={<FallbackPage />}>
                       <panelWithPathArgs.panel
+                        panelTopRef={panelTopRef}
+
                         args={ctx?.args}
                         pathArgs={panelWithPathArgs.pathArgs}
 
-                        openPanel={openPanel}
-                        resetPanel={resetPanel}
+                        openPanel={openPanel} resetPanel={resetPanel}
                       />
                     </React.Suspense>
                   </div>
@@ -1022,7 +1025,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
   const [sidebarDropdownMenu, setSidebarDropdownMenu] = React.useState<SidebarDropdownMenu>({});
 
-  const sidebarContainerRef = React.useRef<HTMLDivElement>(null);
+  const sidebarPanelContainerRef = React.useRef<HTMLDivElement>(null);
   const sidebarResizerRef = React.useRef<HTMLDivElement>(null);
 
   const maxSidebarWidth: number = window.innerWidth;
@@ -1170,7 +1173,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
   }, []);
 
   const handleSidebarResizerPointerMove = React.useCallback((e: MouseEvent | TouchEvent) => {
-    if (!isResizableSidebarDragging || !sidebarContainerRef.current) {
+    if (!isResizableSidebarDragging || !sidebarPanelContainerRef.current) {
       return;
     }
 
@@ -1178,7 +1181,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
     e.preventDefault();
     e.stopPropagation();
 
-    const containerRect = sidebarContainerRef.current.getBoundingClientRect();
+    const containerRect = sidebarPanelContainerRef.current.getBoundingClientRect();
 
     // Get X position from either mouse or touch event
     const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
@@ -1217,8 +1220,8 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
     // console.log("Resize!");
 
-    if (sidebarContainerRef.current) {
-      const containerRect: DOMRect = sidebarContainerRef.current.getBoundingClientRect();
+    if (sidebarPanelContainerRef.current) {
+      const containerRect: DOMRect = sidebarPanelContainerRef.current.getBoundingClientRect();
       const windowInnerWidth: number = Math.min(containerRect.width, window.innerWidth);
 
       // The value 768px is breakpoint 'md' in tailwind Responsive design.
@@ -1242,12 +1245,12 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
 
   // Adjust the gap or interval of sidebar resizer when sidebar has exceeded width to the screen
   React.useEffect(() => {
-    if (!sidebarResizerRef.current || !sidebarContainerRef.current) {
+    if (!sidebarResizerRef.current || !sidebarPanelContainerRef.current) {
       return;
     }
 
-    console.assert(sidebarResizerRef.current.clientWidth < sidebarContainerRef.current.clientWidth)
-    const validWidth: number = (sidebarContainerRef.current.clientWidth - sidebarResizerRef.current.clientWidth);
+    console.assert(sidebarResizerRef.current.clientWidth < sidebarPanelContainerRef.current.clientWidth)
+    const validWidth: number = (sidebarPanelContainerRef.current.clientWidth - sidebarResizerRef.current.clientWidth);
 
     // console.log("sidebarContainerRef.current.clientWidth:", sidebarContainerRef.current.clientWidth);
     // console.log("sidebarResizerRef.current.clientWidth:", sidebarResizerRef.current.clientWidth);
@@ -1258,7 +1261,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
     }
 
     // console.log("validWidth:", validWidth);
-  }, [sidebarResizerRef, sidebarContainerRef, sidebarWidth]);
+  }, [sidebarResizerRef, sidebarPanelContainerRef, sidebarWidth]);
 
   const sidebarProps: SidebarProps = {
     currentPath: currentMainPanelPath,
@@ -1380,7 +1383,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
       </div >
 
       <div
-        ref={sidebarContainerRef}
+        ref={sidebarPanelContainerRef}
         className={clsx(
           "relative w-full flex-1",
           "flex flex-row justify-start items-center gap-0",
@@ -1405,6 +1408,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
         >
           <Sidebar {...sidebarProps} textEllipsis={true} />
         </div>
+
         {/* Mobile Sidebar */}
         <div className={clsx(
           "md:hidden absolute flex flex-row",

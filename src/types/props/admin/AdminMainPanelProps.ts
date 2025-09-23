@@ -1,4 +1,6 @@
 interface AdminMainPanelProps {
+  panelTopRef: React.RefObject<HTMLDivElement | null>;
+
   args?: string[];
   pathArgs?: string[];
 
