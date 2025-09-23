@@ -1370,13 +1370,13 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
       <div
         ref={sidebarContainerRef}
         className={clsx(
-          "relative w-full flex-1 ",
+          "relative w-full flex-1",
           "flex flex-row justify-start items-center gap-0",
           "md:grid",
           "overflow-y-hidden",
         )}
         style={{
-          gridTemplateColumns: `${sidebarWidth}px 14px 1fr`
+          gridTemplateColumns: (sidebarWidth > 0) ? `${sidebarWidth}px 14px 1fr` : `${sidebarWidth}px 1px 1fr`,
         }}
       >
 
@@ -1413,6 +1413,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
           className={clsx(
             "hidden md:flex h-full",
             "bg-transparent cursor-col-resize",
+            (sidebarWidth === 0) ? "hidden" : "",
           )}
           onMouseDown={handleSidebarResizerPointerDown}
           onTouchStart={handleSidebarResizerPointerDown}
