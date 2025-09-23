@@ -96,6 +96,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   userData as UserData;
   setUserData;
 
+  const serverDetailsRef = React.useRef<HTMLDivElement>(null);
+
   // State for table controls
   const [serverTableSearchTerm, setServerTableSearchTerm] = React.useState('');
   const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
@@ -164,7 +166,19 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
   React.useEffect(() => {
     setServerList(getPaginatedServerList(serverTableCurrentPage, serverTablePageSize));
-  }, [serverTableCurrentPage, serverTablePageSize])
+  }, [serverTableCurrentPage, serverTablePageSize]);
+
+  const openServerDetails = (server: ServerData) => {
+    if (serverDetailsRef.current) {
+      const rect: DOMRect = serverDetailsRef.current.getBoundingClientRect();
+
+      if (rect.top < 0) {
+        serverDetailsRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    setSelectedServer(server);
+  }
 
   return (
     <>
@@ -247,111 +261,113 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
       <div className="w-full border-black border-b-1 my-4" />
 
       {/* Server Details */}
-      {selectedServer && (
-        <div className="@container w-full max-w-4xl mb-2 p-2 border border-black relative">
-          <h3 className="text-lg font-semibold mb-5 text-black">Server Details</h3>
-          <div className="absolute right-1 top-1 cursor-pointer" onClick={() => setSelectedServer(null)}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>Name:</strong>
-              <span>{selectedServer.name}</span>
+      <div ref={serverDetailsRef} className="@container w-full max-w-4xl mb-2 p-2 border border-black relative">
+        {selectedServer && (
+          <>
+            <h3 className="text-lg font-semibold mb-5 text-black">Server Details</h3>
+            <div className="absolute right-1 top-1 cursor-pointer" onClick={() => setSelectedServer(null)}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
             </div>
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>IP Address:</strong>
-              <span>{selectedServer.address}</span>
+            <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>Name:</strong>
+                <span>{selectedServer.name}</span>
+              </div>
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>IP Address:</strong>
+                <span>{selectedServer.address}</span>
+              </div>
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>Status:</strong>
+                <span className={clsx(
+                  selectedServer.isOnline ? 'text-green-600' : 'text-red-600',
+                )}>
+                  {selectedServer.isOnline ? ' Online' : ' Offline'}
+                </span>
+              </div>
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>Last Ping:</strong>
+                <span>{formatTimestamp(selectedServer.lastPingTimestamp)}</span>
+              </div>
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>Registered:</strong>
+                <span>{formatTimestamp(selectedServer.registeredTimestamp)}</span>
+              </div>
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>Account Required:</strong>
+                <span>{selectedServer.accountRequired ? 'Yes' : 'No'}</span>
+              </div>
             </div>
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>Status:</strong>
-              <span className={clsx(
-                selectedServer.isOnline ? 'text-green-600' : 'text-red-600',
-              )}>
-                {selectedServer.isOnline ? ' Online' : ' Offline'}
-              </span>
+            <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>Capacity:</strong>
+                <span>{formatBytes(selectedServer.capacity)}</span>
+              </div>
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>FreeSpace:</strong>
+                <span>{formatBytes(selectedServer.freeSpace)}</span>
+              </div>
+              <div className="flex flex-row flex-wrap gap-1">
+                <strong>Usage:</strong>
+                <span>{getUsagePercentage(selectedServer.capacity, selectedServer.freeSpace).toFixed(1)} %</span>
+              </div>
             </div>
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>Last Ping:</strong>
-              <span>{formatTimestamp(selectedServer.lastPingTimestamp)}</span>
+            <div className="pt-4">
+              <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+                <button
+                  onClick={() => openPanel('servers/user-storages')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  User Storages
+                </button>
+                <button
+                  onClick={() => openPanel('servers/block-devices')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  Block Devices
+                </button>
+                <button
+                  onClick={() => openPanel('servers/blobs')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  Blobs
+                </button>
+              </div>
+              <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+                <button
+                  onClick={() => openPanel('servers/uploads-downloads')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  Uploads & Downloads
+                </button>
+                <button
+                  onClick={() => openPanel('servers/logging')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  Logging
+                </button>
+              </div>
             </div>
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>Registered:</strong>
-              <span>{formatTimestamp(selectedServer.registeredTimestamp)}</span>
-            </div>
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>Account Required:</strong>
-              <span>{selectedServer.accountRequired ? 'Yes' : 'No'}</span>
-            </div>
-          </div>
-          <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>Capacity:</strong>
-              <span>{formatBytes(selectedServer.capacity)}</span>
-            </div>
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>FreeSpace:</strong>
-              <span>{formatBytes(selectedServer.freeSpace)}</span>
-            </div>
-            <div className="flex flex-row flex-wrap gap-1">
-              <strong>Usage:</strong>
-              <span>{getUsagePercentage(selectedServer.capacity, selectedServer.freeSpace).toFixed(1)} %</span>
-            </div>
-          </div>
-          <div className="pt-4">
-            <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
-              <button
-                onClick={() => openPanel('servers/user-storages')}
-                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                </svg>
-                User Storages
-              </button>
-              <button
-                onClick={() => openPanel('servers/block-devices')}
-                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                </svg>
-                Block Devices
-              </button>
-              <button
-                onClick={() => openPanel('servers/blobs')}
-                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                </svg>
-                Blobs
-              </button>
-            </div>
-            <div className="max-w-4xl w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
-              <button
-                onClick={() => openPanel('servers/uploads-downloads')}
-                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                </svg>
-                Uploads & Downloads
-              </button>
-              <button
-                onClick={() => openPanel('servers/logging')}
-                className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                </svg>
-                Logging
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
 
       {/* Search and Filter Controls */}
       <div className="w-full mb-1 flex flex-row gap-2">
@@ -438,7 +454,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setSelectedServer(server)}
+                      onClick={() => openServerDetails(server)}
                       className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
                     >
                       Details
