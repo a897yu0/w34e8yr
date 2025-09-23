@@ -942,7 +942,7 @@ function MainPanelWrapper(props: MainPanelWrapperProps): React.JSX.Element {
                 <div className="absolute w-full h-full overflow-auto">
                   <div className="min-w-fit min-h-fit w-full h-full p-2">
                     <React.Suspense fallback={<FallbackPage />}>
-                      <panelWithPathArgs.panel params={panelWithPathArgs.pathArgs} />
+                      <panelWithPathArgs.panel args={panelWithPathArgs.pathArgs} />
                     </React.Suspense>
                   </div>
                 </div>

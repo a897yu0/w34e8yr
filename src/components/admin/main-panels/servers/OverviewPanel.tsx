@@ -288,6 +288,32 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
               <span>{getUsagePercentage(selectedServer.capacity, selectedServer.freeSpace).toFixed(1)} %</span>
             </div>
           </div>
+          <div className="pt-4">
+            <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+              <button
+                // onClick={() => }
+                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >User Storages</button>
+              <button
+                // onClick={() => }
+                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >Block Devices</button>
+              <button
+                // onClick={() => }
+                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >Blobs</button>
+            </div>
+            <div className="grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+              <button
+                // onClick={() => }
+                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >Uploads & Downloads</button>
+              <button
+                // onClick={() => }
+                className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+              >Logging</button>
+            </div>
+          </div>
         </div>
       )}
 

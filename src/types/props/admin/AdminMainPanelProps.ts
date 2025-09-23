@@ -1,5 +1,5 @@
 interface AdminMainPanelProps {
-  params?: string[];
+  args?: string[];
 }
 
 export type { AdminMainPanelProps };
