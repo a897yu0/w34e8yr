@@ -105,6 +105,7 @@ function App(): React.JSX.Element {
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
   const { isReady: isUserDataReady, prepare: prepareUserData } = useUserDataReady();
+  defaultUserData as User;
 
   const openDialog = (ctx: DialogContext | null): void => {
     if (!ctx) return;

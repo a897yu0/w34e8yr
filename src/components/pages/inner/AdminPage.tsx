@@ -1016,10 +1016,10 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
   const openDialog: (ctx: DialogContext | null) => void = props.openDialog;
   openDialog;
 
-  const { user: userData, setUser: setUserData } = useUser();
+  const [user, setUser] = useUser();
   defaultUserData;
-  userData as User;
-  setUserData;
+  user as User;
+  setUser;
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
 
