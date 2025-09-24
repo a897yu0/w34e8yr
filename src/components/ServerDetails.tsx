@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 
-import type { ServerData } from "@/types/data/ServerData";
+import type { Server } from "@/types/Server";
 import type { ServerDetailsProps } from "@/types/props/ServerDetailsProps";
 import { formatBytes, formatTimestamp, getUsagePercentage } from "@/utils";
 
@@ -9,7 +9,7 @@ import { formatBytes, formatTimestamp, getUsagePercentage } from "@/utils";
 function ServerDetails(props: ServerDetailsProps): React.JSX.Element {
   props;
 
-  const server: ServerData = props.server;
+  const server: Server = props.server;
 
   const resetSelection: (() => void) | undefined = props.resetSelection;
 

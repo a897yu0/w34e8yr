@@ -1,5 +1,5 @@
-import type { LayoutData } from "../types/data/LayoutData";
-import { getValidPositiveNumberOrDefault } from "../validators";
+import type { LayoutData } from "./types/LayoutData";
+import { getValidPositiveNumberOrDefault } from "./validators";
 
 const defaultLayoutData: Readonly<LayoutData> = {
   adminPage: {
@@ -50,8 +50,8 @@ function saveLayoutData(data: LayoutData): void {
   localStorage.setItem('layout', JSON.stringify(data));
 }
 
-function setLayoutData(f: (data: LayoutData) => void): void {
-  f(layoutData);
+function setLayoutData(dispatch: (data: LayoutData) => void): void {
+  dispatch(layoutData);
 
   if (!timeout) {
     timeout = setTimeout(() => {

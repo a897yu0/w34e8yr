@@ -1,7 +1,7 @@
-import type { ServerData } from "@/types/data/ServerData";
+import type { Server } from "@/types/Server";
 
 interface ServerDetailsProps {
-  server: ServerData;
+  server: Server;
 
   resetSelection?: () => void;
 }

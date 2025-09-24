@@ -1,6 +1,6 @@
-import type { ServerData } from "@/types/data/ServerData";
+import type { Server } from "@/types/Server";
 
-const sampleServerList: ServerData[] = [
+const sampleServerList: Server[] = [
   {
     id: 9,
 

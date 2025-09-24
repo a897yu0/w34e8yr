@@ -2,36 +2,37 @@ import clsx from 'clsx';
 import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
-import type { ServerData } from '@/types/data/ServerData';
+import type { Server } from '@/types/Server';
 
 import ResizableVerticalWrapper from '@/components/ResizableVerticalWrapper';
 import Paginator from '@/components/Paginator';
 import ServerDetails from '@/components/ServerDetails';
 
-import type { UserData } from '@/types/data/UserData';
-import { defaultUserData, useUserDataContext } from '@/data/user';
+import type { User } from '@/types/User';
+import { useUser } from '@/user';
 
-import type { LayoutData } from '@/types/data/LayoutData';
-import { defaultLayoutData, layoutData, setLayoutData } from '@/data/layout';
+import type { LayoutData } from '@/types/LayoutData';
+import { defaultLayoutData, layoutData, setLayoutData } from '@/layout-data';
 
 import { formatTimestamp, getUsagePercentage } from '@/utils';
 
 import sampleServerList from './sampleServerList';
 
 interface PaginatedServerList {
-  items: ServerData[];
+  items: Server[];
 
   currentPage: number;
   totalPages: number;
 }
 
-function getPaginatedServerList(page: number, pageSize: number = 3): PaginatedServerList {
+function paginateServerList(serverList: Server[], page: number, pageSize: number = 3): PaginatedServerList {
   if (pageSize <= 0) {
     throw new Error(`Invalid page size: ${pageSize} <= 0`);
   };
 
   // Sort servers by order first
-  const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
+  // const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
+  const sortedServers = [...serverList].sort((a, b) => b.id - a.id);
 
   const totalItems = sortedServers.length;
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -55,7 +56,7 @@ function moveServerItemToFirst(id: number) {
 
   const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
 
-  sampleServerList.forEach((server: ServerData) => {
+  sampleServerList.forEach((server: Server) => {
     if (server.id !== id) return;
 
     server.id = (sortedServers[0].id + 1);
@@ -76,10 +77,9 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
   const openPanel: (path: string) => void = props.openPanel;
 
-  const { data: userData, set: setUserData } = useUserDataContext();
-  defaultUserData;
-  userData as UserData;
-  setUserData;
+  const [user, setUser] = useUser();
+  user as User;
+  setUser;
 
   const serverDetailsRef = React.useRef<HTMLDivElement>(null);
 
@@ -88,7 +88,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
   const [serverTableCurrentPage, setServerTableCurrentPage] = React.useState(1);
   const [serverTablePageSize, setServerTablePageSize] = React.useState<number>(7);
-  const [selectedServer, setSelectedServer] = React.useState<ServerData | null>(null);
+  const [selectedServer, setSelectedServer] = React.useState<Server | null>(null);
 
   setServerTablePageSize;
 
@@ -134,7 +134,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   const moveItemToFirst = (id: number) => {
     moveServerItemToFirst(id);
 
-    setServerList(getPaginatedServerList(serverTableCurrentPage, serverTablePageSize));
+    setServerList(paginateServerList(user.serverList, serverTableCurrentPage, serverTablePageSize));
   };
 
   // Filter and search servers, The filter is handled by DB and query, not in client...
@@ -150,10 +150,10 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   // }, [servers, searchTerm, statusFilter]);
 
   React.useEffect(() => {
-    setServerList(getPaginatedServerList(serverTableCurrentPage, serverTablePageSize));
-  }, [serverTableCurrentPage, serverTablePageSize]);
+    setServerList(paginateServerList(user.serverList, serverTableCurrentPage, serverTablePageSize));
+  }, [user, serverTableCurrentPage, serverTablePageSize]);
 
-  const openServerDetails = (server: ServerData) => {
+  const openServerDetails = (server: Server) => {
     setSelectedServer(server);
 
     setTimeout(() => {
@@ -169,6 +169,20 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
         }
       }
     }, 1);
+  };
+
+  const goToPanel = (serverId: number, path: string) => {
+    console.assert(Number.isInteger(serverId));
+    console.assert(serverId > 0);
+    console.assert(serverId < Number.MAX_SAFE_INTEGER);
+
+    setUser((user: User) => {
+      console.assert(Number.isInteger(serverId));
+      console.assert(serverId > 0);
+      console.assert(serverId < Number.MAX_SAFE_INTEGER);
+      user.selectedServerId = serverId;
+    });
+    openPanel(path);
   }
 
   return (
@@ -197,7 +211,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       {/* Add Server Form */}
       {showAddFormToAddServer ? (
-        <div className="max-w-md mb-2 p-2 border border-black">
+        <div className="max-w-md mb-2 p-2 border-1 border-black">
           {/* <h3 className="text-lg font-semibold mb-4 text-black">Add New Server</h3> */}
           <div className="space-y-4">
             <div className="w-full flex flex-col gap-2">
@@ -207,7 +221,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                   type="text"
                   value={formDataToAddServer.name}
                   onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-black text-black min-h-[2.5rem]"
+                  className="w-full px-3 py-2 border-1 border-black text-black min-h-[2.5rem]"
                   placeholder="Enter server name"
                 />
               </div>
@@ -217,7 +231,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                   type="text"
                   value={formDataToAddServer.address}
                   onChange={(e) => setFormDataToAddServer({ ...formDataToAddServer, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-black text-black min-h-[2.5rem]"
+                  className="w-full px-3 py-2 border-1 border-black text-black min-h-[2.5rem]"
                   placeholder="192.168.1.1 or www.example.com"
                 />
               </div>
@@ -225,13 +239,13 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
             <div className="flex flex-row gap-1">
               <button
                 onClick={handleAddServer}
-                className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                className="px-4 py-2 border-1 border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Add Server
               </button>
               <button
                 onClick={() => setShowAddFormToAddServer(false)}
-                className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                className="px-4 py-2 border-1 border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -242,7 +256,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
         <div className="mb-2">
           <button
             onClick={() => setShowAddFormToAddServer(true)}
-            className="px-4 py-2 border border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
+            className="px-4 py-2 border-1 border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Add Server
           </button>
@@ -251,73 +265,13 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       <div className="w-full border-black border-b-1 my-4" />
 
-      {/* Server Details */}
-      {selectedServer && (
-        <div ref={serverDetailsRef} className="@container w-full max-w-4xl">
-          <div className="mb-2 p-2 border border-black relative">
-            <ServerDetails server={selectedServer} resetSelection={() => setSelectedServer(null)} />
-            <div className="pt-4">
-              <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
-                <button
-                  onClick={() => openPanel('servers/user-storages')}
-                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                  </svg>
-                  User Storages
-                </button>
-                <button
-                  onClick={() => openPanel('servers/block-devices')}
-                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                  </svg>
-                  Block Devices
-                </button>
-                <button
-                  onClick={() => openPanel('servers/blobs')}
-                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                  </svg>
-                  Blobs
-                </button>
-              </div>
-              <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
-                <button
-                  onClick={() => openPanel('servers/uploads-downloads')}
-                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                  </svg>
-                  Uploads & Downloads
-                </button>
-                <button
-                  onClick={() => openPanel('servers/logging')}
-                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                  </svg>
-                  Logging
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Search and Filter Controls */}
-      <div className="w-full mb-1 flex flex-row gap-2">
+      <div className="w-full mb-2 flex flex-row gap-2">
         <div className="w-fit">
           <select
             value={serverTableStatusFilter}
             onChange={(e) => setServerTableStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-black text-black"
+            className="w-full px-3 py-2 border-1 border-black text-black"
           >
             <option value="all">All Status</option>
             <option value="online">Online Only</option>
@@ -330,10 +284,70 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
             placeholder="Search servers by name or address"
             value={serverTableSearchTerm}
             onChange={(e) => setServerTableSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-black text-black"
+            className="w-full px-3 py-2 border-1 border-black text-black"
           />
         </div>
       </div>
+
+      {/* Server Details */}
+      {selectedServer && (
+        <div ref={serverDetailsRef} className="@container w-full max-w-4xl mb-2 ">
+          <div className="p-2 border-1 border-black relative">
+            <ServerDetails server={selectedServer} resetSelection={() => setSelectedServer(null)} />
+            <div className="pt-4">
+              <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+                <button
+                  onClick={() => goToPanel(selectedServer.id, 'servers/user-storages')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  User Storages
+                </button>
+                <button
+                  onClick={() => goToPanel(selectedServer.id, 'servers/block-devices')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  Block Devices
+                </button>
+                <button
+                  onClick={() => goToPanel(selectedServer.id, 'servers/blobs')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  Blobs
+                </button>
+              </div>
+              <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
+                <button
+                  onClick={() => goToPanel(selectedServer.id, 'servers/uploads-downloads')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  Uploads & Downloads
+                </button>
+                <button
+                  onClick={() => goToPanel(selectedServer.id, 'servers/logging')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  Logging
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Server Summary Table */}
       <ResizableVerticalWrapper
@@ -362,7 +376,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
             </tr>
           </thead>
           <tbody>
-            {serverList && serverList.items.map((server: ServerData, index: number) => (
+            {serverList && serverList.items.map((server: Server, index: number) => (
               <tr key={server.id} className={clsx(
                 (index % 2 == 0) ? 'bg-white' : 'bg-gray-100'
               )}>
@@ -397,13 +411,13 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                   <div className="flex gap-2">
                     <button
                       onClick={() => openServerDetails(server)}
-                      className="px-2 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                      className="px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                     >
                       Details
                     </button>
                     <button
                       onClick={() => moveItemToFirst(server.id)}
-                      className="px-0 py-1 text-sm border border-black text-black hover:bg-gray-50 cursor-pointer"
+                      className="px-0 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
@@ -411,7 +425,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                     </button>
                     <button
                       onClick={() => handleRemoveServer(server.id)}
-                      className="px-2 py-1 text-sm border border-red-600 text-red-600 hover:bg-red-50 cursor-pointer"
+                      className="px-2 py-1 text-sm border-1 border-red-600 text-red-600 hover:bg-red-50 cursor-pointer"
                     >
                       Remove
                     </button>

@@ -1,30 +1,48 @@
 import React from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
-import type { ServerData } from '@/types/data/ServerData';
+import type { Server } from '@/types/Server';
 
 import ServerDetails from '@/components/ServerDetails';
 
-import { useUserDataContext } from '@/data/user';
+import type { User } from '@/types/User';
+import { useUser } from '@/user';
 
 function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
 
-  const [currentServer, setCurrentServer] = React.useState<ServerData | undefined>(undefined);
+  const [currentServer, setCurrentServer] = React.useState<Server | undefined>(undefined);
 
-  useUserDataContext;
+  const [user, setUser] = useUser();
   currentServer; setCurrentServer;
-
-
-  React.useEffect(() => {
-
-  }, [])
 
   return (
     <>
       {/* Header */}
       <div className="w-full">
         <h1 className="text-2xl font-bold mb-5">User Storages</h1>
+
+        <div className="w-fit">
+          {user && (
+            <select
+              value={user.selectedServerId}
+              onChange={(e) => setUser((user: User) => {
+                user.selectedServerId = parseInt(e.target.value, 10);
+              })}
+              className="w-full px-3 py-2 border-1 border-black text-black"
+            >
+              <option value={Number.MAX_SAFE_INTEGER}>
+                {user.serverList.length === 0 ? "No servers available" : "Select a server"}
+              </option>
+              {user.serverList.map((server: Server, index: number) => {
+                console.assert(server.id < Number.MAX_SAFE_INTEGER);
+                return (
+                  <option key={index} value={server.id}>{server.name}</option>
+                );
+              })}
+            </select>
+          )}
+        </div>
       </div>
 
       <div className="w-full border-black border-b-1 my-4" />
@@ -38,7 +56,7 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
 
               name: 'office-public',
               address: '192.168.1.101',
-              
+
               isOnline: false,
               lastPingTimestamp: new Date('2024-01-14T15:20:00'),
               registeredTimestamp: new Date('2024-01-05T11:30:00'),

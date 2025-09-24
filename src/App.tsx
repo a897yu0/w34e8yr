@@ -9,13 +9,8 @@ import type { EntryPageProps } from './types/props/pages/EntryPageProps';
 import type { InnerPageProps } from '@/types/props/pages/inner/InnerPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
 
-import type { UserData } from '@/types/data/UserData';
-import {
-  defaultUserData,
-  loadUserData,
-  saveUserData,
-  UserDataContext,
-} from '@/data/user';
+import type { User } from '@/types/User';
+import { defaultUserData, useUserDataReady } from '@/user';
 
 interface HeaderProps {
 }
@@ -106,12 +101,10 @@ function Header(props: HeaderProps): React.JSX.Element {
   );
 }
 
-let timeoutForSavingUserData: NodeJS.Timeout | undefined = undefined;
-
 function App(): React.JSX.Element {
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
-  const [userData, setUserData] = React.useState<UserData | undefined>(undefined);
+  const { isReady: isUserDataReady, prepare: prepareUserData } = useUserDataReady();
 
   const openDialog = (ctx: DialogContext | null): void => {
     if (!ctx) return;
@@ -122,64 +115,17 @@ function App(): React.JSX.Element {
   const EntryPage: EntryPageLazyExoticComponent = React.lazy(() => import('@/components/pages/EntryPage'));
   const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/inner/AdminPage'));
 
-  const handleLocalUseInEntryPage = () => {
-    setUserData((userData: UserData | undefined) => {
-      if (userData) {
-        return userData;
-      }
-
-      userData = structuredClone(defaultUserData);
-      saveUserData(userData);
-      return userData;
-    });
-  };
-
-  const setUserDataWithSaving = (f: (data: UserData) => void) => {
-    setUserData((data: UserData | undefined) => {
-      if (!data) {
-        return;
-      }
-      f(data);
-
-      return data;
-    });
-
-    if (!timeoutForSavingUserData) {
-      timeoutForSavingUserData = setTimeout(() => {
-
-        setUserData((data: UserData | undefined) => {
-          if (!data) {
-            return;
-          }
-          saveUserData(data);
-          return data;
-        });
-
-        timeoutForSavingUserData = undefined;
-      }, 1000);
-
-    }
-  };
-
-  React.useEffect(() => {
-    setUserData(loadUserData());
-  }, []);
-
   return (
     <>
       <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
-        {!userData ? (
+        {!isUserDataReady ? (
           <main className="w-full flex-1">
             <React.Suspense fallback={<FallbackPage />}>
-              <EntryPage handleLocalUse={handleLocalUseInEntryPage} />
+              <EntryPage handleLocalUse={() => prepareUserData()} />
             </React.Suspense>
           </main>
         ) : (
-          <UserDataContext.Provider value={{
-            data: userData,
-
-            set: setUserDataWithSaving,
-          }}>
+          <>
             <Header />
 
             <main className="w-full flex-1">
@@ -187,7 +133,7 @@ function App(): React.JSX.Element {
                 <AdminPage openDialog={openDialog} />
               </React.Suspense>
             </main>
-          </UserDataContext.Provider>
+          </>
         )}
 
         <footer className="w-full bg-white m-0 border-black border-t-1">

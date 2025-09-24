@@ -1,6 +1,6 @@
 
 
-interface ServerData {
+interface Server {
   id: number;
 
   name: string;
@@ -15,4 +15,4 @@ interface ServerData {
   freeSpace: number;
 }
 
-export type { ServerData };
+export type { Server };

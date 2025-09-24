@@ -6,11 +6,11 @@ import type { AdminPageProps } from '@/types/props/pages/inner/AdminPageProps';
 
 import FallbackPage from '@/components/pages/FallbackPage';
 
-import type { UserData } from '@/types/data/UserData';
-import { defaultUserData, useUserDataContext } from '@/data/user';
+import type { User } from '@/types/User';
+import { defaultUserData, useUser } from '@/user';
 
-import type { LayoutData } from '@/types/data/LayoutData';
-import { defaultLayoutData, layoutData, setLayoutData } from '@/data/layout';
+import type { LayoutData } from '@/types/LayoutData';
+import { defaultLayoutData, layoutData, setLayoutData } from '@/layout-data';
 import type { DialogContext } from '@/types/DialogContext';
 
 interface SidebarDropdownMenu {
@@ -1016,9 +1016,9 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
   const openDialog: (ctx: DialogContext | null) => void = props.openDialog;
   openDialog;
 
-  const { data: userData, set: setUserData } = useUserDataContext();
+  const { user: userData, setUser: setUserData } = useUser();
   defaultUserData;
-  userData as UserData;
+  userData as User;
   setUserData;
 
   const [isMobileSidebarShown, setIsMobileSidebarShown] = React.useState<boolean>(false);
