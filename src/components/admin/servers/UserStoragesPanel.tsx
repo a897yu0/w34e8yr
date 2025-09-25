@@ -71,7 +71,6 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
         )}
       </div>
 
-
       <div className="w-full border-black border-b-1 my-4" />
 
     </>

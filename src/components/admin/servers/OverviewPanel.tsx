@@ -401,7 +401,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                 <td className="px-4 py-3 whitespace-nowrap text-black">
                   <div className="ml-2 inset-0 flex items-center justify-center">
                     <span className="text-sm font-semibold text-gray-700">
-                      {getUsagePercentage(server.capacity, server.freeSpace).toFixed(1)}%
+                      {getUsagePercentage(server.capacity, server.freeSpace).toFixed(1)} %
                     </span>
                   </div>
                 </td>
@@ -454,7 +454,6 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
             onPageChange={setServerTableCurrentPageIndex} />
         )}
-
       </div>
 
       <div className="mb-17"></div>
