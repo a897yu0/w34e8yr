@@ -1,5 +1,5 @@
 import type { LayoutData } from "./types/LayoutData";
-import { getValidPositiveNumberOrDefault } from "./validators";
+import { getValidPositiveIntegerOrDefault, getValidPositiveNumberOrDefault } from "./validators";
 
 const defaultLayoutData: Readonly<LayoutData> = {
   adminPage: {
@@ -8,6 +8,7 @@ const defaultLayoutData: Readonly<LayoutData> = {
     },
     serverManagementPanel: {
       serverTable: {
+        itemCountPerPage: 5,
         height: 177,  // TODO: Make configurable with .env
       },
     },
@@ -33,6 +34,10 @@ function loadLayoutData(): LayoutData | undefined {
       },
       serverManagementPanel: {
         serverTable: {
+          itemCountPerPage: getValidPositiveIntegerOrDefault(
+            unknownLayoutData?.adminPage?.serverManagementPanel?.serverTable?.itemCountPerPage,
+            defaultLayoutData.adminPage.serverManagementPanel.serverTable.itemCountPerPage,
+          ),
           height: getValidPositiveNumberOrDefault(
             unknownLayoutData?.adminPage?.serverManagementPanel?.serverTable?.height,
             defaultLayoutData.adminPage.serverManagementPanel.serverTable.height,

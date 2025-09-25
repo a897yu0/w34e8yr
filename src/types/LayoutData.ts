@@ -6,6 +6,7 @@ interface LayoutData {
     };
     serverManagementPanel: {
       serverTable: {
+        itemCountPerPage: number;
         height: number;
       };
     };

@@ -68,6 +68,8 @@ function paginateServerList(serverList: Server[], pageIndex: number, itemCountPe
 function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
 
+  const defaultItemCountPerPage: number = defaultLayoutData.adminPage.serverManagementPanel.serverTable.itemCountPerPage;
+
   const panelTopRef: React.RefObject<HTMLDivElement | null> = props.panelTopRef;
 
   const openPanel: (path: string) => void = props.openPanel;
@@ -82,18 +84,16 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   const [serverTableSearchTerm, setServerTableSearchTerm] = React.useState('');
   const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
   const [serverTableCurrentPageIndex, setServerTableCurrentPageIndex] = React.useState(0);
-  const [serverTableServerCountPerPage, setServerTableServerCountPerPage] = React.useState<number>(2);
+  const [serverTableItemCountPerPage, setServerTableItemCountPerPage] = React.useState<number>(defaultItemCountPerPage);
   const [isServerDetailsShown, setIsServerDetailsShown] = React.useState<boolean>(false);
-
-  setServerTableServerCountPerPage;
 
   // Mock server data
   // The order is pre-sorted when this list get from DB. and the pagination is handled by partially, not paginated at the client.
   const paginatedServerList: PaginatedServerList = React.useMemo<PaginatedServerList>(() => {
     // console.log("user.serverList:", user.serverList);
     // console.log("serverTableCurrentPage:", serverTableCurrentPageIndex);
-    return paginateServerList(user.serverList, serverTableCurrentPageIndex, serverTableServerCountPerPage);
-  }, [user, serverTableCurrentPageIndex, serverTableServerCountPerPage]);
+    return paginateServerList(user.serverList, serverTableCurrentPageIndex, serverTableItemCountPerPage);
+  }, [user, serverTableCurrentPageIndex, serverTableItemCountPerPage]);
 
   // State for form
   const [showAddFormToAddServer, setShowAddFormToAddServer] = React.useState(false);
@@ -150,7 +150,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
     console.assert(index < user.serverList.length);
     console.assert(Number.isInteger(index));
 
-    console.log("index:", index);
+    // console.log("index:", index);
 
     setUser((user: User) => {
       const server: Server = user.serverList.splice(index, 1)[0];
@@ -176,6 +176,17 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
     });
 
   };
+
+  const changeServerTableItemCountPerPage = (itemCountPerPage: number) => {
+    console.assert(itemCountPerPage > 0);
+    console.assert(Number.isInteger(itemCountPerPage));
+
+    setLayoutData((data: LayoutData) => {
+      data.adminPage.serverManagementPanel.serverTable.itemCountPerPage = itemCountPerPage;
+    })
+
+    setServerTableItemCountPerPage(itemCountPerPage);
+  }
 
   return (
     <>
@@ -343,8 +354,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       {/* Server Summary Table */}
       <ResizableVerticalWrapper
-        defaultLayoutHeight={defaultLayoutData.adminPage.serverManagementPanel.serverTable.height}
         layoutHeight={layoutData.adminPage.serverManagementPanel.serverTable.height}
+        defaultLayoutHeight={defaultLayoutData.adminPage.serverManagementPanel.serverTable.height}
 
         minHeight={77}
 
@@ -402,7 +413,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-row gap-2">
                     <button
-                      onClick={() => openServerDetails((paginatedServerList.currentPageIndex * serverTableServerCountPerPage) + index)}
+                      onClick={() => openServerDetails((paginatedServerList.currentPageIndex * serverTableItemCountPerPage) + index)}
                       className="px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                     >
                       <div className="flex flex-row justify-center items-center gap-1">
@@ -427,14 +438,28 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
         </table>
       </ResizableVerticalWrapper>
 
-      {paginatedServerList && (
-        <Paginator
-          currentPageIndex={serverTableCurrentPageIndex}
-          totalPageCount={paginatedServerList.totalPageCount}
-          maxVisiblePageCount={3}
+      <div className="w-full flex felx-row gap-3 justify-end items-center">
+        <select
+          value={serverTableItemCountPerPage}
+          onChange={(e) => changeServerTableItemCountPerPage(parseInt(e.target.value, 10))}
+          className="w-17 px-3 py-2 border-1 border-black text-black"
+        >
+          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultItemCountPerPage).map(num => (
+            <option key={num} value={num}>
+              {num}
+            </option>
+          ))}
+        </select>
+        {paginatedServerList && (
+          <Paginator
+            currentPageIndex={serverTableCurrentPageIndex}
+            totalPageCount={paginatedServerList.totalPageCount}
+            maxVisiblePageCount={3}
 
-          onPageChange={setServerTableCurrentPageIndex} />
-      )}
+            onPageChange={setServerTableCurrentPageIndex} />
+        )}
+
+      </div>
 
       <div className="mb-17"></div>
 
