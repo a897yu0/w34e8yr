@@ -14,6 +14,8 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
   const [currentServer, setCurrentServer] = React.useState<Server | undefined>(undefined);
 
   const [user, setUser] = useUser();
+  user as User;
+  setUser;
   currentServer; setCurrentServer;
 
   return (
@@ -22,7 +24,7 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
       <div className="w-full">
         <h1 className="text-2xl font-bold mb-5">User Storages</h1>
 
-        <div className="w-fit">
+        {/* <div className="w-fit">
           {user && (
             <select
               value={user.selectedServerIndex}
@@ -42,7 +44,7 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
               })}
             </select>
           )}
-        </div>
+        </div> */}
       </div>
 
       <div className="w-full border-black border-b-1 my-4" />
@@ -52,8 +54,6 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
         <div className="@container flex flex-col items-start">
           <ServerDetails
             server={{
-              id: 5,
-
               name: 'office-public',
               address: '192.168.1.101',
 

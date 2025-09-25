@@ -10,7 +10,6 @@ import {
   getValidString,
   getValidDate,
   getValidPositiveIntegerOrDefault,
-  getValidPositiveInteger,
 } from "@/validators";
 import sampleServerList from "@/sampleServerList";
 
@@ -87,7 +86,7 @@ function parseServer(data: any): Server | undefined {
       isOnline: isOnline,
       lastPingTimestamp: lastPingTimestamp,
       registeredTimestamp: registeredTimestamp,
-      
+
       accountRequired: accountRequired,
 
       capacity: capacity,

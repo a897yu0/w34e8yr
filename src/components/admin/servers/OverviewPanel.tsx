@@ -31,7 +31,7 @@ function paginateServerList(serverList: Server[], pageIndex: number, itemCountPe
   if (itemCountPerPage <= 0) {
     throw new Error(`Invalid page size: ${itemCountPerPage} <= 0`);
   };
-  
+
   const totalItems = serverList.length;
   if (totalItems === 0) {
     return {
@@ -90,8 +90,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   // Mock server data
   // The order is pre-sorted when this list get from DB. and the pagination is handled by partially, not paginated at the client.
   const paginatedServerList: PaginatedServerList = React.useMemo<PaginatedServerList>(() => {
-    console.log("user.serverList:", user.serverList);
-    console.log("serverTableCurrentPage:", serverTableCurrentPageIndex);
+    // console.log("user.serverList:", user.serverList);
+    // console.log("serverTableCurrentPage:", serverTableCurrentPageIndex);
     return paginateServerList(user.serverList, serverTableCurrentPageIndex, serverTableServerCountPerPage);
   }, [user, serverTableCurrentPageIndex, serverTableServerCountPerPage]);
 
