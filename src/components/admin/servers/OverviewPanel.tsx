@@ -143,7 +143,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   //   });
   // }, [servers, searchTerm, statusFilter]);
 
-  const openServerDetails = (index: number) => {
+  const openServer = (index: number) => {
     console.assert(index >= 0);
     console.assert(index < user.serverList.length);
     console.assert(Number.isInteger(index));
@@ -298,15 +298,6 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
             <div className="pt-4">
               <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
                 <button
-                  onClick={() => openPanel('servers/user-storages')}
-                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                  </svg>
-                  User Storages
-                </button>
-                <button
                   onClick={() => openPanel('servers/block-devices')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                 >
@@ -314,6 +305,15 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
                   </svg>
                   Block Devices
+                </button>
+                <button
+                  onClick={() => openPanel('servers/user-storages')}
+                  className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                  </svg>
+                  User Storages
                 </button>
                 <button
                   onClick={() => openPanel('servers/blobs')}
@@ -324,8 +324,6 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                   </svg>
                   Blobs
                 </button>
-              </div>
-              <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
                 <button
                   onClick={() => openPanel('servers/uploads-downloads')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
@@ -411,7 +409,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-row gap-2">
                     <button
-                      onClick={() => openServerDetails((paginatedServerList.currentPageIndex * serverTableItemCountPerPage) + index)}
+                      onClick={() => openServer((paginatedServerList.currentPageIndex * serverTableItemCountPerPage) + index)}
                       className="px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                     >
                       <div className="flex flex-row justify-center items-center gap-1">
@@ -436,11 +434,11 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
         </table>
       </ResizableVerticalWrapper>
 
-      <div className="w-full flex felx-row gap-3 justify-end items-center">
+      <div className="w-full h-9 flex felx-row gap-3 justify-end items-center">
         <select
           value={serverTableItemCountPerPage}
           onChange={(e) => changeServerTableItemCountPerPage(parseInt(e.target.value, 10))}
-          className="w-17 px-3 py-2 border-1 border-black text-black"
+          className="w-17 px-3 h-full border-1 border-black text-black"
         >
           {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultLayoutData.adminPage.servers.overviewPanel.serverTable.itemCountPerPage).map(num => (
             <option key={num} value={num}>

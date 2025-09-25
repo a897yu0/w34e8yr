@@ -47,19 +47,19 @@ function Paginator(props: PaginatorProps): React.JSX.Element {
   const showEndEllipsis = visiblePages[visiblePages.length - 1] < (totalPageCount - 2);
 
   return (
-    <div className="flex justify-center items-center gap-2">
+    <div className="h-full flex flex-row justify-center items-center gap-2">
       {/* Previous Button */}
       <button
         onClick={() => onPageChange(Math.max(0, currentPageIndex - 1))}
         disabled={currentPageIndex === 0}
-        className="p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+        className="h-full p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
         </svg>
       </button>
 
-      <div className="flex gap-1">
+      <div className="h-full flex gap-1">
         {/* First page */}
         {showFirstPage && (
           <>
@@ -83,7 +83,7 @@ function Paginator(props: PaginatorProps): React.JSX.Element {
           <button
             key={page}
             onClick={() => onPageChange(page)}
-            className={`px-3 py-1 border border-black cursor-pointer ${currentPageIndex === page
+            className={`h-full px-3 py-1 border border-black cursor-pointer ${currentPageIndex === page
               ? 'bg-black text-white'
               : 'bg-white text-black hover:bg-gray-50'
               }`}
@@ -100,7 +100,7 @@ function Paginator(props: PaginatorProps): React.JSX.Element {
             )}
             <button
               onClick={() => onPageChange((totalPageCount - 1))}
-              className={`px-3 py-1 border border-black cursor-pointer ${currentPageIndex === (totalPageCount - 1)
+              className={`h-full px-3 py-1 border border-black cursor-pointer ${currentPageIndex === (totalPageCount - 1)
                 ? 'bg-black text-white'
                 : 'bg-white text-black hover:bg-gray-50'
                 }`}
@@ -115,7 +115,7 @@ function Paginator(props: PaginatorProps): React.JSX.Element {
       <button
         onClick={() => onPageChange(Math.min(totalPageCount, currentPageIndex + 1))}
         disabled={currentPageIndex === (totalPageCount - 1)}
-        className="p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+        className="h-full p-1 border border-black text-black hover:bg-gray-50 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
           <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
