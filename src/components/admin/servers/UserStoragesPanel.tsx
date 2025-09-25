@@ -54,15 +54,20 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
               </select>
             </div>
             <div className="@container flex flex-col items-start">
-              <ServerDetails
-                server={user.serverList[0]}
-              />
+              <ServerDetails server={user.serverList[0]} />
             </div>
           </>
         ) : (
-          <div className="h-27 flex justify-start items-center">
-            <span>No servers available</span>
-          </div>
+          <>
+            <div className="w-fit mb-4">
+              <select
+                value={0}
+                className="w-full px-3 py-2 border-1 border-black text-black"
+              >
+                <option key={0} value={0}>No servers available</option>
+              </select>
+            </div>
+          </>
         )}
       </div>
 
