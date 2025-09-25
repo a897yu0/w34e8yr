@@ -7,7 +7,7 @@ import type { AdminPageProps } from '@/types/props/pages/inner/AdminPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
 
 import type { User } from '@/types/User';
-import { defaultUserData, useUser } from '@/user';
+import { defaultUser, useUser } from '@/user';
 
 import type { LayoutData } from '@/types/LayoutData';
 import { defaultLayoutData, layoutData, setLayoutData } from '@/layout-data';
@@ -1017,7 +1017,7 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
   openDialog;
 
   const [user, setUser] = useUser();
-  defaultUserData;
+  defaultUser;
   user as User;
   setUser;
 

@@ -180,4 +180,4 @@ function useUser(): [User, (dispatch: (user: User) => void) => void] {
   ];
 }
 
-export { defaultUser as defaultUserData, useUserDataReady, useUser };
+export { defaultUser, useUserDataReady, useUser };

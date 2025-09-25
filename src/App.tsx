@@ -10,7 +10,7 @@ import type { InnerPageProps } from '@/types/props/pages/inner/InnerPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
 
 import type { User } from '@/types/User';
-import { defaultUserData, useUserDataReady } from '@/user';
+import { defaultUser, useUserDataReady } from '@/user';
 
 interface HeaderProps {
 }
@@ -105,7 +105,7 @@ function App(): React.JSX.Element {
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
   const { isReady: isUserDataReady, prepare: prepareUserData } = useUserDataReady();
-  defaultUserData as User;
+  defaultUser as User;
 
   const openDialog = (ctx: DialogContext | null): void => {
     if (!ctx) return;
