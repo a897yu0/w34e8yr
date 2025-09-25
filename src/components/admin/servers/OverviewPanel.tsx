@@ -68,8 +68,6 @@ function paginateServerList(serverList: Server[], pageIndex: number, itemCountPe
 function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;
 
-  const defaultItemCountPerPage: number = defaultLayoutData.adminPage.serverManagementPanel.serverTable.itemCountPerPage;
-
   const panelTopRef: React.RefObject<HTMLDivElement | null> = props.panelTopRef;
 
   const openPanel: (path: string) => void = props.openPanel;
@@ -84,7 +82,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   const [serverTableSearchTerm, setServerTableSearchTerm] = React.useState('');
   const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
   const [serverTableCurrentPageIndex, setServerTableCurrentPageIndex] = React.useState(0);
-  const [serverTableItemCountPerPage, setServerTableItemCountPerPage] = React.useState<number>(defaultItemCountPerPage);
+  const [serverTableItemCountPerPage, setServerTableItemCountPerPage] = React.useState<number>(layoutData.adminPage.serverManagementPanel.serverTable.itemCountPerPage);
   const [isServerDetailsShown, setIsServerDetailsShown] = React.useState<boolean>(false);
 
   // Mock server data
@@ -444,7 +442,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
           onChange={(e) => changeServerTableItemCountPerPage(parseInt(e.target.value, 10))}
           className="w-17 px-3 py-2 border-1 border-black text-black"
         >
-          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultItemCountPerPage).map(num => (
+          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultLayoutData.adminPage.serverManagementPanel.serverTable.itemCountPerPage).map(num => (
             <option key={num} value={num}>
               {num}
             </option>
