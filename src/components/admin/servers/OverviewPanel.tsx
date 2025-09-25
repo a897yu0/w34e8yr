@@ -16,52 +16,47 @@ import { defaultLayoutData, layoutData, setLayoutData } from '@/layout-data';
 
 import { formatTimestamp, getUsagePercentage } from '@/utils';
 
-import sampleServerList from './sampleServerList';
-
 interface PaginatedServerList {
   items: Server[];
 
-  currentPage: number;
-  totalPages: number;
+  currentPageIndex: number;
+  totalPageCount: number;
+
 }
 
-function paginateServerList(serverList: Server[], page: number, pageSize: number = 3): PaginatedServerList {
-  if (pageSize <= 0) {
-    throw new Error(`Invalid page size: ${pageSize} <= 0`);
+function paginateServerList(serverList: Server[], pageIndex: number, itemCountPerPage: number = 3): PaginatedServerList {
+  if (pageIndex < 0) {
+    throw new Error(`Invalid page index: ${pageIndex} < 0`);
+  }
+  if (itemCountPerPage <= 0) {
+    throw new Error(`Invalid page size: ${itemCountPerPage} <= 0`);
   };
+  
+  const totalItems = serverList.length;
+  if (totalItems === 0) {
+    return {
+      items: [],
 
-  // Sort servers by order first
-  // const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
-  const sortedServers = [...serverList].sort((a, b) => b.id - a.id);
+      currentPageIndex: 0,
+      totalPageCount: 0,
+    };
+  }
 
-  const totalItems = sortedServers.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const totalPageCount = Math.ceil(totalItems / itemCountPerPage);
 
   // Ensure page is within valid range
-  const currentPage = Math.max(1, Math.min(page, totalPages));
+  const currentPageIndex = Math.max(0, Math.min(pageIndex, totalPageCount));
 
   // Calculate start and end indices
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
+  const startIndex = (currentPageIndex * itemCountPerPage);
+  const endIndex = (startIndex + itemCountPerPage);
 
   return {
-    items: sortedServers.slice(startIndex, endIndex),
+    items: serverList.slice(startIndex, endIndex),
 
-    currentPage: currentPage,
-    totalPages: totalPages,
+    currentPageIndex: currentPageIndex,
+    totalPageCount: totalPageCount,
   };
-}
-
-function moveServerItemToFirst(id: number) {
-
-  const sortedServers = [...sampleServerList].sort((a, b) => b.id - a.id);
-
-  sampleServerList.forEach((server: Server) => {
-    if (server.id !== id) return;
-
-    server.id = (sortedServers[0].id + 1);
-  });
-
 }
 
 /**
@@ -86,15 +81,19 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   // State for table controls
   const [serverTableSearchTerm, setServerTableSearchTerm] = React.useState('');
   const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
-  const [serverTableCurrentPage, setServerTableCurrentPage] = React.useState(1);
-  const [serverTablePageSize, setServerTablePageSize] = React.useState<number>(7);
-  const [selectedServer, setSelectedServer] = React.useState<Server | null>(null);
+  const [serverTableCurrentPageIndex, setServerTableCurrentPageIndex] = React.useState(0);
+  const [serverTableServerCountPerPage, setServerTableServerCountPerPage] = React.useState<number>(2);
+  const [isServerDetailsShown, setIsServerDetailsShown] = React.useState<boolean>(false);
 
-  setServerTablePageSize;
+  setServerTableServerCountPerPage;
 
   // Mock server data
   // The order is pre-sorted when this list get from DB. and the pagination is handled by partially, not paginated at the client.
-  const [serverList, setServerList] = React.useState<PaginatedServerList | undefined>(undefined);
+  const paginatedServerList: PaginatedServerList = React.useMemo<PaginatedServerList>(() => {
+    console.log("user.serverList:", user.serverList);
+    console.log("serverTableCurrentPage:", serverTableCurrentPageIndex);
+    return paginateServerList(user.serverList, serverTableCurrentPageIndex, serverTableServerCountPerPage);
+  }, [user, serverTableCurrentPageIndex, serverTableServerCountPerPage]);
 
   // State for form
   const [showAddFormToAddServer, setShowAddFormToAddServer] = React.useState(false);
@@ -103,7 +102,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
     address: '',
     // protocol: '',
     // port: '',
-    accountRequired: false
+    // accountRequired: false,
   });
 
   // Add server
@@ -125,16 +124,13 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   };
 
   // Remove server
-  const handleRemoveServer = (id: number) => {
-    id;
+  const handleRemoveServer = (index: number) => {
+    console.assert(index >= 0);
+    console.assert(index < user.serverList.length);
+    console.assert(Number.isInteger(index));
+
     // setServerList(serverList.filter(server => server.id !== id));
     // setSelectedServer(null);
-  };
-
-  const moveItemToFirst = (id: number) => {
-    moveServerItemToFirst(id);
-
-    setServerList(paginateServerList(user.serverList, serverTableCurrentPage, serverTablePageSize));
   };
 
   // Filter and search servers, The filter is handled by DB and query, not in client...
@@ -149,41 +145,37 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   //   });
   // }, [servers, searchTerm, statusFilter]);
 
-  React.useEffect(() => {
-    setServerList(paginateServerList(user.serverList, serverTableCurrentPage, serverTablePageSize));
-  }, [user, serverTableCurrentPage, serverTablePageSize]);
+  const openServerDetails = (index: number) => {
+    console.assert(index >= 0);
+    console.assert(index < user.serverList.length);
+    console.assert(Number.isInteger(index));
 
-  const openServerDetails = (server: Server) => {
-    setSelectedServer(server);
-
-    setTimeout(() => {
-      if (serverDetailsRef.current && panelTopRef.current) {
-        // console.log("panelTopRef y:", panelTopRef.current.getBoundingClientRect().y);
-        // console.log("serverDetailsRef y:", serverDetailsRef.current.getBoundingClientRect().y);
-        if (serverDetailsRef.current.getBoundingClientRect().y < panelTopRef.current.getBoundingClientRect().y) {
-          serverDetailsRef.current.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',  // Vertical Alignment
-            inline: 'start',  // Horizontal Alignment
-          });
-        }
-      }
-    }, 1);
-  };
-
-  const goToPanel = (serverId: number, path: string) => {
-    console.assert(Number.isInteger(serverId));
-    console.assert(serverId > 0);
-    console.assert(serverId < Number.MAX_SAFE_INTEGER);
+    console.log("index:", index);
 
     setUser((user: User) => {
-      console.assert(Number.isInteger(serverId));
-      console.assert(serverId > 0);
-      console.assert(serverId < Number.MAX_SAFE_INTEGER);
-      user.selectedServerId = serverId;
+      const server: Server = user.serverList.splice(index, 1)[0];
+      user.serverList.unshift(server);
+
+      if (user.serverList.length > 0) {
+        setIsServerDetailsShown(true);
+
+        setTimeout(() => {
+          if (serverDetailsRef.current && panelTopRef.current) {
+            // console.log("panelTopRef y:", panelTopRef.current.getBoundingClientRect().y);
+            // console.log("serverDetailsRef y:", serverDetailsRef.current.getBoundingClientRect().y);
+            if (serverDetailsRef.current.getBoundingClientRect().y < panelTopRef.current.getBoundingClientRect().y) {
+              serverDetailsRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',  // Vertical Alignment
+                inline: 'start',  // Horizontal Alignment
+              });
+            }
+          }
+        }, 1);
+      }
     });
-    openPanel(path);
-  }
+
+  };
 
   return (
     <>
@@ -290,14 +282,14 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
       </div>
 
       {/* Server Details */}
-      {selectedServer && (
+      {isServerDetailsShown && (user.serverList.length > 0) && (
         <div ref={serverDetailsRef} className="@container w-full max-w-4xl mb-2 ">
           <div className="p-2 border-1 border-black relative">
-            <ServerDetails server={selectedServer} resetSelection={() => setSelectedServer(null)} />
+            <ServerDetails server={user.serverList[0]} resetSelection={() => setIsServerDetailsShown(false)} />
             <div className="pt-4">
               <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
                 <button
-                  onClick={() => goToPanel(selectedServer.id, 'servers/user-storages')}
+                  onClick={() => openPanel('servers/user-storages')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
@@ -306,7 +298,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                   User Storages
                 </button>
                 <button
-                  onClick={() => goToPanel(selectedServer.id, 'servers/block-devices')}
+                  onClick={() => openPanel('servers/block-devices')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
@@ -315,7 +307,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                   Block Devices
                 </button>
                 <button
-                  onClick={() => goToPanel(selectedServer.id, 'servers/blobs')}
+                  onClick={() => openPanel('servers/blobs')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
@@ -326,7 +318,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
               </div>
               <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
                 <button
-                  onClick={() => goToPanel(selectedServer.id, 'servers/uploads-downloads')}
+                  onClick={() => openPanel('servers/uploads-downloads')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
@@ -335,7 +327,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                   Uploads & Downloads
                 </button>
                 <button
-                  onClick={() => goToPanel(selectedServer.id, 'servers/logging')}
+                  onClick={() => openPanel('servers/logging')}
                   className="flex flex-row gap-1 justify-start items-center px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
@@ -376,8 +368,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
             </tr>
           </thead>
           <tbody>
-            {serverList && serverList.items.map((server: Server, index: number) => (
-              <tr key={server.id} className={clsx(
+            {paginatedServerList && paginatedServerList.items.map((server: Server, index: number) => (
+              <tr key={index} className={clsx(
                 (index % 2 == 0) ? 'bg-white' : 'bg-gray-100'
               )}>
                 <td className="px-4 py-3 whitespace-nowrap text-black">{server.name}</td>
@@ -408,23 +400,21 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                 </td>
 
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="flex gap-2">
+                  <div className="flex flex-row gap-2">
                     <button
-                      onClick={() => openServerDetails(server)}
+                      onClick={() => openServerDetails((paginatedServerList.currentPageIndex * serverTableServerCountPerPage) + index)}
                       className="px-2 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
                     >
-                      Details
+                      <div className="flex flex-row justify-center items-center gap-1">
+                        Details
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 18.75 7.5-7.5 7.5 7.5" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 7.5-7.5 7.5 7.5" />
+                        </svg>
+                      </div>
                     </button>
                     <button
-                      onClick={() => moveItemToFirst(server.id)}
-                      className="px-0 py-1 text-sm border-1 border-black text-black hover:bg-gray-50 cursor-pointer"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handleRemoveServer(server.id)}
+                      onClick={() => handleRemoveServer(index)}
                       className="px-2 py-1 text-sm border-1 border-red-600 text-red-600 hover:bg-red-50 cursor-pointer"
                     >
                       Remove
@@ -437,8 +427,13 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
         </table>
       </ResizableVerticalWrapper>
 
-      {serverList && (
-        <Paginator currentPage={serverTableCurrentPage} totalPages={serverList.totalPages} onPageChange={setServerTableCurrentPage} maxVisiblePages={3} />
+      {paginatedServerList && (
+        <Paginator
+          currentPageIndex={serverTableCurrentPageIndex}
+          totalPageCount={paginatedServerList.totalPageCount}
+          maxVisiblePageCount={3}
+
+          onPageChange={setServerTableCurrentPageIndex} />
       )}
 
       <div className="mb-17"></div>

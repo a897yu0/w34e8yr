@@ -1,8 +1,6 @@
 
 
 interface Server {
-  id: number;
-
   name: string;
   address: string;
   

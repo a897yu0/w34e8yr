@@ -12,22 +12,19 @@ import {
   getValidPositiveIntegerOrDefault,
   getValidPositiveInteger,
 } from "@/validators";
+import sampleServerList from "@/sampleServerList";
 
 const defaultUser: Readonly<User> = {
-  serverList: [],
-  selectedServerId: Number.MAX_SAFE_INTEGER,
+  serverList: [
+    ...sampleServerList,
+  ],
+  selectedServerIndex: Number.MAX_SAFE_INTEGER,
 };
 
 function parseServer(data: any): Server | undefined {
   try {
     // Check if data exists and is an object
     if (!data || (typeof data !== 'object')) {
-      return undefined;
-    }
-
-    const id: number | undefined = getValidPositiveInteger(data.id);
-
-    if (!id || (id >= Number.MAX_SAFE_INTEGER)) {
       return undefined;
     }
 
@@ -84,14 +81,13 @@ function parseServer(data: any): Server | undefined {
     }
 
     return {
-      id: id,
-
       name: name,
       address: address,
 
       isOnline: isOnline,
       lastPingTimestamp: lastPingTimestamp,
       registeredTimestamp: registeredTimestamp,
+      
       accountRequired: accountRequired,
 
       capacity: capacity,
@@ -123,9 +119,9 @@ function loadUser(): User | null {
 
   return {
     serverList: parseServerList(unknownUser?.serverList),
-    selectedServerId: getValidPositiveIntegerOrDefault(
+    selectedServerIndex: getValidPositiveIntegerOrDefault(
       unknownUser?.selectedServerId,
-      defaultUser.selectedServerId,
+      defaultUser.selectedServerIndex,
     ),
 
   };

@@ -12,7 +12,7 @@ function ServerDetails(props: ServerDetailsProps): React.JSX.Element {
   const server: Server = props.server;
 
   const resetSelection: (() => void) | undefined = props.resetSelection;
-
+  
   return (
     <div className="w-full relative">
       <h3 className="text-lg font-semibold mb-5 text-black">Server Details</h3>
@@ -50,6 +50,8 @@ function ServerDetails(props: ServerDetailsProps): React.JSX.Element {
           <strong>Registered:</strong>
           <span>{formatTimestamp(server.registeredTimestamp)}</span>
         </div>
+      </div>
+      <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-4">
         <div className="flex flex-row flex-wrap gap-1">
           <strong>Account Required:</strong>
           <span>{server.accountRequired ? 'Yes' : 'No'}</span>

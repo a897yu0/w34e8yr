@@ -1,9 +1,9 @@
 interface PaginatorProps {
-  currentPage: number;
-  totalPages: number;
-  maxVisiblePages?: number;
+  currentPageIndex: number;
+  totalPageCount: number;
+  maxVisiblePageCount?: number;
 
-  onPageChange: (page: number) => void;
+  onPageChange: (index: number) => void;
 }
 
 export type { PaginatorProps };
