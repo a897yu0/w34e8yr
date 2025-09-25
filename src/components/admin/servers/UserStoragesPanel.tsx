@@ -41,7 +41,7 @@ function UserStoragesPanel(props: AdminMainPanelProps): React.JSX.Element {
       <div className="w-full border-black border-b-1 my-4" />
 
       {/* Server Details */}
-      <div className="max-w-4xl w-full">
+      <div className="max-w-4xl w-full border p-2">
         {(user.serverList.length > 0) ? (
           <>
             <div className="w-fit mb-4">
