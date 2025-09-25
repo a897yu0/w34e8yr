@@ -82,7 +82,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
   const [serverTableSearchTerm, setServerTableSearchTerm] = React.useState('');
   const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
   const [serverTableCurrentPageIndex, setServerTableCurrentPageIndex] = React.useState(0);
-  const [serverTableItemCountPerPage, setServerTableItemCountPerPage] = React.useState<number>(layoutData.adminPage.serverManagementPanel.serverTable.itemCountPerPage);
+  const [serverTableItemCountPerPage, setServerTableItemCountPerPage] = React.useState<number>(layoutData.adminPage.servers.overviewPanel.serverTable.itemCountPerPage);
   const [isServerDetailsShown, setIsServerDetailsShown] = React.useState<boolean>(false);
 
   // Mock server data
@@ -180,7 +180,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
     console.assert(Number.isInteger(itemCountPerPage));
 
     setLayoutData((data: LayoutData) => {
-      data.adminPage.serverManagementPanel.serverTable.itemCountPerPage = itemCountPerPage;
+      data.adminPage.servers.overviewPanel.serverTable.itemCountPerPage = itemCountPerPage;
     })
 
     setServerTableItemCountPerPage(itemCountPerPage);
@@ -352,15 +352,15 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       {/* Server Summary Table */}
       <ResizableVerticalWrapper
-        layoutHeight={layoutData.adminPage.serverManagementPanel.serverTable.height}
-        defaultLayoutHeight={defaultLayoutData.adminPage.serverManagementPanel.serverTable.height}
+        layoutHeight={layoutData.adminPage.servers.overviewPanel.serverTable.height}
+        defaultLayoutHeight={defaultLayoutData.adminPage.servers.overviewPanel.serverTable.height}
 
         minHeight={77}
 
         className="mb-1"
 
         setLayoutHeight={(height: number) => setLayoutData((layoutData: LayoutData) => {
-          layoutData.adminPage.serverManagementPanel.serverTable.height = height;
+          layoutData.adminPage.servers.overviewPanel.serverTable.height = height;
         })}
       >
         <table className="w-fit h-fit relative">
@@ -442,7 +442,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
           onChange={(e) => changeServerTableItemCountPerPage(parseInt(e.target.value, 10))}
           className="w-17 px-3 py-2 border-1 border-black text-black"
         >
-          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultLayoutData.adminPage.serverManagementPanel.serverTable.itemCountPerPage).map(num => (
+          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultLayoutData.adminPage.servers.overviewPanel.serverTable.itemCountPerPage).map(num => (
             <option key={num} value={num}>
               {num}
             </option>

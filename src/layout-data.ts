@@ -6,10 +6,12 @@ const defaultLayoutData: Readonly<LayoutData> = {
     sidebar: {
       width: 277,  // TODO: Make configurable with .env
     },
-    serverManagementPanel: {
-      serverTable: {
-        itemCountPerPage: 5,
-        height: 177,  // TODO: Make configurable with .env
+    servers: {
+      overviewPanel: {
+        serverTable: {
+          itemCountPerPage: 5,
+          height: 177,  // TODO: Make configurable with .env
+        },
       },
     },
   },
@@ -32,16 +34,18 @@ function loadLayoutData(): LayoutData | undefined {
           defaultLayoutData.adminPage.sidebar.width,
         ),
       },
-      serverManagementPanel: {
-        serverTable: {
-          itemCountPerPage: getValidPositiveIntegerOrDefault(
-            unknownLayoutData?.adminPage?.serverManagementPanel?.serverTable?.itemCountPerPage,
-            defaultLayoutData.adminPage.serverManagementPanel.serverTable.itemCountPerPage,
-          ),
-          height: getValidPositiveNumberOrDefault(
-            unknownLayoutData?.adminPage?.serverManagementPanel?.serverTable?.height,
-            defaultLayoutData.adminPage.serverManagementPanel.serverTable.height,
-          ),
+      servers: {
+        overviewPanel: {
+          serverTable: {
+            itemCountPerPage: getValidPositiveIntegerOrDefault(
+              unknownLayoutData?.adminPage?.servers?.overviewPanel?.serverTable?.itemCountPerPage,
+              defaultLayoutData.adminPage.servers.overviewPanel.serverTable.itemCountPerPage,
+            ),
+            height: getValidPositiveNumberOrDefault(
+              unknownLayoutData?.adminPage?.servers?.overviewPanel?.serverTable?.height,
+              defaultLayoutData.adminPage.servers.overviewPanel.serverTable.height,
+            ),
+          },
         },
       },
     },

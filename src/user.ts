@@ -9,7 +9,6 @@ import {
   getValidPositiveNumber,
   getValidString,
   getValidDate,
-  getValidPositiveIntegerOrDefault,
 } from "@/validators";
 import sampleServerList from "@/sampleServerList";
 
@@ -17,7 +16,6 @@ const defaultUser: Readonly<User> = {
   serverList: [
     ...sampleServerList,
   ],
-  selectedServerIndex: Number.MAX_SAFE_INTEGER,
 };
 
 function parseServer(data: any): Server | undefined {
@@ -118,11 +116,6 @@ function loadUser(): User | null {
 
   return {
     serverList: parseServerList(unknownUser?.serverList),
-    selectedServerIndex: getValidPositiveIntegerOrDefault(
-      unknownUser?.selectedServerId,
-      defaultUser.selectedServerIndex,
-    ),
-
   };
 }
 
@@ -138,8 +131,6 @@ function saveUser(): void {
       }
     }, 1000);
   }
-
-
 }
 
 function setUserWithSaving(dispatch: (user: User) => void): User {
@@ -148,13 +139,7 @@ function setUserWithSaving(dispatch: (user: User) => void): User {
   }
 
   dispatch(user);
-
-  if (!timeout) {
-    timeout = setTimeout(() => {
-      saveUser();
-      timeout = null;
-    }, 1000);
-  }
+  saveUser();
 
   return user;
 }

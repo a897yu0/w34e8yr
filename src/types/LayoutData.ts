@@ -4,10 +4,12 @@ interface LayoutData {
     sidebar: {
       width: number;
     };
-    serverManagementPanel: {
-      serverTable: {
-        itemCountPerPage: number;
-        height: number;
+    servers: {
+      overviewPanel: {
+        serverTable: {
+          itemCountPerPage: number;
+          height: number;
+        };
       };
     };
   };
