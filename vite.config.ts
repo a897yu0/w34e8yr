@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import babel from 'vite-plugin-babel';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
@@ -7,6 +8,11 @@ import path from 'path';
 export default defineConfig({
   plugins: [
     react(),
+    babel({
+      babelConfig: {
+        plugins: ['babel-plugin-react-compiler'],
+      },
+    }),
     tailwindcss(),
   ],
   build: {
