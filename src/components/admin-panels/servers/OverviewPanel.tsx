@@ -127,8 +127,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
     address: '',
   });
 
-  // Add server
-  const handleAddServer = () => {
+  const addServer = () => {
     if (formDataToAddServer.name && formDataToAddServer.address) {
       const newServer: Server = {
         name: formDataToAddServer.name,
@@ -137,11 +136,12 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
         registered: new Date(),
         storages: [],
       };
-      setServerList([...serverList, newServer]);
+      const newServerList: Server[] = [newServer, ...serverList];
+      setServerList(newServerList);
       setFormDataToAddServer({ name: '', address: '' });
       setShowAddFormToAddServer(false);
 
-      saveServerListData(serverList);
+      saveServerListData(newServerList);
     }
   };
 
@@ -279,7 +279,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
             </div>
             <div className="flex flex-row gap-1">
               <button
-                onClick={handleAddServer}
+                onClick={addServer}
                 className="px-4 py-2 border-1 border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Add Server
