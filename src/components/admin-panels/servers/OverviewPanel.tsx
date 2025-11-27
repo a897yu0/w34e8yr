@@ -323,7 +323,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
         <div className="w-fit">
           <select
             value={serverTableStatusFilter}
-            onChange={(e) => setServerTableStatusFilter(e.target.value)}
+            onChange={(e) => setServerTableStatusFilter(e.target.value as "all" | "online" | "offline")}
             className="w-full px-3 py-2 border-1 border-black text-black"
           >
             <option value="all">All Status</option>
