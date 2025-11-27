@@ -6,7 +6,7 @@ import type { DialogProps } from '@/types/props/DialogProps';
 import Dialog from '@/components/Dialog';
 
 import type { EntryPageProps } from './types/props/pages/EntryPageProps';
-import type { InnerPageProps } from '@/types/props/pages/inner/InnerPageProps';
+import type { InnerPageProps } from '@/types/props/pages/InnerPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
 
 import type { User } from '@/types/User';
@@ -114,7 +114,7 @@ function App(): React.JSX.Element {
   };
 
   const EntryPage: EntryPageLazyExoticComponent = React.lazy(() => import('@/components/pages/EntryPage'));
-  const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/inner/AdminPage'));
+  const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/AdminPage'));
 
   return (
     <>

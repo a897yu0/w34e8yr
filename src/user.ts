@@ -5,7 +5,6 @@ import type { Server } from "@/types/Server";
 import type { User } from "@/types/User";
 
 import {
-  getValidBoolean,
   getValidPositiveNumber,
   getValidString,
   getValidDate,
@@ -21,71 +20,42 @@ const defaultUser: Readonly<User> = {
 function parseServer(data: any): Server | undefined {
   try {
     // Check if data exists and is an object
-    if (!data || (typeof data !== 'object')) {
-      return undefined;
-    }
+    if (!data || (typeof data !== 'object')) { return undefined; }
 
     const name: string | undefined = getValidString(data.name);
-
-    if (!name) {
-      return undefined;
-    }
-
     const address: string | undefined = getValidString(data.address);
 
-    if (!address) {
-      return undefined;
-    }
+    const firstRegistered: Date | undefined = getValidDate(data.firstRegistered);
+    const lastPing: Date | undefined = getValidDate(data.lastPing);
 
-    const isOnline: boolean | undefined = getValidBoolean(data.isOnline);
-
-    if (!isOnline) {
-      return undefined;
-    }
-
-    const lastPingTimestamp: Date | undefined = getValidDate(data.lastPingTimestamp);
-
-    if (!lastPingTimestamp) {
-      return undefined;
-    }
-
-    const registeredTimestamp: Date | undefined = getValidDate(data.registeredTimestamp);
-
-    if (!registeredTimestamp) {
-      return undefined;
-    }
-
-    const accountRequired: boolean | undefined = getValidBoolean(data.accountRequired);
-
-    if (!accountRequired) {
-      return undefined;
-    }
+    const storages: number | undefined = getValidPositiveNumber(data.storages);
+    const devices: number | undefined = getValidPositiveNumber(data.devices);
 
     const capacity: number | undefined = getValidPositiveNumber(data.capacity);
-
-    if (!capacity) {
-      return undefined;
-    }
-
     const freeSpace: number | undefined = getValidPositiveNumber(data.freeSpace);
 
-    if (!freeSpace) {
-      return undefined;
-    }
+    if (!name) { return undefined; }
+    if (!address) { return undefined; }
 
-    if (freeSpace > capacity) {
-      return undefined;
-    }
+    if (!firstRegistered) { return undefined; }
+    if (!lastPing) { return undefined; }
+
+    if (!storages) { return undefined; }
+    if (!devices) { return undefined; }
+
+    if (!capacity) { return undefined; }
+    if (!freeSpace) { return undefined; }
+    if (freeSpace > capacity) { return undefined; }
 
     return {
       name: name,
       address: address,
 
-      isOnline: isOnline,
-      lastPingTimestamp: lastPingTimestamp,
-      registeredTimestamp: registeredTimestamp,
+      firstRegistered: firstRegistered,
+      lastPing: lastPing,
 
-      accountRequired: accountRequired,
+      storages: storages,
+      devices: devices,
 
       capacity: capacity,
       freeSpace: freeSpace,

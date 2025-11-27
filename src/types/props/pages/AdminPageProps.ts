@@ -1,4 +1,4 @@
-import type { InnerPageProps } from "@/types/props/pages/inner/InnerPageProps";
+import type { InnerPageProps } from "@/types/props/pages/InnerPageProps";
 
 interface AdminPageProps extends InnerPageProps {
 }

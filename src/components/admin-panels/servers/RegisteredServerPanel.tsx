@@ -1,4 +1,4 @@
-import type { AdminMainPanelProps } from "@/types/props/admin/AdminMainPanelProps";
+import type { AdminMainPanelProps } from "@/types/props/admin-panels/AdminMainPanelProps";
 
 function RegisteredServerPanel(props: AdminMainPanelProps): React.JSX.Element {
   props;

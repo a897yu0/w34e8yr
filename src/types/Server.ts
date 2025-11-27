@@ -4,10 +4,11 @@ interface Server {
   name: string;
   address: string;
   
-  isOnline: boolean;
-  lastPingTimestamp: Date;
-  registeredTimestamp: Date;
-  accountRequired: boolean;
+  firstRegistered: Date;
+  lastPing: Date;
+
+  storages: number;
+  devices: number;
 
   capacity: number;
   freeSpace: number;

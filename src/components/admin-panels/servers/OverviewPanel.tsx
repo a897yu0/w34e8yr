@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React from 'react';
 
-import type { AdminMainPanelProps } from '@/types/props/admin/AdminMainPanelProps';
+import type { AdminMainPanelProps } from '@/types/props/admin-panels/AdminMainPanelProps';
 import type { Server } from '@/types/Server';
 
 import ResizableVerticalWrapper from '@/components/ResizableVerticalWrapper';
