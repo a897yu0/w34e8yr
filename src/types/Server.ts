@@ -5,7 +5,10 @@ interface Server {
   registered: Date;
   lastPing: Date;
 
-  storages: string[];
+  storages: {
+    id: string;
+    username?: string;
+  }[];
 }
 
 export type { Server };
