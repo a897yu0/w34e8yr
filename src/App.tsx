@@ -106,15 +106,19 @@ function App(): React.JSX.Element {
 
   const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/AdminPage'));
 
+  const memoizedAdminPage = React.useMemo(() => (
+    <React.Suspense fallback={<FallbackPage />}>
+      <AdminPage openDialog={openDialog} />
+    </React.Suspense>
+  ), []);
+
   return (
     <>
       <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
         <Header />
 
         <main className="w-full flex-1">
-          <React.Suspense fallback={<FallbackPage />}>
-            <AdminPage openDialog={openDialog} />
-          </React.Suspense>
+          {memoizedAdminPage}
         </main>
 
         <footer className="w-full bg-white m-0 border-black border-t-1">

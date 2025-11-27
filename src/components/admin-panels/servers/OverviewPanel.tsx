@@ -145,27 +145,26 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
     }
   };
 
-  // Remove server
-  const handleRemoveServer = (index: number) => {
+  const removeServer = (index: number) => {
     console.assert(index >= 0);
     console.assert(index < serverList.length);
     console.assert(Number.isInteger(index));
 
-    // setServerList(serverList.filter(server => server.id !== id));
-    // setSelectedServer(null);
-  };
+    props.openDialog({
+      title: "Confirm Removal",
+      message: "All associated information will be removed. This action cannot be undone.",
+      onConfirm: () => {
+        setServerList((serverList: Server[]) => {
+          const newServerList = [...serverList];
+          newServerList.splice(index, 1)[0];
 
-  // Filter and search servers, The filter is handled by DB and query, not in client...
-  // const filteredServers = React.useMemo(() => {
-  //   return servers.filter(server => {
-  //     const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       server.serverAddress.includes(searchTerm);
-  //     const matchesStatus = statusFilter === 'all' ||
-  //       (statusFilter === 'online' && server.isOnline) ||
-  //       (statusFilter === 'offline' && !server.isOnline);
-  //     return matchesSearch && matchesStatus;
-  //   });
-  // }, [servers, searchTerm, statusFilter]);
+          saveServerListData(newServerList);
+          return newServerList;
+        });
+      },
+    });
+
+  };
 
   const openServer = (index: number) => {
     console.assert(index >= 0);
@@ -212,6 +211,8 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
   const clearServers = () => {
     setServerList([]);
+    setIsServerDetailsShown(false);
+
     saveServerListData([]);
   };
 
@@ -472,7 +473,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                       </div>
                     </button>
                     <button
-                      onClick={() => handleRemoveServer(index)}
+                      onClick={() => removeServer(index)}
                       className="px-2 py-1 text-sm border-1 border-red-600 text-red-600 hover:bg-red-50 cursor-pointer"
                     >
                       Remove

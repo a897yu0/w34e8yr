@@ -1,4 +1,6 @@
-interface AdminMainPanelProps {
+import type { PanelProps } from "./PanelProps";
+
+interface AdminMainPanelProps extends PanelProps {
   panelTopRef: React.RefObject<HTMLDivElement | null>;
 
   args?: string[];

@@ -62,6 +62,7 @@ interface SidebarProps extends SidebarDefaultProps, SidebarWrapperProps {
 }
 
 interface MainPanelWrapperProps {
+  openDialog: (ctx: DialogContext | null) => void;
 }
 
 type AdminMainPanelComponentType<T extends AdminMainPanelProps = AdminMainPanelProps> = React.ComponentType<T>;
@@ -986,6 +987,8 @@ function useMainPanelWrapper(props: MainPanelWrapperProps): {
                   <div className="min-w-fit min-h-fit w-full h-full p-2">
                     <React.Suspense fallback={<FallbackPage />}>
                       <panelWithPathArgs.panel
+                        openDialog={props.openDialog}
+
                         panelTopRef={panelTopRef}
 
                         args={ctx?.args}
@@ -1040,7 +1043,9 @@ function AdminPage(props: AdminPageProps): React.JSX.Element {
     currentPanelPath: currentMainPanelPath,
     openPanel: openMainPanel,
     resetPanel: resetMainPanel,
-  } = useMainPanelWrapper({});
+  } = useMainPanelWrapper({
+    openDialog,
+  });
   resetMainPanel;
 
   const setLayoutSidebarWidth = (width: number): void => {
