@@ -1,17 +1,11 @@
-
-
 interface Server {
   name: string;
   address: string;
-  
-  firstRegistered: Date;
+
+  registered: Date;
   lastPing: Date;
 
-  storages: number;
-  devices: number;
-
-  capacity: number;
-  freeSpace: number;
+  storages: string[];
 }
 
 export type { Server };

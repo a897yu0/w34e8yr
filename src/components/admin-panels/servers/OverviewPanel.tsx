@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React from 'react';
+import React, { useState } from 'react';
 
 import type { AdminMainPanelProps } from '@/types/props/admin-panels/AdminMainPanelProps';
 import type { Server } from '@/types/Server';
@@ -8,23 +8,21 @@ import ResizableVerticalWrapper from '@/components/ResizableVerticalWrapper';
 import Paginator from '@/components/Paginator';
 import ServerDetails from '@/components/ServerDetails';
 
-import type { User } from '@/types/User';
-import { useUser } from '@/user';
+import type { Layout } from '@/types/Layout';
+import { defaultLayout, layout, setLayout } from '@/data/layout';
 
-import type { LayoutData } from '@/types/LayoutData';
-import { defaultLayoutData, layoutData, setLayoutData } from '@/layout-data';
-
-import { formatTimestamp, getUsagePercentage } from '@/utils';
+import { formatTimestamp, isWithinLastNMinutes } from '@/utils';
+import { saveServerListData, serverListData } from '@/data/serverList';
+import sampleServerList from '@/sampleServerList';
 
 interface PaginatedServerList {
   items: Server[];
 
   currentPageIndex: number;
   totalPageCount: number;
-
 }
 
-function paginateServerList(serverList: Server[], pageIndex: number, itemCountPerPage: number = 3): PaginatedServerList {
+function paginateServerList(serverList: Server[], statusFilter: 'all' | 'online' | 'offline', nameOrAddrFilter: string, pageIndex: number, itemCountPerPage: number = 3): PaginatedServerList {
   if (pageIndex < 0) {
     throw new Error(`Invalid page index: ${pageIndex} < 0`);
   }
@@ -32,7 +30,38 @@ function paginateServerList(serverList: Server[], pageIndex: number, itemCountPe
     throw new Error(`Invalid page size: ${itemCountPerPage} <= 0`);
   };
 
-  const totalItems = serverList.length;
+  const filteredServerList = serverList.filter(server => {
+    // Status filter
+    const isOnline = isWithinLastNMinutes(server.lastPing, 10);
+    let statusMatch = true;
+
+    switch (statusFilter) {
+      case 'online':
+        statusMatch = isOnline;
+        break;
+      case 'offline':
+        statusMatch = !isOnline;
+        break;
+      case 'all':
+      default:
+        statusMatch = true;
+    }
+
+    // Name/Address filter (case-insensitive)
+    const searchTerm = nameOrAddrFilter.trim().toLowerCase();
+    let nameOrAddrMatch = true;
+
+    if (searchTerm) {
+      nameOrAddrMatch =
+        server.name.toLowerCase().includes(searchTerm) ||
+        server.address.toLowerCase().includes(searchTerm);
+    }
+
+    // Both filters must match
+    return statusMatch && nameOrAddrMatch;
+  });
+
+  const totalItems = filteredServerList.length;
   if (totalItems === 0) {
     return {
       items: [],
@@ -52,7 +81,7 @@ function paginateServerList(serverList: Server[], pageIndex: number, itemCountPe
   const endIndex = (startIndex + itemCountPerPage);
 
   return {
-    items: serverList.slice(startIndex, endIndex),
+    items: filteredServerList.slice(startIndex, endIndex),
 
     currentPageIndex: currentPageIndex,
     totalPageCount: totalPageCount,
@@ -72,59 +101,54 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
   const openPanel: (path: string) => void = props.openPanel;
 
-  const [user, setUser] = useUser();
-  user as User;
-  setUser;
+  const [serverList, setServerList] = useState<Server[]>(serverListData);
 
   const serverDetailsRef = React.useRef<HTMLDivElement>(null);
 
   // State for table controls
   const [serverTableSearchTerm, setServerTableSearchTerm] = React.useState('');
-  const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState('all');
+  const [serverTableStatusFilter, setServerTableStatusFilter] = React.useState<'all' | 'online' | 'offline'>('all');
   const [serverTableCurrentPageIndex, setServerTableCurrentPageIndex] = React.useState(0);
-  const [serverTableItemCountPerPage, setServerTableItemCountPerPage] = React.useState<number>(layoutData.adminPage.servers.overviewPanel.serverTable.itemCountPerPage);
+  const [serverTableItemCountPerPage, setServerTableItemCountPerPage] = React.useState<number>(layout.adminPage.servers.overviewPanel.serverTable.itemCountPerPage);
   const [isServerDetailsShown, setIsServerDetailsShown] = React.useState<boolean>(false);
 
   // Mock server data
   // The order is pre-sorted when this list get from DB. and the pagination is handled by partially, not paginated at the client.
   const paginatedServerList: PaginatedServerList = React.useMemo<PaginatedServerList>(() => {
-    // console.log("user.serverList:", user.serverList);
+    // console.log("serverList:", serverList);
     // console.log("serverTableCurrentPage:", serverTableCurrentPageIndex);
-    return paginateServerList(user.serverList, serverTableCurrentPageIndex, serverTableItemCountPerPage);
-  }, [user, serverTableCurrentPageIndex, serverTableItemCountPerPage]);
+    return paginateServerList(serverList, serverTableStatusFilter, serverTableSearchTerm, serverTableCurrentPageIndex, serverTableItemCountPerPage);
+  }, [serverList, serverTableStatusFilter, serverTableSearchTerm, serverTableCurrentPageIndex, serverTableItemCountPerPage]);
 
   // State for form
   const [showAddFormToAddServer, setShowAddFormToAddServer] = React.useState(false);
   const [formDataToAddServer, setFormDataToAddServer] = React.useState({
     name: '',
     address: '',
-    // protocol: '',
-    // port: '',
-    // accountRequired: false,
   });
 
   // Add server
   const handleAddServer = () => {
-    // if (formData.name && formData.serverAddress) {
-    //   const newServer = {
-    //     id: serverList.length + 1,
-    //     name: formData.name,
-    //     serverAddress: formData.serverAddress,
-    //     isOnline: Math.random() > 0.5, // Random online status
-    //     lastPingTimestamp: new Date(),
-    //     registeredTimestamp: new Date(),
-    //     accountRequired: formData.accountRequired
-    //   };
-    //   setServerList([...serverList, newServer]);
-    //   setFormData({ name: '', serverAddress: '', accountRequired: false });
-    //   setShowAddForm(false);
-    // }
+    if (formDataToAddServer.name && formDataToAddServer.address) {
+      const newServer: Server = {
+        name: formDataToAddServer.name,
+        address: formDataToAddServer.address,
+        lastPing: new Date(),
+        registered: new Date(),
+        storages: [],
+      };
+      setServerList([...serverList, newServer]);
+      setFormDataToAddServer({ name: '', address: '' });
+      setShowAddFormToAddServer(false);
+
+      saveServerListData(serverList);
+    }
   };
 
   // Remove server
   const handleRemoveServer = (index: number) => {
     console.assert(index >= 0);
-    console.assert(index < user.serverList.length);
+    console.assert(index < serverList.length);
     console.assert(Number.isInteger(index));
 
     // setServerList(serverList.filter(server => server.id !== id));
@@ -145,16 +169,17 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
   const openServer = (index: number) => {
     console.assert(index >= 0);
-    console.assert(index < user.serverList.length);
+    console.assert(index < serverList.length);
     console.assert(Number.isInteger(index));
 
     // console.log("index:", index);
 
-    setUser((user: User) => {
-      const server: Server = user.serverList.splice(index, 1)[0];
-      user.serverList.unshift(server);
+    setServerList((serverList: Server[]) => {
+      const newServerList = [...serverList];
+      const server: Server = newServerList.splice(index, 1)[0];
+      newServerList.unshift(server);
 
-      if (user.serverList.length > 0) {
+      if (newServerList.length > 0) {
         setIsServerDetailsShown(true);
 
         setTimeout(() => {
@@ -171,15 +196,30 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
           }
         }, 1);
       }
+
+      saveServerListData(newServerList);
+      return newServerList;
     });
 
+  };
+  const addSampleServers = () => {
+    setServerList((serverList: Server[]) => {
+      const newServerList = [...serverList, ...sampleServerList];
+      saveServerListData(newServerList);
+      return newServerList;
+    });
+  };
+
+  const clearServers = () => {
+    setServerList([]);
+    saveServerListData([]);
   };
 
   const changeServerTableItemCountPerPage = (itemCountPerPage: number) => {
     console.assert(itemCountPerPage > 0);
     console.assert(Number.isInteger(itemCountPerPage));
 
-    setLayoutData((data: LayoutData) => {
+    setLayout((data: Layout) => {
       data.adminPage.servers.overviewPanel.serverTable.itemCountPerPage = itemCountPerPage;
     })
 
@@ -193,7 +233,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
         <h1 className="text-2xl font-bold mb-2 text-black">Overview</h1>
         <div className="flex items-center gap-5 mb-4">
           <div className="text-lg text-black">
-            Total Servers: <span className="font-semibold">15</span>
+            Servers: <span className="font-semibold">15</span>
           </div>
           <div className="text-lg text-black">
             Online: <span className="font-semibold text-green-600">
@@ -254,12 +294,24 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="mb-2">
+        <div className="flex mb-2 gap-2">
           <button
             onClick={() => setShowAddFormToAddServer(true)}
             className="px-4 py-2 border-1 border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Add Server
+          </button>
+          <button
+            onClick={() => addSampleServers()}
+            className="px-4 py-2 border-1 border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Samples
+          </button>
+          <button
+            onClick={() => clearServers()}
+            className="px-4 py-2 border-1 border-black text-black hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Clear
           </button>
         </div>
       )}
@@ -291,10 +343,10 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
       </div>
 
       {/* Server Details */}
-      {isServerDetailsShown && (user.serverList.length > 0) && (
+      {isServerDetailsShown && (serverList.length > 0) && (
         <div ref={serverDetailsRef} className="@container w-full max-w-4xl mb-2 ">
           <div className="p-2 border-1 border-black relative">
-            <ServerDetails server={user.serverList[0]} resetSelection={() => setIsServerDetailsShown(false)} />
+            <ServerDetails server={serverList[0]} resetSelection={() => setIsServerDetailsShown(false)} />
             <div className="pt-4">
               <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 gap-y-1 mb-1">
                 <button
@@ -350,14 +402,14 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
 
       {/* Server Summary Table */}
       <ResizableVerticalWrapper
-        layoutHeight={layoutData.adminPage.servers.overviewPanel.serverTable.height}
-        defaultLayoutHeight={defaultLayoutData.adminPage.servers.overviewPanel.serverTable.height}
+        layoutHeight={layout.adminPage.servers.overviewPanel.serverTable.height}
+        defaultLayoutHeight={defaultLayout.adminPage.servers.overviewPanel.serverTable.height}
 
         minHeight={77}
 
         className="mb-1"
 
-        setLayoutHeight={(height: number) => setLayoutData((layoutData: LayoutData) => {
+        setLayoutHeight={(height: number) => setLayout((layoutData: Layout) => {
           layoutData.adminPage.servers.overviewPanel.serverTable.height = height;
         })}
       >
@@ -367,10 +419,10 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Name</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Address</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Status</th>
-              <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Last Ping</th>
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Registered</th>
-              <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Account Req.</th>
-              <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Usage</th>
+              <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Last Ping</th>
+              <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Storages</th>
+              {/* <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Usage</th> */}
               <th className="px-4 py-3 whitespace-nowrap text-left text-black font-semibold">Actions</th>
             </tr>
           </thead>
@@ -382,29 +434,28 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
                 <td className="px-4 py-3 whitespace-nowrap text-black">{server.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-black font-mono">{server.address}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={clsx(
-                    "px-2 py-1 text-sm border",
-                    server.isOnline ? 'bg-green-50 border-green-600 text-green-600' : 'bg-red-50 border-red-600 text-red-600'
-                  )}>
-                    {server.isOnline ? 'Online' : 'Offline'}
-                  </span>
+                  {isWithinLastNMinutes(server.lastPing, 10) ? (
+                    <span className="text-green-600">Online</span>
+                  ) : (
+                    <span className="text-red-600">Offline</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-black text-sm">
-                  {formatTimestamp(server.lastPingTimestamp)}
+                  {formatTimestamp(server.registered)}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-black text-sm">
-                  {formatTimestamp(server.registeredTimestamp)}
+                  {formatTimestamp(server.lastPing)}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-black">
-                  {server.accountRequired ? 'Yes' : 'No'}
+                  {server.storages.length}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-black">
+                {/* <td className="px-4 py-3 whitespace-nowrap text-black">
                   <div className="ml-2 inset-0 flex items-center justify-center">
                     <span className="text-sm font-semibold text-gray-700">
                       {getUsagePercentage(server.capacity, server.freeSpace).toFixed(1)} %
                     </span>
                   </div>
-                </td>
+                </td> */}
 
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-row gap-2">
@@ -440,7 +491,7 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
           onChange={(e) => changeServerTableItemCountPerPage(parseInt(e.target.value, 10))}
           className="w-17 px-3 h-full border-1 border-black text-black"
         >
-          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultLayoutData.adminPage.servers.overviewPanel.serverTable.itemCountPerPage).map(num => (
+          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultLayout.adminPage.servers.overviewPanel.serverTable.itemCountPerPage).map(num => (
             <option key={num} value={num}>
               {num}
             </option>

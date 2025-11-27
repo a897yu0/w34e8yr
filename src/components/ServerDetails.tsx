@@ -1,9 +1,12 @@
-import clsx from "clsx";
+// import clsx from "clsx";
 import React from "react";
 
 import type { Server } from "@/types/Server";
 import type { ServerDetailsProps } from "@/types/props/ServerDetailsProps";
-import { formatBytes, formatTimestamp, getUsagePercentage } from "@/utils";
+import {
+  formatTimestamp,
+  isWithinLastNMinutes,
+} from "@/utils";
 
 
 function ServerDetails(props: ServerDetailsProps): React.JSX.Element {
@@ -39,41 +42,27 @@ function ServerDetails(props: ServerDetailsProps): React.JSX.Element {
         <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-1">
           <div className="flex flex-row flex-wrap gap-1">
             <strong>Status:</strong>
-            <span className={clsx(
-              server.isOnline ? 'text-green-600' : 'text-red-600',
-            )}>
-              {server.isOnline ? ' Online' : ' Offline'}
-            </span>
-          </div>
-          <div className="flex flex-row flex-wrap gap-1">
-            <strong>Last Ping:</strong>
-            <span>{formatTimestamp(server.lastPingTimestamp)}</span>
+            {isWithinLastNMinutes(server.lastPing, 10) ? (
+              <span className="text-green-600">Online</span>
+            ) : (
+              <span className="text-red-600">Offline</span>
+            )}
           </div>
           <div className="flex flex-row flex-wrap gap-1">
             <strong>Registered:</strong>
-            <span>{formatTimestamp(server.registeredTimestamp)}</span>
+            <span>{formatTimestamp(server.registered)}</span>
+          </div>
+          <div className="flex flex-row flex-wrap gap-1">
+            <strong>Last Ping:</strong>
+            <span>{formatTimestamp(server.lastPing)}</span>
           </div>
         </div>
       </div>
       <div className="w-full flex flex-col mb-4 bordre-black border-b-1">
         <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-1">
           <div className="flex flex-row flex-wrap gap-1">
-            <strong>Account Required:</strong>
-            <span>{server.accountRequired ? 'Yes' : 'No'}</span>
-          </div>
-        </div>
-        <div className="w-full grid grid-cols-1 @sm:grid-cols-2 @md:grid-cols-3 gap-x-3 mb-1">
-          <div className="flex flex-row flex-wrap gap-1">
-            <strong>Capacity:</strong>
-            <span>{formatBytes(server.capacity)}</span>
-          </div>
-          <div className="flex flex-row flex-wrap gap-1">
-            <strong>FreeSpace:</strong>
-            <span>{formatBytes(server.freeSpace)}</span>
-          </div>
-          <div className="flex flex-row flex-wrap gap-1">
-            <strong>Usage:</strong>
-            <span>{getUsagePercentage(server.capacity, server.freeSpace).toFixed(1)} %</span>
+            <strong>Storages:</strong>
+            <span>{server.storages.length}</span>
           </div>
         </div>
       </div>

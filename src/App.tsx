@@ -5,19 +5,13 @@ import type { DialogContext } from '@/types/DialogContext';
 import type { DialogProps } from '@/types/props/DialogProps';
 import Dialog from '@/components/Dialog';
 
-import type { EntryPageProps } from './types/props/pages/EntryPageProps';
 import type { InnerPageProps } from '@/types/props/pages/InnerPageProps';
 import FallbackPage from '@/components/pages/FallbackPage';
-
-import type { User } from '@/types/User';
-import { defaultUser, useUserDataReady } from '@/user';
 
 interface HeaderProps {
 }
 
-type EntryPageComponentType<T extends EntryPageProps = EntryPageProps> = React.ComponentType<T>;
 type InnerPageComponentType<T extends InnerPageProps = InnerPageProps> = React.ComponentType<T>;
-type EntryPageLazyExoticComponent = React.LazyExoticComponent<EntryPageComponentType>;
 type InnerPageLazyExoticComponent = React.LazyExoticComponent<InnerPageComponentType>;
 
 const MemorizedDialog = React.memo<DialogProps>(Dialog);
@@ -104,38 +98,24 @@ function Header(props: HeaderProps): React.JSX.Element {
 function App(): React.JSX.Element {
   const [dialog, setDialog] = React.useState<DialogContext | null>(null);
 
-  const { isReady: isUserDataReady, prepare: prepareUserData } = useUserDataReady();
-  defaultUser as User;
-
   const openDialog = (ctx: DialogContext | null): void => {
     if (!ctx) return;
 
     setDialog(ctx);
   };
 
-  const EntryPage: EntryPageLazyExoticComponent = React.lazy(() => import('@/components/pages/EntryPage'));
   const AdminPage: InnerPageLazyExoticComponent = React.lazy(() => import('@/components/pages/AdminPage'));
 
   return (
     <>
       <div className="font-sans w-full h-screen flex flex-col items-center justify-between gap-0 px-0 overflow-hidden">
-        {!isUserDataReady ? (
-          <main className="w-full flex-1">
-            <React.Suspense fallback={<FallbackPage />}>
-              <EntryPage handleLocalUse={() => prepareUserData()} />
-            </React.Suspense>
-          </main>
-        ) : (
-          <>
-            <Header />
+        <Header />
 
-            <main className="w-full flex-1">
-              <React.Suspense fallback={<FallbackPage />}>
-                <AdminPage openDialog={openDialog} />
-              </React.Suspense>
-            </main>
-          </>
-        )}
+        <main className="w-full flex-1">
+          <React.Suspense fallback={<FallbackPage />}>
+            <AdminPage openDialog={openDialog} />
+          </React.Suspense>
+        </main>
 
         <footer className="w-full bg-white m-0 border-black border-t-1">
           <div className="w-full mx-auto p-1 md:flex md:items-center md:justify-between">

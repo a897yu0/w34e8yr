@@ -20,8 +20,15 @@ function formatBytes(bytes: number, decimals: number = 2): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+function isWithinLastNMinutes(timestamp: Date, minutes: number): boolean {
+  const now = new Date();
+  const diffInMs = now.getTime() - timestamp.getTime();
+  return diffInMs < (minutes * 60 * 1000);
+}
+
 export {
   getUsagePercentage,
   formatTimestamp,
   formatBytes,
+  isWithinLastNMinutes as isWithinLastNMinutes,
 };

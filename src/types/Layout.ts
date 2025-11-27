@@ -1,5 +1,5 @@
 
-interface LayoutData {
+interface Layout {
   adminPage: {
     sidebar: {
       width: number;
@@ -15,4 +15,4 @@ interface LayoutData {
   };
 }
 
-export type { LayoutData };
+export type { Layout };
