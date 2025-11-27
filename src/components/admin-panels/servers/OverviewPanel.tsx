@@ -491,11 +491,12 @@ function OverviewPanel(props: AdminMainPanelProps): React.JSX.Element {
           onChange={(e) => changeServerTableItemCountPerPage(parseInt(e.target.value, 10))}
           className="w-17 px-3 h-full border-1 border-black text-black"
         >
-          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultLayout.adminPage.servers.overviewPanel.serverTable.itemCountPerPage).map(num => (
-            <option key={num} value={num}>
-              {num}
-            </option>
-          ))}
+          {Array.from({ length: 10 }, (_, i) => (i + 1) * defaultLayout.adminPage.servers.overviewPanel.serverTable.itemCountPerPage)
+            .filter(num => num < 100).map(num => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
         </select>
         {paginatedServerList && (
           <Paginator
