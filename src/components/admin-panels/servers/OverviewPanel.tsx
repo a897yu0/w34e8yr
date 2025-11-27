@@ -61,6 +61,8 @@ function paginateServerList(serverList: Server[], statusFilter: 'all' | 'online'
     return statusMatch && nameOrAddrMatch;
   });
 
+  // console.log(filteredServerList);
+  
   const totalItems = filteredServerList.length;
   if (totalItems === 0) {
     return {
